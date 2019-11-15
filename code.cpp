@@ -14,6 +14,9 @@ void init();
 
 
 /* ISR */
+ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
+	brightness = (ADC>>2); // 10 bits, gooi 2 LSB weg, uitkomst 8 bits
+}
 
 
 int main(void) {
@@ -47,5 +50,7 @@ void init() {
 }
 
 void adc_init() { // initialiseer ADC
-	
+	ADMUX |= (1<<REFS0); // reference voltage on AVCC (5V)
+	ADCSRA |= (1<<ADIE); // ADC interrupt enable
+	// ...
 }
