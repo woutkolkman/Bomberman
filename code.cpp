@@ -5,7 +5,7 @@
 
 
 /* defines */
-
+#define TEST
 
 
 /* function prototypes */
