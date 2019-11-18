@@ -5,6 +5,7 @@
 #include "libraries/IR/ir.h" // IR library
 // ... // LCD library
 
+// Hallo dit is Nadia
 
 /* defines and global variables */
 volatile uint8_t brightness = 0;
