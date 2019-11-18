@@ -52,7 +52,7 @@ void init() {
 	// pin in/outputs
 	/*
 	 * TFT scherm : digital 13-9
-	 * Touchscreen : digital 8
+	 * Touchscreen : digital 8 (als deze wordt gebruikt)
 	 * MicroSD lezer : digital 4 (als die wordt gebruikt)
 	 * IR-zender : digital 3
 	 * IR-ontvanger (?) : digital 2
@@ -60,8 +60,13 @@ void init() {
 	 * ? : analog 2
 	 * Nunchuck : analog 4, 5
 	 */
-	DDRD |= (1<<PD3); // IR-zender
-	DDRD |= (1<<PD13) | (1<<PD12) | (1<<PD11) | (1<<PD10) | (1<<PD9); // TFT scherm
+	DDRD |= (1<<DDD3); // IR-zender
+	DDRD |= (1<<DDD2); // IR-ontvanger
+	DDRB |= (1<<DDB1) | (1<<DDB2) | (1<<DDB3) | (1<<DDB4) | (1<<DDB5); // TFT scherm
+	//DDRB |= (1<<PB0); //touchscreen
+	//DDRD |= (1<<PD4); //SD lezer
+	DDRD |= (1<<DDD0) | (1<<DDD1); //UART
+	DDRC |= (1<<DDC4) /*?*/ | (1<<DDC5); //nunchuck I2C
 
 	sei(); // set global interrupt flag
 }
@@ -84,7 +89,7 @@ void adc_init() { // initialiseer ADC
 	ADCSRA |= (1<<ADPS2) | (1<<ADPS1) | (1<<ADPS0); // ADC clock prescaler ...(nog kiezen)
 
 	ADCSRA |= (1<<ADATE); // ADC auto trigger enable \/
-	ADCSRB &= ~(1<<ADTS2) | ~(1<<ADTS1) | ~(1<<ADTS0); // free running mode
+	ADCSRB &= ~(1<<ADTS2) & ~(1<<ADTS1) & ~(1<<ADTS0); // free running mode
 
 	ADCSRA |= (1<<ADEN); // enable ADC
         ADCSRA |= (1<<ADSC); // start eerste meting
