@@ -3,9 +3,9 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include "libraries/IR/ir.h" // IR library
+#include "libraries/IRremote-2.2.3/IRremote.h" // testen van bestaande library
 // ... // LCD library
 
-// Hallo dit is Nadia
 
 /* defines and global variables */
 volatile uint8_t brightness = 0;
