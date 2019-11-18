@@ -2,6 +2,9 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <util/delay.h>
+#include <util/setbaud.h>
+#include <cspi.h>
+#include <usart.h>
 #include "libraries/IR/ir.h" // IR library
 // ... // LCD library
 
@@ -11,10 +14,14 @@
 volatile uint8_t brightness = 0;
 #define HALFDUTYCYCLE 128;
 #define KHZ38 421;
+#define BAUD 9600
 
 /* function prototypes */
 void adc_init();
 void init();
+void timer0_init();
+void timer1_init();
+void timer2_init();
 
 
 /* ISR */
@@ -48,7 +55,7 @@ int main(void) {
 
 void init() {
 	// init Wire
-	// init UART
+	USART_Init(); // init serial
 	// init IR
 	// init CSPI
 	timer0_init();
@@ -101,4 +108,3 @@ void adc_init() { // initialiseer ADC
 	ADCSRA |= (1<<ADEN); // enable ADC
         ADCSRA |= (1<<ADSC); // start eerste meting
 }
-
