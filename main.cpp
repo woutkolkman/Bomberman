@@ -10,6 +10,9 @@
 /* defines and global variables */
 volatile uint8_t brightness = 0;
 
+=======
+/* defines */
+>>>>>>> Stashed changes:code.cpp
 
 /* function prototypes */
 void adc_init();
