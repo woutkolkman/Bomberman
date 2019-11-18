@@ -60,8 +60,10 @@ void init() {
 	 * ? : analog 2
 	 * Nunchuck : analog 4, 5
 	 */
-	DDRD |= (1<<PD3); // IR-zender
-	DDRD |= (1<<PD13) | (1<<PD12) | (1<<PD11) | (1<<PD10) | (1<<PD9); // TFT scherm
+	DDRD |= (1<<DDD3); // IR-zender
+	DDRD &= ~(1<<DDD2); //IR-ontvanger
+	DDRBD |= (1<<DDB1) | (1<<DDB2) | (1<<DDB3) | (1<<DDB4) | (1<<DDB5); // TFT scherm
+	DDRD |= (1<<DDD0) | (1<<DDD1); //UART
 
 	sei(); // set global interrupt flag
 }
@@ -75,6 +77,8 @@ void timer1_init() {
 }
 
 void timer2_init() {
+	TCCR2A |= (1<<WGM20) | (1<< WGM21); //fast PWM mode
+	TCCR2B |= (1<<CS20);
 	
 }
 
