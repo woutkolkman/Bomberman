@@ -2,6 +2,9 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <util/delay.h>
+#include <util/setbaud.h>
+#include <cspi.h>
+#include <usart.h>
 #include "libraries/IR/ir.h" // IR library
 #include "libraries/IRremote-2.2.3/IRremote.h" // testen van bestaande library
 // ... // LCD library
@@ -9,11 +12,15 @@
 
 /* defines and global variables */
 volatile uint8_t brightness = 0;
+#define BAUD 9600
 
 
 /* function prototypes */
 void adc_init();
 void init();
+void timer0_init();
+void timer1_init();
+void timer2_init();
 
 
 /* ISR */
@@ -41,7 +48,7 @@ int main(void) {
 
 void init() {
 	// init Wire
-	// init UART
+	USART_Init(); // init serial
 	// init IR
 	// init CSPI
 	timer0_init();
@@ -62,7 +69,7 @@ void init() {
 	 */
 	DDRD |= (1<<DDD3); // IR-zender
 	DDRD &= ~(1<<DDD2); //IR-ontvanger
-	DDRBD |= (1<<DDB1) | (1<<DDB2) | (1<<DDB3) | (1<<DDB4) | (1<<DDB5); // TFT scherm
+	DDRB |= (1<<DDB1) | (1<<DDB2) | (1<<DDB3) | (1<<DDB4) | (1<<DDB5); // TFT scherm
 	DDRD |= (1<<DDD0) | (1<<DDD1); //UART
 
 	sei(); // set global interrupt flag
@@ -93,4 +100,3 @@ void adc_init() { // initialiseer ADC
 	ADCSRA |= (1<<ADEN); // enable ADC
         ADCSRA |= (1<<ADSC); // start eerste meting
 }
-
