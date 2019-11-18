@@ -1,3 +1,10 @@
+/* defines and global variables */
+volatile uint8_t brightness = 0;
+#define HALFDUTYCYCLE 128;
+#define KHZ38 421;
+#define BAUD 9600
+
+
 /* includes */
 #include <avr/interrupt.h>
 #include <avr/io.h>
@@ -8,13 +15,6 @@
 #include "libraries/IR/ir.h" // IR library
 // ... // LCD library
 
-// Hallo dit is Nadia
-
-/* defines and global variables */
-volatile uint8_t brightness = 0;
-#define HALFDUTYCYCLE 128;
-#define KHZ38 421;
-#define BAUD 9600
 
 /* function prototypes */
 void adc_init();
