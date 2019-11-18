@@ -2,7 +2,8 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <util/delay.h>
-#include "libraries/IR/ir.h"
+#include "libraries/IR/ir.h" // IR library
+// ... // LCD library
 
 
 /* defines and global variables */
@@ -18,7 +19,7 @@ void init();
 ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 	brightness = (ADC>>2); // 10 bits, gooi 2 LSB weg, uitkomst 8 bits
 
-	// brightness nog toepassen op beeldscherm
+	// brightness toepassen op beeldscherm
 }
 
 
@@ -38,16 +39,28 @@ int main(void) {
 }
 
 void init() {
-	// init wire
-	// init uart
+	// init Wire
+	// init UART
 	// init IR
+	// init CSPI
 	timer0_init();
 	timer1_init();
 	timer2_init();
 	adc_init();
 
 	// pin in/outputs
-	
+	/*
+	 * TFT scherm : digital 13-9
+	 * Touchscreen : digital 8
+	 * MicroSD lezer : digital 4 (als die wordt gebruikt)
+	 * IR-zender : digital 3
+	 * IR-ontvanger (?) : digital 2
+	 * UART verbinding PC : digital 1, 0
+	 * ? : analog 2
+	 * Nunchuck : analog 4, 5
+	 */
+	DDRD |= (1<<PD3); // IR-zender
+	DDRD |= (1<<PD13) | (1<<PD12) | (1<<PD11) | (1<<PD10) | (1<<PD9); // TFT scherm
 
 	sei(); // set global interrupt flag
 }
@@ -75,3 +88,4 @@ void adc_init() { // initialiseer ADC
 	ADCSRA |= (1<<ADEN); // enable ADC
         ADCSRA |= (1<<ADSC); // start eerste meting
 }
+
