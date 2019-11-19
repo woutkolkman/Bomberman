@@ -1,5 +1,5 @@
 /* defines and global variables */
-volatile uint8_t brightness = 0;
+//volatile uint8_t brightness = 0;
 #define HALFDUTYCYCLE 128;
 #define KHZ38 421;
 #define BAUD 9600
@@ -10,7 +10,7 @@ volatile uint8_t brightness = 0;
 #include <avr/io.h>
 #include <util/delay.h>
 #include <util/setbaud.h>
-#include <cspi.h>
+//#include <cspi.h>
 #include <usart.h>
 #include "libraries/IR/ir.h" // IR library
 #include <stdint.h>
@@ -31,9 +31,8 @@ ISR(TIMER1_COMPA_vect) {
 	TCCR2A ^= (1<<COM2A1); //toggle timer2 fastPWM/off
 }
 
-
 ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
-	brightness = (ADC>>2); // 10 bits, gooi 2 LSB weg, uitkomst 8 bits
+	//brightness = (ADC>>2); // 10 bits, gooi 2 LSB weg, uitkomst 8 bits
 
 	// brightness toepassen op beeldscherm
 }
@@ -46,7 +45,8 @@ int main(void) {
 
 	/* loop */
 	while(1) {
-		
+		PORTD ^= (1<<PORTD3);
+		_delay_ms(10);
 	}
 
 
@@ -95,7 +95,7 @@ void timer1_init() {
 void timer2_init() {
 	TCCR2A |= (1<<WGM20) | (1<< WGM21); //fast PWM mode
 	TCCR2B |= (1<<CS20); //no prescaling
-	OCR2A = HALFDUTYCYCLE;
+	OCR2B = HALFDUTYCYCLE;
 }
 
 void adc_init() { // initialiseer ADC
