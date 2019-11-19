@@ -13,6 +13,7 @@ volatile uint8_t brightness = 0;
 #include <cspi.h>
 #include <usart.h>
 #include "libraries/IR/ir.h" // IR library
+#include <stdint.h>
 // ... // LCD library
 
 
