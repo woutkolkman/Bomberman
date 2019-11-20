@@ -2,13 +2,27 @@
  *	IR communication library
  */
 
-/* includes */
-#include "ir.h"
-
 /* defines */
 // ...
 
+/* includes */
+#include "ir.h"
+
 /* functions */
-void voorbeeld_functie(void) {
+void IR_prepare_timer_send(void) {
+	
+}
+
+void IR_prepare_timer_receive(void) {
+	
+}
+
+void IR_send(uint8_t) {
+	
+}
+
+uint8_t IR_receive(void) {
+	// mogelijk functie aanpassen om interrupt te genereren op ontvangst informatie
+
 	
 }

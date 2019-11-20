@@ -16,14 +16,14 @@
 #include <usart.h>
 #include <Wire.h>
 #include <stdint.h>
-//#include "libraries/IR/ir.h" // IR library
-#include "libraries/IRremote-2.2.3/IRremote.h" // test library voor IR
+#include "libraries/IR/ir.h" // IR library
+//#include "./libraries/IRremote-2.2.3/IRremote.h" // test library voor IR
 // ... // LCD library
 
 
 /* global variables */
 volatile uint8_t brightness = 0;
-IRsend irsend;
+//volatile IRsend irsend;
 
 /* function prototypes */
 void adc_init();
@@ -53,8 +53,8 @@ int main(void) {
 
 	/* loop */
 	for(;;) {
-		_delay_ms(10);
-		irsend.sendNEC(0xAA, NUMBITS);
+//		_delay_ms(10);
+//		irsend.sendNEC(0xAA, NUMBITS);
 	}
 
 
@@ -85,7 +85,7 @@ void init() {
 	 */
 	DDRD |= (1<<DDD3); // IR-zender
 	DDRD &= ~(1<<DDD2); //IR-ontvanger
-	PORTD |= (1<<PORTD2); //pull-up resistor voor ontvanger 
+	PORTD |= (1<<PORTD2); //pull-up resistor voor ontvanger
 	DDRB |= (1<<DDB1) | (1<<DDB2) | (1<<DDB3) | (1<<DDB4) | (1<<DDB5); // TFT scherm
 	DDRD |= (1<<DDD0) | (1<<DDD1); //UART
 
