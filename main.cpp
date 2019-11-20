@@ -2,7 +2,9 @@
 #define BAUD 9600
 #define TFT_DC 9
 #define TFT_CS 10
-
+#define cs DDB2
+#define cd DDB1
+#define rst DDB0
 
 /* includes */
 #include <avr/interrupt.h>
@@ -20,9 +22,9 @@
 /* global variables */
 volatile uint8_t brightness = 0;
 
-
 /* Use hHardware SPI and CS/DC   */
 Adarfuit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
+TFT TFTscreen = TFT(cd, dc, rst);
 
 
 /* function prototypes */
@@ -37,16 +39,16 @@ ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 	// brightness toepassen op beeldscherm
 }
 
-TFT TFTscreen = TFT(cs, dc, rst); //test
+//TFT TFTscreen = TFT(cs, dc, rst); //test
 
 
 int main(void) {
 	/* setup */
 	//USART_Transmit();
-	//Serial.begin();
+	Serial.begin(9600);
 
-	// start communication of the TFT LCD
-	
+	TFTscreen.begin();
+	TFTscreen..background(0,200,0);
 
 	/* loop */
 	for(;;){
