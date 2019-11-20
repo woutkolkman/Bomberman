@@ -4,8 +4,8 @@
 #include <util/delay.h>
 #include "libraries/IR/ir.h" // IR library
 // ... // LCD library
-
-// Nadia Kraken test 2
+#include <tft.h>
+#include <SPI.h>
 
 /* defines and global variables */
 volatile uint8_t brightness = 0;
@@ -13,6 +13,9 @@ volatile uint8_t brightness = 0;
 =======
 /* defines */
 >>>>>>> Stashed changes:code.cpp
+#define cs 10 //test display
+#define dc 9 //test
+#define rst 8 //test
 
 /* function prototypes */
 void adc_init();
@@ -26,16 +29,26 @@ ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 	// brightness toepassen op beeldscherm
 }
 
+TFT TFTscreen = TFT(cs, dc, rst); //test
+
 
 int main(void) {
 	/* setup */
-	init(); // initialize
-
+	TFTscreen.begin(); //test
+	TFTscreen.background(0,0,0) // test r,g,b
+	TFTscreen.setTextSize(2); // test
 
 	/* loop */
-	for(;;) {
-		
+	for(;;){
 	}
+	
+	int redRandom = random(0, 255);
+	int greenRandom = random(0, 255);
+	int blueRandom = random(0, 255);
+
+	TFTscreen.stroke(redRandom, greenRandom, blueRandom);
+	TFTscreen.text("Hello, World!", 6, 57);
+	delay(200);
 
 
 	/* never reached */
