@@ -80,6 +80,7 @@ void init() {
 	 */
 	DDRD |= (1<<DDD3); // IR-zender
 	DDRD &= ~(1<<DDD2); //IR-ontvanger
+	PORTD |= (1<<PORTD2); //pull-up resistor voor ontvanger 
 	DDRB |= (1<<DDB1) | (1<<DDB2) | (1<<DDB3) | (1<<DDB4) | (1<<DDB5); // TFT scherm
 	DDRD |= (1<<DDD0) | (1<<DDD1); //UART
 
