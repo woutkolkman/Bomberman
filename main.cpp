@@ -109,11 +109,11 @@ void timer1_init() {
 	OCR1B = KHZ38;
 }
 
-void timer2_init() {
-	TCCR2A |= (1<<WGM20) | (1<< WGM21); //fast PWM mode
-	TCCR2B |= (1<<CS20); //no prescaling
-	OCR2B = HALFDUTYCYCLE;
-}
+//void timer2_init() {
+//	TCCR2A |= (1<<WGM20) | (1<< WGM21); //fast PWM mode
+//	TCCR2B |= (1<<CS20); //no prescaling
+//	OCR2B = HALFDUTYCYCLE;
+//}
 
 void adc_init() { // initialiseer ADC
 	ADMUX |= (1<<REFS0); // reference voltage on AVCC (5V)
