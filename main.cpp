@@ -1,28 +1,29 @@
+/* defines */
 #define BAUD 9600
+#define TFT_DC 9
+#define TFT_CS 10
+
 
 /* includes */
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <util/delay.h>
 #include "libraries/IR/ir.h" // IR library
-#include "libraries/Adafruit_GFX_Library/Adafruit_GFX.h" // LCD library
+//#include "libraries/Adafruit_GFX_Library/Adafruit_GFX.h" // LCD library
 #include "libraries/Adafruit_ILI9341/Adafruit_ILI9341.h" // LCD library
-#include "libraries/Adafruit_Zero_DMA_Library/Adafruit_ZeroDMA.h" // LCD library
+//#include "libraries/Adafruit_Zero_DMA_Library/Adafruit_ZeroDMA.h" // LCD library
 #include <tft.h>
-#include <SPI.h>
+#include <cspi.h>
 #include <usart.h>
 
 
-/* defines and global variables */
+/* global variables */
 volatile uint8_t brightness = 0;
 
 
-/* defines boven de includes */
-#define TFT_DC 9
-#define TFT_CS 10
-
 /* Use hHardware SPI and CS/DC   */
 Adarfuit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
+
 
 /* function prototypes */
 void adc_init();
