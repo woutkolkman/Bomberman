@@ -23,7 +23,7 @@
 
 /* global variables */
 volatile uint8_t brightness = 0;
-
+IRsend irsend;
 
 /* function prototypes */
 void adc_init();
@@ -53,6 +53,7 @@ int main(void) {
 
 	/* loop */
 	for(;;) {
+		_delay_ms(10);
 		irsend.sendNEC(0xAA, NUMBITS);
 	}
 
@@ -95,7 +96,7 @@ void ir_init() {
 //	IRrecv irrecv(IR_RECEIVE_PIN);
 //	irrecv.enableIRIn();
 //	irrecv.
-	IRsend irsend;
+//	IRsend irsend;
 }
 
 void timer0_init() {
