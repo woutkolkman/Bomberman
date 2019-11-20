@@ -7,12 +7,12 @@
 #include <tft.h>
 #include <SPI.h>
 
+
 /* defines and global variables */
 volatile uint8_t brightness = 0;
 
-=======
+
 /* defines */
->>>>>>> Stashed changes:code.cpp
 #define cs 10 //test display
 #define dc 9 //test
 #define rst 8 //test
