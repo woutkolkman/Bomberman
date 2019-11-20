@@ -15,6 +15,9 @@
 //...
 
 /* functions */
+ISR(TIMER1_COMPA_vect) {
+	TCCR2A ^= (1<<COM2A1);
+}
 void IR_prepare_timer_send(uint8_t frequency) {
 	TCCR1B |= (1<<WGM12); //CTC mode
 	TCCR1B |= (1<< CS10); //no prescaling
