@@ -1,21 +1,28 @@
+#define BAUD 9600
+
 /* includes */
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <util/delay.h>
 #include "libraries/IR/ir.h" // IR library
-// ... // LCD library
+#include "libraries/Adafruit_GFX_Library/Adafruit_GFX.h" // LCD library
+#include "libraries/Adafruit_ILI9341/Adafruit_ILI9341.h" // LCD library
+#include "libraries/Adafruit_Zero_DMA_Library/Adafruit_ZeroDMA.h" // LCD library
 #include <tft.h>
 #include <SPI.h>
+#include <usart.h>
 
 
 /* defines and global variables */
 volatile uint8_t brightness = 0;
 
 
-/* defines */
-#define cs 10 //test display
-#define dc 9 //test
-#define rst 8 //test
+/* defines boven de includes */
+#define TFT_DC 9
+#define TFT_CS 10
+
+/* Use hHardware SPI and CS/DC   */
+Adarfuit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 
 /* function prototypes */
 void adc_init();
@@ -34,21 +41,15 @@ TFT TFTscreen = TFT(cs, dc, rst); //test
 
 int main(void) {
 	/* setup */
-	TFTscreen.begin(); //test
-	TFTscreen.background(0,0,0) // test r,g,b
-	TFTscreen.setTextSize(2); // test
+	//USART_Transmit();
+	//Serial.begin();
+
+	// start communication of the TFT LCD
+	
 
 	/* loop */
 	for(;;){
 	}
-	
-	int redRandom = random(0, 255);
-	int greenRandom = random(0, 255);
-	int blueRandom = random(0, 255);
-
-	TFTscreen.stroke(redRandom, greenRandom, blueRandom);
-	TFTscreen.text("Hello, World!", 6, 57);
-	delay(200);
 
 
 	/* never reached */
@@ -57,7 +58,7 @@ int main(void) {
 
 void init() {
 	// init Wire
-	// init UART
+	USART_Init();// init UART
 	// init IR
 	// init CSPI
 	timer0_init();
@@ -85,18 +86,6 @@ void init() {
 	DDRC |= (1<<DDC4) /*?*/ | (1<<DDC5); //nunchuck I2C
 
 	sei(); // set global interrupt flag
-}
-
-void timer0_init() {
-	
-}
-
-void timer1_init() {
-	
-}
-
-void timer2_init() {
-	
 }
 
 void adc_init() { // initialiseer ADC
