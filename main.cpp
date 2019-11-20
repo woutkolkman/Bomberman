@@ -1,22 +1,32 @@
+/* defines */
+#define HALFDUTYCYCLE 128;
+#define KHZ38 421;
+#define BAUD 9600
+
+
 /* includes */
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <util/delay.h>
+#include <util/setbaud.h>
+#include <cspi.h>
+#include <usart.h>
+#include <Wire.h>
+#include <stdint.h>
 #include "libraries/IR/ir.h" // IR library
 // ... // LCD library
 
-// Nadia Kraken test 2
 
-/* defines and global variables */
+/* global variables */
 volatile uint8_t brightness = 0;
 
-=======
-/* defines */
->>>>>>> Stashed changes:code.cpp
 
 /* function prototypes */
 void adc_init();
 void init();
+void timer0_init();
+void timer1_init();
+void timer2_init();
 
 
 /* ISR */
@@ -44,7 +54,7 @@ int main(void) {
 
 void init() {
 	// init Wire
-	// init UART
+	USART_Init(); // init serial
 	// init IR
 	// init CSPI
 	timer0_init();
@@ -68,6 +78,7 @@ void init() {
 	DDRB |= (1<<DDB1) | (1<<DDB2) | (1<<DDB3) | (1<<DDB4) | (1<<DDB5); // TFT scherm
 	//DDRB |= (1<<PB0); //touchscreen
 	//DDRD |= (1<<PD4); //SD lezer
+
 	DDRD |= (1<<DDD0) | (1<<DDD1); //UART
 	DDRC |= (1<<DDC4) /*?*/ | (1<<DDC5); //nunchuck I2C
 
