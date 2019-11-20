@@ -92,7 +92,7 @@ void timer0_init() {
 void timer1_init() {
 	TCCR1B |= (1<<WGM12); //CTC mode
 	TCCR1B |= (1<<CS10); //no prescaling
-	OCR1A = KHZ38;
+	OCR1B = KHZ38;
 }
 
 void timer2_init() {
