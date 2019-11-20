@@ -1,7 +1,10 @@
 /* defines */
-#define HALFDUTYCYCLE 128;
-#define KHZ38 421;
+#define HALFDUTYCYCLE 128
+#define KHZ38 421
 #define BAUD 9600
+#define IR_RECEIVE_PIN PD2
+#define IR_SEND_PIN PD3
+#define NUMBITS 8
 
 
 /* includes */
@@ -13,7 +16,8 @@
 #include <usart.h>
 #include <Wire.h>
 #include <stdint.h>
-#include "libraries/IR/ir.h" // IR library
+//#include "libraries/IR/ir.h" // IR library
+#include "libraries/IRremote-2.2.3/IRremote.h" // test library voor IR
 // ... // LCD library
 
 
@@ -27,6 +31,7 @@ void init();
 void timer0_init();
 void timer1_init();
 void timer2_init();
+void ir_init();
 
 
 /* ISR */
@@ -47,9 +52,8 @@ int main(void) {
 
 
 	/* loop */
-	while(1) {
-		PORTD ^= (1<<PORTD3);
-		_delay_ms(10);
+	for(;;) {
+		irsend.sendNEC(0xAA, NUMBITS);
 	}
 
 
@@ -60,7 +64,7 @@ int main(void) {
 void init() {
 	// init Wire
 	USART_Init(); // init serial
-	// init IR
+	ir_init(); // init IR
 	// init CSPI
 	timer0_init();
 	timer1_init();
@@ -86,7 +90,15 @@ void init() {
 	sei(); // set global interrupt flag
 }
 
+void ir_init() {
+//	IRrecv irrecv(IR_RECEIVE_PIN);
+//	irrecv.enableIRIn();
+//	irrecv.
+	IRsend irsend;
+}
+
 void timer0_init() {
+	
 }
 
 void timer1_init() {
