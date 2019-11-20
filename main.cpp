@@ -2,9 +2,9 @@
 #define BAUD 9600
 #define TFT_DC 9
 #define TFT_CS 10
-#define cs DDB2
-#define cd DDB1
-#define rst DDB0
+#define CS DDB2
+#define CD DDB1
+#define RST DDB0
 
 /* includes */
 #include <avr/interrupt.h>
@@ -13,8 +13,11 @@
 #include "libraries/IR/ir.h" // IR library
 //#include "libraries/Adafruit_GFX_Library/Adafruit_GFX.h" // LCD library
 #include "libraries/Adafruit_ILI9341/Adafruit_ILI9341.h" // LCD library
+#include "libraries/Adafruit_ILI9341/Adafruit_ZeroDMA.h"
+#include "libraries/Adafruit_ILI9341/Adafruit_GFX.h"
 //#include "libraries/Adafruit_Zero_DMA_Library/Adafruit_ZeroDMA.h" // LCD library
-#include <tft.h>
+#include "libraries/TFT/TFT.h"
+//#include <tft.h>
 #include <cspi.h>
 #include <usart.h>
 
@@ -24,7 +27,7 @@ volatile uint8_t brightness = 0;
 
 /* Use hHardware SPI and CS/DC   */
 Adarfuit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
-TFT TFTscreen = TFT(cd, dc, rst);
+TFT TFTscreen = TFT(CD, DC, RST);
 
 
 /* function prototypes */
@@ -44,11 +47,12 @@ ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 
 int main(void) {
 	/* setup */
+	init();
 	//USART_Transmit();
 	Serial.begin(9600);
 
 	TFTscreen.begin();
-	TFTscreen..background(0,200,0);
+	TFTscreen.background(0,200,0);
 
 	/* loop */
 	for(;;){
@@ -64,10 +68,10 @@ void init() {
 	USART_Init();// init UART
 	// init IR
 	// init CSPI
-	timer0_init();
-	timer1_init();
-	timer2_init();
-	adc_init();
+	//timer0_init();
+	//timer1_init();
+	//timer2_init();
+	//adc_init();
 
 	// pin in/outputs
 	/*
@@ -102,4 +106,3 @@ void adc_init() { // initialiseer ADC
 	ADCSRA |= (1<<ADEN); // enable ADC
         ADCSRA |= (1<<ADSC); // start eerste meting
 }
-
