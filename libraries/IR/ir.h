@@ -18,7 +18,7 @@ extern "C" {
 /* function prototypes */
 void IR_prepare_timer_send(void);
 void IR_prepare_timer_receive(void);
-void IR_send(uint8_t);
+void IR_send(uint8_t waarde);
 uint8_t IR_receive(void);
  
 #ifdef __cplusplus

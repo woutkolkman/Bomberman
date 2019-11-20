@@ -11,13 +11,16 @@
 /* includes */
 #include "ir.h"
 
+/* function prototypes */
+//...
+
 /* functions */
 void IR_prepare_timer_send(uint8_t frequency) {
 	TCCR1B |= (1<<WGM12); //CTC mode
 	TCCR1B |= (1<< CS10); //no prescaling
 	if (frequency == 38) {
 		OCR1B = KHZ38;
-	} else {
+	} else if (frequency == 56) {
 		OCR1B = KHZ56;
 	}
 	TCCR2A |= (1<<WGM20) | (1<< WGM21); //fast PWM mode
@@ -30,7 +33,11 @@ void IR_prepare_timer_receive(void) {
 }
 
 void IR_send(uint8_t waarde) {
-	
+	// start bit
+	for (int i=7, i<0, i--) {
+		if ( // verstuur byte
+	}
+	// stop bits
 }
 
 uint8_t IR_receive(void) {
