@@ -3,7 +3,6 @@
  */
 
 /* defines */
-// ...
 //#define KHZ38 421 timer1 prescale 1
 #define KHZ38 52 //timer2 prescale 8
 #define DUTYCYCLE38 26 //duty cycle 50% 38KHz
@@ -11,6 +10,15 @@
 #define KHZ56 36 //timer2 prescale 8
 #define DUTYCYCLE56 18 //duty cycle 50% 56KHz
 #define STARTBITVALUE //INVULLEN, kleiner of gelijk aan 65535 (wat veel te groot is)
+
+#define BITS 32
+#define HDR_MARK 9000
+#define HDR_SPACE 4500
+#define BIT_MARK 560
+#define ONE_SPACE 1690
+#define ZERO_SPACE 560
+#define RPT_SPACE 2250
+
 
 /* includes */
 #include "ir.h"
@@ -56,3 +64,6 @@ uint8_t IR_receive(void) {
 	// mogelijk functie aanpassen om interrupt te genereren op ontvangst informatie
 	
 }
+
+//======================================================================
+
