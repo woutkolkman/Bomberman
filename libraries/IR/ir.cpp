@@ -22,7 +22,6 @@
 #define STOPBITVALUE //INVULLEN, kleiner of gelijk aan 719
 
 
-
 /* includes */
 #include "ir.h"
 
@@ -40,23 +39,37 @@ ISR (TIMER1_COMPB_vect) { //
 	TCCR2B ^= (1<<WGM22); //switch counter2 off/CTC fastPWM
 }
 
+ISR (TIMER2_COMPB_vect) {
+	#if FREQUENCY == 38 // aangeroepen elke 1,05ms
+	
+	#elif FREQUENCY == 56 // aangeroepen elke 0,71ms
+	
+	#else
+	// exception error, geen khz gekozen
+	#endif
+}
+
 
 /* functions */
 void IR_prepare_timer_send(uint8_t frequency) {
 	TCCR2A |= (1<<WGM20) | (1<<WGM21); //CTC, fast PWM
 	TCCR2B |= (1<<WGM22) //CTC, fast PWM
 	TCCR2A |= (1<<COM2B1); //clear on compare
-	if (frequency == 38) {
-		OCR2A = KHZ38; //maximum 1 knipper 38 KHz
-		OCR2B = DUTYCYCLE38;
-		OCR1A = TOTALBIT38; //totaal 1 bit 38 KHz
-		freq = 0;
-	} else if (frequency == 56) {
-		OCR2A = KHZ56; //maximum 1 knipper 56 KHz
-		OCR2B = DUTYCYCLE56;
-		OCR1A = TOTALBIT56; //totaal 1 bit 56 KHz
-		freq = 1;
-	}
+
+	#if FREQUENCY == 38
+	OCR2A = KHZ38; //maximum 1 knipper 38 KHz
+	OCR2B = DUTYCYCLE38;
+	OCR1A = TOTALBIT38; //totaal 1 bit 38 KHz
+	freq = 0;
+	#elif FREQUENCY == 56
+	OCR2A = KHZ56; //maximum 1 knipper 56 KHz
+	OCR2B = DUTYCYCLE56;
+	OCR1A = TOTALBIT56; //totaal 1 bit 56 KHz
+	freq = 1;
+	#else
+	// exception error, geen khz gekozen
+	#endif
+
 	TCCR1A |= (1<<WGM10) | (1<<WGM11); //fast PWM CTC
 	TCCR1B |= (1<<WGM12) | (1<<WGM13); //fast PWM CTC
 	TCCR1B |= (1<<CS11); //prescaler 8
@@ -70,7 +83,7 @@ void IR_prepare_timer_receive(void) {
 
 void IR_send(uint8_t waarde) {
 	// start bit
-	if (freq) {
+	#ifdef FREQUENCY == 56
 		OCR1B = STARTBITVALUE56;
 		for (int i=7, i>=0, i--) {
 			if (waarde & (1<<i) { //is bit i 1?
@@ -80,7 +93,7 @@ void IR_send(uint8_t waarde) {
 			}
 		}
 	OCR1B = STOPBITVALUE56;
-	} else {
+	#elif FREQUENCY == 38
 		OCR1B = STARTBITVALUE38;
 		for (int i=7; i>=0; i--) {
 			if (waarde & (1<<i) {
@@ -89,7 +102,9 @@ void IR_send(uint8_t waarde) {
 				OCR1B = BITIS0F38
 			}
 		}
-	}
+	#else
+	// exception error, geen khz gekozen
+	#endif
 	OCR1B = STOPBITVALUE38;
 }
 

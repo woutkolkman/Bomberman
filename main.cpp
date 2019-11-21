@@ -1,6 +1,5 @@
 /* defines */
-#define HALFDUTYCYCLE 128
-#define KHZ38 421
+#define FREQUENCY 38 // 38/56
 #define BAUD 9600
 #define IR_RECEIVE_PIN PD2
 #define IR_SEND_PIN PD3
@@ -35,9 +34,9 @@ void ir_init();
 
 
 /* ISR */
-ISR(TIMER1_COMPA_vect) {
-	TCCR2A ^= (1<<COM2A1); //toggle timer2 fastPWM/off
-}
+//ISR(TIMER1_COMPA_vect) {
+//	TCCR2A ^= (1<<COM2A1); //toggle timer2 fastPWM/off
+//}
 
 ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 	brightness = (ADC>>2); // 10 bits, gooi 2 LSB weg, uitkomst 8 bits
