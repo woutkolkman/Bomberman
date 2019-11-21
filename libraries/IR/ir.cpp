@@ -4,7 +4,6 @@
 
 
 /* defines */
-
 #define KHZ38 52 //timer2 prescale 8
 #define DUTYCYCLE38 26 //duty cycle 50% 38KHz
 #define TOTALBIT38 1040 //40 keer knipperen
@@ -29,24 +28,13 @@
 /* function prototypes */
 uint16_t curcounter;
 uint16_t prevcounter;
-uint8_t freq;
 
 
 /* ISR */
-ISR (TIMER1_COMPB_vect) { // 
+ISR (TIMER1_COMPB_vect) { // aangeroepen op frequentie defined door FREQUENCY
 	TCCR2A ^= (1<<WGM20); //switch counter2 off/CTC
 	TCCR2A ^= (1<<WGM21); //switch counter2 off/CTC
 	TCCR2B ^= (1<<WGM22); //switch counter2 off/CTC fastPWM
-}
-
-ISR (TIMER2_COMPB_vect) {
-	#if FREQUENCY == 38 // aangeroepen elke 1,05ms
-	
-	#elif FREQUENCY == 56 // aangeroepen elke 0,71ms
-	
-	#else
-	// exception error, geen khz gekozen
-	#endif
 }
 
 
@@ -84,24 +72,25 @@ void IR_prepare_timer_receive(void) {
 void IR_send(uint8_t waarde) {
 	// start bit
 	#ifdef FREQUENCY == 56
-		OCR1B = STARTBITVALUE56;
-		for (int i=7, i>=0, i--) {
-			if (waarde & (1<<i) { //is bit i 1?
-				OCR1B = BITIS1F56;
-			} else { //bit i is 0
-				OCR1B = BITIS0F56;
-			}
+	OCR1B = STARTBITVALUE56;
+	for (int i=7, i>=0, i--) {
+		if (waarde & (1<<i) { //is bit i 1?
+			OCR1B = BITIS1F56;
+		} else { //bit i is 0
+			OCR1B = BITIS0F56;
 		}
+	}
 	OCR1B = STOPBITVALUE56;
+
 	#elif FREQUENCY == 38
-		OCR1B = STARTBITVALUE38;
-		for (int i=7; i>=0; i--) {
-			if (waarde & (1<<i) {
-				OCR1B = BITIS1F38
-			} else {
-				OCR1B = BITIS0F38
-			}
+	OCR1B = STARTBITVALUE38;
+	for (int i=7; i>=0; i--) {
+		if (waarde & (1<<i) {
+			OCR1B = BITIS1F38
+		} else {
+			OCR1B = BITIS0F38
 		}
+	}
 	#else
 	// exception error, geen khz gekozen
 	#endif
