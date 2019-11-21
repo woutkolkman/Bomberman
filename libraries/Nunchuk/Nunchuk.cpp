@@ -103,7 +103,7 @@ uint8_t NunChuk::_read(uint8_t address, uint8_t offset) {
 	uint8_t i = 0;
 
 	// send offset
-        Wire.beginTransmission(address);
+        Wire.beginTransmission(address); 
         Wire.write(offset);
         Wire.endTransmission();
 
