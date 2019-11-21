@@ -66,9 +66,8 @@ void init() {
 	USART_Init(); // init serial
 	ir_init(); // init IR
 	// init CSPI
-	timer0_init();
-	timer1_init();
-//	timer2_init();
+//	timer0_init();
+//	timer1_init();
 	adc_init();
 
 	// pin in/outputs
@@ -92,10 +91,8 @@ void init() {
 }
 
 void ir_init() {
-//	IRrecv irrecv(IR_RECEIVE_PIN);
-//	irrecv.enableIRIn();
-//	irrecv.
-//	IRsend irsend;
+	IR_prepare_send();
+	IR_prepare_receive();
 }
 
 void timer0_init() {
@@ -103,18 +100,10 @@ void timer0_init() {
 }
 
 void timer1_init() {
-	TCCR1B |= (1<<WGM12); //CTC mode
-	TCCR1B |= (1<<CS10); //no prescaling
-	OCR1B = KHZ38;
+	
 }
 
-//void timer2_init() {
-//	TCCR2A |= (1<<WGM20) | (1<< WGM21); //fast PWM mode
-//	TCCR2B |= (1<<CS20); //no prescaling
-//	OCR2B = HALFDUTYCYCLE;
-//}
-
-void adc_init() { // initialiseer ADC
+void adc_init() { // initialiseer ADC, voor podmeter / brightness scherm
 	ADMUX |= (1<<REFS0); // reference voltage on AVCC (5V)
 	ADCSRA |= (1<<ADIE); // ADC interrupt enable
 	ADCSRA |= (1<<ADPS2) | (1<<ADPS1) | (1<<ADPS0); // ADC clock prescaler ...(nog kiezen)
