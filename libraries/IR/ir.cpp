@@ -32,23 +32,31 @@
 
 
 /* ISR */
-ISR () { // 
-
+ISR (TIMER2_COMPB_vect) {
+	#if FREQUENCY == 38 // aangeroepen elke 1,05ms
+	
+	#elif FREQUENCY == 56 // aangeroepen elke 0,71ms
+	
+	#else
+	// exception error, geen khz gekozen
+	#endif
 }
 
 
 /* functions */
-void IR_prepare_timer_send(uint8_t frequency) {
-	TCCR2A |= (1<<WGM20) | (1<<WGM21);
-	TCCR2B |= (1<<WGM22) //CTC, fast PWM
-	TCCR2A |= (1<<COM2B1); //set above value, clear on bottom
-	if (frequency == 38) {
-		OCR2A = KHZ38;
-		OCR2B = DUTYCYCLE38;
-	} else if (frequency == 56) {
-		OCR2A = KHZ56;
-		OCR2B = DUTYCYCLE56;
-	}
+void IR_prepare_timer_send(void) {
+	TCCR2A |= (1<<WGM20) | (1<<WGM21); // Fast PWM
+	TCCR2B |= (1<<WGM22); // CTC, fast PWM
+	TCCR2A |= (1<<COM2B1); // set above value, clear on bottom
+	#if FREQUENCY == 38
+	OCR2A = KHZ38;
+	OCR2B = DUTYCYCLE38;
+	#elif FREQUENCY == 56
+	OCR2A = KHZ56;
+	OCR2B = DUTYCYCLE56;
+	#else
+	// exception error, geen khz gekozen
+	#endif
 }
 
 
@@ -66,7 +74,7 @@ void IR_send(uint8_t waarde) {
 		if (waarde & (1<<i) { //is bit i 1?
 			
 		} else { //bit i is 0
-
+			
 		}
 	}
 	// stop bits

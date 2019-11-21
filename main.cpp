@@ -1,6 +1,5 @@
 /* defines */
-#define HALFDUTYCYCLE 128
-#define KHZ38 421
+#define FREQUENCY 38 // 38/56
 #define BAUD 9600
 #define IR_RECEIVE_PIN PD2
 #define IR_SEND_PIN PD3
