@@ -30,7 +30,7 @@ void adc_init();
 void init();
 void timer0_init();
 void timer1_init();
-void timer2_init();
+//void timer2_init();
 void ir_init();
 
 
@@ -69,7 +69,7 @@ void init() {
 	// init CSPI
 	timer0_init();
 	timer1_init();
-	timer2_init();
+//	timer2_init();
 	adc_init();
 
 	// pin in/outputs
