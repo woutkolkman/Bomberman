@@ -12,8 +12,8 @@
 #define TOTALBIT56 720 //40 keer knipperen
 #define BITIS1 100 // INVULLEN, kleiner of gelijk aan 719
 #define BITIS0 200 // INVULLEN, kleiner of gelijk aan 719
-#define STARTBITVALUE 0 // INVULLEN, kleiner of gelijk aan 719 (wat veel te groot is)
-#define STOPBITVALUE 0 // INVULLEN, kleiner of gelijk aan 719
+#define STARTBITVALUE 400 // INVULLEN, kleiner of gelijk aan 719 (wat veel te groot is)
+#define STOPBITVALUE 400 // INVULLEN, kleiner of gelijk aan 719
 #define OFFSET 5 // offset waarde voor kleine afwijking
 
 /* includes */
@@ -48,14 +48,18 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 	if (DDRD & (1<<PD2)) { // opgaande flank (0 -> 1)
 		// bepaal verschil huidige counterstand en vorige counterstand
 		diffcounter = OCR1A - prevcounter; //OCR2A - prevcounter;
-		input = (input>>1); // shift input 1 naar rechts, nieuwe bit komt links
 
-
-
-		if (diffcounter >= (BITIS1 - OFFSET) && diffcounter <= (BITIS1 + OFFSET)) { // bit is een 1
-			input |= (1<<7); // zet MSB op 1
-		} else if (diffcounter >= (BITIS0 - OFFSET) && diffcounter <= (BITIS0 + OFFSET)) { // bit is een 0
-			input &= ~(1<<7); // zet MSB op 0 (mag weggelaten worden)
+		if (diffcounter >= (STARTBITVALUE - OFFSET) && diffcounter <= (STARTBITVALUE + OFFSET)) { // startbit
+			
+		} else if (diffcounter >= (STOPBITVALUE - OFFSET) && diffcounter <= (STOPBITVALUE + OFFSET)) { // stopbit
+			
+		} else { // byte informatie
+			input = (input>>1); // shift input 1 naar rechts, nieuwe bit komt links
+			if (diffcounter >= (BITIS1 - OFFSET) && diffcounter <= (BITIS1 + OFFSET)) { // bit is een 1
+				input |= (1<<7); // zet MSB op 1
+			} else if (diffcounter >= (BITIS0 - OFFSET) && diffcounter <= (BITIS0 + OFFSET)) { // bit is een 0
+				input &= ~(1<<7); // zet MSB op 0 (mag weggelaten worden)
+			}
 		}
 	} else { // neergaande flank
 		prevcounter = OCR1A; //OCR2A; // onthoud counterstand, als het goed is 0, anders dicht in de buurt van 0.
@@ -119,6 +123,10 @@ void IR_send(uint8_t waarde) {
 uint8_t IR_receive(void) {
 	// mogelijk functie aanpassen om interrupt te genereren op ontvangst informatie
 	return 0x00;
+}
+
+uint8_t getInput(void) {
+	return input;
 }
 
 //======================================================================
