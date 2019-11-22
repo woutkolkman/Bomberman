@@ -100,9 +100,7 @@ void IR_prepare_receive(void) {
 
 
 void IR_send(uint8_t waarde) {
-	// start bit
-	#if FREQUENCY == 56
-	OCR1B = STARTBITVALUE;
+	OCR1B = STARTBITVALUE; // start bit
 	for (int i=7, i>=0, i--) {
 		if (waarde & (1<<i)) { //is bit i 1?
 			OCR1B = BITIS1F;
@@ -110,21 +108,7 @@ void IR_send(uint8_t waarde) {
 			OCR1B = BITIS0F;
 		}
 	}
-	OCR1B = STOPBITVALUE;
-
-	#elif FREQUENCY == 38
-	OCR1B = STARTBITVALUE;
-	for (int i=7; i>=0; i--) {
-		if (waarde & (1<<i)) {
-			OCR1B = BITIS1;
-		} else {
-			OCR1B = BITIS0;
-		}
-	}
-	OCR1B = STOPBITVALUE;
-	#else
-	// exception error, geen (geldige) khz gekozen
-	#endif
+	OCR1B = STOPBITVALUE; // start bit
 }
 
 
