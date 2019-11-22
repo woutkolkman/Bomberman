@@ -53,9 +53,9 @@ int main(void) {
 
 	/* loop */
 	for(;;) {
-//		_delay_ms(1000);
+		_delay_ms(1000);
 //		irsend.sendNEC(0xAA, NUMBITS);
-//		IR_send(0x76);
+		IR_send(0x76);
 //		USART_Transmit(0xFF);
 	}
 
