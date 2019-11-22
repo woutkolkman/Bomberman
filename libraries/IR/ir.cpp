@@ -24,7 +24,7 @@
 volatile uint8_t prevcounter;
 volatile uint8_t diffcounter;
 volatile uint8_t input = 0x00; // bevat de gestuurde byte
-
+volatile uint8_t values[];
 
 /* function prototypes */
 uint8_t ontcijfer_input(uint8_t input);
@@ -47,16 +47,18 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 
 	if (DDRD & (1<<PD2)) { // opgaande flank (0 -> 1)
 		// bepaal verschil huidige counterstand en vorige counterstand
-		diffcounter = OCR2A - prevcounter;
+		diffcounter = OCR1A - prevcounter; //OCR2A - prevcounter;
 		input = (input>>1); // shift input 1 naar rechts, nieuwe bit komt links
 
-		if (diffcounter <= BITIS1 /*waarde en vergelijking nakijken*/ ) { // bit is een 1
+
+
+		if (diffcounter >= BITIS1 - OFFSET && diffcounter <= BITIS1 + OFFSET /*waarde en vergelijking nakijken*/ ) { // bit is een 1
 			input |= (1<<7); // zet MSB op 1
-		} else { // bit is een 0
+		} else if (diffcounter >= BITIS0 - OFFSET && diffcounter <= BITIS0 + OFFSET { // bit is een 0
 			input &= ~(1<<7); // zet MSB op 0 (mag weggelaten worden)
 		}
-	} else { // neergaande flank (1 -> 0)
-		prevcounter = OCR2A; // onthoud counterstand
+	} else { // neergaande flank
+		prevcounter = OCR1A; //OCR2A; // onthoud counterstand, als het goed is 0, anders dicht in de buurt van 0.
 	}
 }
 
@@ -67,7 +69,7 @@ void IR_prepare_send(void) {
 	TCCR2A |= (1<<WGM20) | (1<<WGM21); //CTC, fast PWM
 	TCCR2B |= (1<<WGM22); //CTC, fast PWM
 	TCCR2A |= (1<<COM2B1); //clear on compare
-	TCCR2B |= /*(1<<CS22) | (1<<CS21) |*/ (1<<CS20); // timer2 no prescaling (prescaler 1)
+	TCCR2B |= (1<<CS22) | (1<<CS21) //(1<<CS20); // timer2 no prescaling (prescaler 1), Prescaler 1 maakt 38 en 56 KHz nagenoeg onmogelijk om te realiseren
 
 	#if FREQUENCY == 38
 	OCR2A = KHZ38; //maximum 1 knipper 38 KHz
