@@ -11,11 +11,9 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include "libraries/IR/ir.h" // IR library
-//#include "libraries/Adafruit_GFX_Library/Adafruit_GFX.h" // LCD library
-#include "libraries/Adafruit_ILI9341/Adafruit_ILI9341.h" // LCD library
-#include "libraries/Adafruit_ILI9341/Adafruit_ZeroDMA.h"
-#include "libraries/Adafruit_ILI9341/Adafruit_GFX.h"
-//#include "libraries/Adafruit_Zero_DMA_Library/Adafruit_ZeroDMA.h" // LCD library
+#include <Adafruit_TFTLCD.h> // LCD library
+#include <Adafruit_ZeroDMA.h> // LCD library
+#include <Adafruit_GFX.h>// LCD library
 #include "libraries/TFT/TFT.h"
 //#include <tft.h>
 #include <cspi.h>
@@ -26,8 +24,8 @@
 volatile uint8_t brightness = 0;
 
 /* Use hHardware SPI and CS/DC   */
-Adarfuit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
-TFT TFTscreen = TFT(CD, DC, RST);
+//Adarfuit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
+//TFT TFTscreen = TFT(CD, DC, RST);
 
 
 /* function prototypes */
@@ -49,14 +47,15 @@ int main(void) {
 	/* setup */
 	init();
 	//USART_Transmit();
-	Serial.begin(9600);
+	//Serial.begin(9600);
 
-	TFTscreen.begin();
-	TFTscreen.background(0,200,0);
-
+	//TFTscreen.begin();
+	//TFTscreen.background(0,200,0);
+	void drawPixel(uint16_t x, uint16_t y, uint16_t colour);
 	/* loop */
 	for(;;){
 	}
+	drawPixel(5, 5, 0XF800);
 
 
 	/* never reached */
