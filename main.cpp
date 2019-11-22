@@ -1,17 +1,17 @@
 /* defines */
 #define BAUD 9600
-#define TFT_DC 9
-#define TFT_CS 10
-#define CS DDB2
-#define CD DDB1
-#define RST DDB0
+#define TFT_DC 9 // initialisatie LCD
+#define TFT_CS 10 // initialisatie LCD
+//#define CS DDB2
+//#define CD DDB1
+//#define RST DDB0
 
 /* includes */
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <util/delay.h>
 #include "libraries/IR/ir.h" // IR library
-#include <Adafruit_TFTLCD.h> // LCD library
+#include <Adafruit_ILI9341.h> // LCD library
 #include <Adafruit_ZeroDMA.h> // LCD library
 #include <Adafruit_GFX.h>// LCD library
 #include "libraries/TFT/TFT.h"
@@ -23,8 +23,8 @@
 /* global variables */
 volatile uint8_t brightness = 0;
 
-/* Use hHardware SPI and CS/DC   */
-//Adarfuit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
+/* Use Hardware SPI (on Uno, #13, #12, #11) and #10 and # 9for  CS/DC   */
+Adarfuit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 //TFT TFTscreen = TFT(CD, DC, RST);
 
 
@@ -40,22 +40,19 @@ ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 	// brightness toepassen op beeldscherm
 }
 
-//TFT TFTscreen = TFT(cs, dc, rst); //test
-
 
 int main(void) {
 	/* setup */
 	init();
 	//USART_Transmit();
-	//Serial.begin(9600);
+	Serial.begin(9600);
+	tft.begin();
+	tft.fillscreen(ILI9341_YELLOW);
 
-	//TFTscreen.begin();
-	//TFTscreen.background(0,200,0);
-	void drawPixel(uint16_t x, uint16_t y, uint16_t colour);
 	/* loop */
 	for(;;){
 	}
-	drawPixel(5, 5, 0XF800);
+	//drawPixel(5, 5, 0XF800);
 
 
 	/* never reached */
