@@ -24,6 +24,7 @@
 volatile uint8_t brightness = 0;
 //volatile IRsend irsend;
 
+
 /* function prototypes */
 void adc_init();
 void init();
@@ -52,8 +53,10 @@ int main(void) {
 
 	/* loop */
 	for(;;) {
-//		_delay_ms(10);
+//		_delay_ms(1000);
 //		irsend.sendNEC(0xAA, NUMBITS);
+//		IR_send(0x76);
+//		USART_Transmit(0xFF);
 	}
 
 

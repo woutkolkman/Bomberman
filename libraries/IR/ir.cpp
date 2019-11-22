@@ -30,11 +30,11 @@ volatile uint8_t input = 0x00; // bevat de gestuurde byte
 uint8_t ontcijfer_input(uint8_t input);
 
 /* ISR */
-ISR (TIMER1_COMPB_vect) { // aangeroepen op frequentie defined door FREQUENCY
-	TCCR2A ^= (1<<WGM20); //switch counter2 off/CTC
-	TCCR2A ^= (1<<WGM21); //switch counter2 off/CTC
-	TCCR2B ^= (1<<WGM22); //switch counter2 off/CTC fastPWM
-}
+//ISR (TIMER1_COMPB_vect) { // aangeroepen op frequentie defined door FREQUENCY
+//	TCCR2A ^= (1<<WGM20); //switch counter2 off/CTC
+//	TCCR2A ^= (1<<WGM21); //switch counter2 off/CTC
+//	TCCR2B ^= (1<<WGM22); //switch counter2 off/CTC fastPWM
+//}
 
 ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van ontvanger
 	/*
@@ -47,7 +47,7 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 
 	if (DDRD & (1<<PD2)) { // opgaande flank (0 -> 1)
 		// bepaal verschil huidige counterstand en vorige counterstand
-		diffcounter = OCR1A - prevcounter; //OCR2A - prevcounter;
+		diffcounter = TCNT2 - prevcounter; //OCR2A - prevcounter;
 
 		if (diffcounter >= (STARTBITVALUE - OFFSET) && diffcounter <= (STARTBITVALUE + OFFSET)) { // startbit
 			
@@ -62,7 +62,7 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 			}
 		}
 	} else { // neergaande flank
-		prevcounter = OCR1A; //OCR2A; // onthoud counterstand, als het goed is 0, anders dicht in de buurt van 0.
+		prevcounter = TCNT2; // onthoud counterstand, als het goed is 0, anders dicht in de buurt van 0.
 	}
 }
 
@@ -70,10 +70,10 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 /* functions */
 void IR_prepare_send(void) {
 	/* TIMER2 - Standaard LED frequentie */
-	TCCR2A |= (1<<WGM20) | (1<<WGM21); //CTC, fast PWM
+	TCCR2A |= (1<<WGM21) | (1<<WGM20); //CTC, fast PWM
 	TCCR2B |= (1<<WGM22); //CTC, fast PWM
-	TCCR2A |= (1<<COM2B1); //clear on compare
-	TCCR2B |= (1<<CS22) | (1<<CS21) /*(1<<CS20)*/; // timer2 no prescaling (prescaler 1), Prescaler 1 maakt 38 en 56 KHz nagenoeg onmogelijk om te realiseren
+	TCCR2A |= (1<<COM2B1); // clear on compare, non-inverting-mode
+	TCCR2B |= /*(1<<CS22) |*/ (1<<CS21) /*| (1<<CS20)*/; // timer2 no prescaling (prescaler 1), Prescaler 1 maakt 38 en 56 KHz nagenoeg onmogelijk om te realiseren
 
 	#if FREQUENCY == 38
 	OCR2A = KHZ38; //maximum 1 knipper 38 KHz
