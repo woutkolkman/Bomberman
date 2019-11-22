@@ -38,13 +38,17 @@ ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 
 int main(void) {
 	/* setup */
+	USART_Transmit(0x76);
 	init_2();
 	//Serial.begin(9600);
+	
 	//tft.begin();
 	//tft.fillScreen(0xFFE0);
 
 	/* loop */
 	for(;;){
+		USART_Transmit(0x76);
+		_delay_ms(1000);
 	}
 
 
