@@ -2,9 +2,6 @@
 #define BAUD 9600
 #define TFT_DC 9 // initialisatie LCD
 #define TFT_CS 10 // initialisatie LCD
-//#define CS DDB2
-//#define CD DDB1
-//#define RST DDB0
 
 /* includes */
 #include <avr/interrupt.h>
@@ -12,10 +9,10 @@
 #include <util/delay.h>
 #include "libraries/IR/ir.h" // IR library
 #include <Adafruit_ILI9341.h> // LCD library
-#include <Adafruit_ZeroDMA.h> // LCD library
 #include <Adafruit_GFX.h>// LCD library
-#include "libraries/TFT/TFT.h"
+//#include "libraries/TFT/TFT.h"
 //#include <tft.h>
+#include <SPI.h>
 #include <cspi.h>
 #include <usart.h>
 
@@ -24,13 +21,11 @@
 volatile uint8_t brightness = 0;
 
 /* Use Hardware SPI (on Uno, #13, #12, #11) and #10 and # 9for  CS/DC   */
-Adarfuit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
-//TFT TFTscreen = TFT(CD, DC, RST);
-
+Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 
 /* function prototypes */
 void adc_init();
-void init();
+void init_2();
 
 
 /* ISR */
@@ -43,23 +38,22 @@ ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 
 int main(void) {
 	/* setup */
-	init();
-	//USART_Transmit();
+	init_2();
+
 	Serial.begin(9600);
 	tft.begin();
-	tft.fillscreen(ILI9341_YELLOW);
+	tft.fillScreen(ILI9341_YELLOW);
 
 	/* loop */
 	for(;;){
 	}
-	//drawPixel(5, 5, 0XF800);
 
 
 	/* never reached */
 	return 0;
 }
 
-void init() {
+void init_2() {
 	// init Wire
 	USART_Init();// init UART
 	// init IR
