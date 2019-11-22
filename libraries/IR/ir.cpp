@@ -14,7 +14,7 @@
 #define BITIS0 200 // INVULLEN, kleiner of gelijk aan 719
 #define STARTBITVALUE 0 // INVULLEN, kleiner of gelijk aan 719 (wat veel te groot is)
 #define STOPBITVALUE 0 // INVULLEN, kleiner of gelijk aan 719
-
+#define OFFSET 5 // offset waarde voor kleine afwijking
 
 /* includes */
 #include "ir.h"
@@ -24,7 +24,7 @@
 volatile uint8_t prevcounter;
 volatile uint8_t diffcounter;
 volatile uint8_t input = 0x00; // bevat de gestuurde byte
-volatile uint8_t values[];
+//volatile uint8_t values[];
 
 /* function prototypes */
 uint8_t ontcijfer_input(uint8_t input);
@@ -52,9 +52,9 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 
 
 
-		if (diffcounter >= BITIS1 - OFFSET && diffcounter <= BITIS1 + OFFSET /*waarde en vergelijking nakijken*/ ) { // bit is een 1
+		if (diffcounter >= (BITIS1 - OFFSET) && diffcounter <= (BITIS1 + OFFSET)) { // bit is een 1
 			input |= (1<<7); // zet MSB op 1
-		} else if (diffcounter >= BITIS0 - OFFSET && diffcounter <= BITIS0 + OFFSET { // bit is een 0
+		} else if (diffcounter >= (BITIS0 - OFFSET) && diffcounter <= (BITIS0 + OFFSET)) { // bit is een 0
 			input &= ~(1<<7); // zet MSB op 0 (mag weggelaten worden)
 		}
 	} else { // neergaande flank
@@ -69,7 +69,7 @@ void IR_prepare_send(void) {
 	TCCR2A |= (1<<WGM20) | (1<<WGM21); //CTC, fast PWM
 	TCCR2B |= (1<<WGM22); //CTC, fast PWM
 	TCCR2A |= (1<<COM2B1); //clear on compare
-	TCCR2B |= (1<<CS22) | (1<<CS21) //(1<<CS20); // timer2 no prescaling (prescaler 1), Prescaler 1 maakt 38 en 56 KHz nagenoeg onmogelijk om te realiseren
+	TCCR2B |= (1<<CS22) | (1<<CS21) /*(1<<CS20)*/; // timer2 no prescaling (prescaler 1), Prescaler 1 maakt 38 en 56 KHz nagenoeg onmogelijk om te realiseren
 
 	#if FREQUENCY == 38
 	OCR2A = KHZ38; //maximum 1 knipper 38 KHz
@@ -104,11 +104,11 @@ void IR_prepare_receive(void) {
 
 void IR_send(uint8_t waarde) {
 	OCR1B = STARTBITVALUE; // start bit
-	for (int i=7, i>=0, i--) {
+	for (int i=7; i>=0; i--) {
 		if (waarde & (1<<i)) { //is bit i 1?
-			OCR1B = BITIS1F;
+			OCR1B = BITIS1;
 		} else { //bit i is 0
-			OCR1B = BITIS0F;
+			OCR1B = BITIS0;
 		}
 	}
 	OCR1B = STOPBITVALUE; // start bit
