@@ -11,7 +11,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <stdint.h>
-//#include "ir.cpp" // snelle fix voor linking error
+#include "ir.cpp" // snelle fix voor linking error
 
 /* function prototypes */
 void IR_prepare_send(void);

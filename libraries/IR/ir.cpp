@@ -7,23 +7,13 @@
 #define KHZ38 52 //timer2 prescale 8
 #define DUTYCYCLE38 26 //duty cycle 50% 38KHz
 #define TOTALBIT38 1040 //40 keer knipperen
-#define STARTBITVALUE38 //INVULLEN, kleiner of gelijk aan 1039 (wat veel te groot is)
-#define BITIS1F38 //INVULLEN, kleiner of gelijk aan 1039
-#define BITIS0F38 //INVULLEN, kleiner of gelijk aan 1039
-#define STOPBITVALUE38 //INVULLEN, kleiner of gelijk aan 1039
-
 #define KHZ56 36 //timer2 prescale 8
 #define DUTYCYCLE56 18 //duty cycle 50% 56KHz
 #define TOTALBIT56 720 //40 keer knipperen
-#define STARTBITVALUE56 //INVULLEN, kleiner of gelijk aan of 719 (wat veel te groot is)
-#define BITIS1F56 //INVULLEN, kleiner of gelijk aan 719
-#define BITIS0F56 //INVULLEN, kleiner of gelijk aan 719
-#define STOPBITVALUE56 //INVULLEN, kleiner of gelijk aan 719
-
-// test
-#define BITIS1 100
-#define BITIS0 200
-// test
+#define BITIS1 100 // INVULLEN, kleiner of gelijk aan 719
+#define BITIS0 200 // INVULLEN, kleiner of gelijk aan 719
+#define STARTBITVALUE 0 // INVULLEN, kleiner of gelijk aan 719 (wat veel te groot is)
+#define STOPBITVALUE 0 // INVULLEN, kleiner of gelijk aan 719
 
 
 /* includes */
@@ -53,6 +43,8 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 	 * meet de tijd tussen deze interrupts, dus een 0 of 1
 	 */
 
+	// nog manier vinden om startbit/stopbit van elkaar te onderscheiden
+
 	if (DDRD & (1<<PD2)) { // opgaande flank (0 -> 1)
 		// bepaal verschil huidige counterstand en vorige counterstand
 		diffcounter = OCR2A - prevcounter;
@@ -73,7 +65,7 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 void IR_prepare_send(void) {
 	/* TIMER2 - Standaard LED frequentie */
 	TCCR2A |= (1<<WGM20) | (1<<WGM21); //CTC, fast PWM
-	TCCR2B |= (1<<WGM22) //CTC, fast PWM
+	TCCR2B |= (1<<WGM22); //CTC, fast PWM
 	TCCR2A |= (1<<COM2B1); //clear on compare
 	TCCR2B |= /*(1<<CS22) | (1<<CS21) |*/ (1<<CS20); // timer2 no prescaling (prescaler 1)
 
@@ -109,27 +101,27 @@ void IR_prepare_receive(void) {
 
 void IR_send(uint8_t waarde) {
 	// start bit
-	#ifdef FREQUENCY == 56
-	OCR1B = STARTBITVALUE56;
+	#if FREQUENCY == 56
+	OCR1B = STARTBITVALUE;
 	for (int i=7, i>=0, i--) {
-		if (waarde & (1<<i) { //is bit i 1?
-			OCR1B = BITIS1F56;
+		if (waarde & (1<<i)) { //is bit i 1?
+			OCR1B = BITIS1F;
 		} else { //bit i is 0
-			OCR1B = BITIS0F56;
+			OCR1B = BITIS0F;
 		}
 	}
-	OCR1B = STOPBITVALUE56;
+	OCR1B = STOPBITVALUE;
 
 	#elif FREQUENCY == 38
-	OCR1B = STARTBITVALUE38;
+	OCR1B = STARTBITVALUE;
 	for (int i=7; i>=0; i--) {
-		if (waarde & (1<<i) {
-			OCR1B = BITIS1F38
+		if (waarde & (1<<i)) {
+			OCR1B = BITIS1;
 		} else {
-			OCR1B = BITIS0F38
+			OCR1B = BITIS0;
 		}
 	}
-	OCR1B = STOPBITVALUES;
+	OCR1B = STOPBITVALUE;
 	#else
 	// exception error, geen (geldige) khz gekozen
 	#endif
@@ -139,11 +131,11 @@ void IR_send(uint8_t waarde) {
 // weghalen? (ook uit .h)
 uint8_t IR_receive(void) {
 	// mogelijk functie aanpassen om interrupt te genereren op ontvangst informatie
-	
+	return 0x00;
 }
 
 //======================================================================
 
 uint8_t ontcijfer_input(uint8_t input) { // van tijden naar byte
-	
+	return input;
 }
