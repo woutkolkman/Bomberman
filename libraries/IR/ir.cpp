@@ -10,7 +10,7 @@
 #define STARTBITVALUE38 //INVULLEN, kleiner of gelijk aan 1039 (wat veel te groot is)
 #define BITIS1F38 //INVULLEN, kleiner of gelijk aan 1039
 #define BITIS0F38 //INVULLEN, kleiner of gelijk aan 1039
-#define STOPBITVALUE //INVULLEN, kleiner of gelijk aan 1039
+#define STOPBITVALUE38 //INVULLEN, kleiner of gelijk aan 1039
 
 #define KHZ56 36 //timer2 prescale 8
 #define DUTYCYCLE56 18 //duty cycle 50% 56KHz
@@ -18,7 +18,7 @@
 #define STARTBITVALUE56 //INVULLEN, kleiner of gelijk aan of 719 (wat veel te groot is)
 #define BITIS1F56 //INVULLEN, kleiner of gelijk aan 719
 #define BITIS0F56 //INVULLEN, kleiner of gelijk aan 719
-#define STOPBITVALUE //INVULLEN, kleiner of gelijk aan 719
+#define STOPBITVALUE56 //INVULLEN, kleiner of gelijk aan 719
 
 // test
 #define BITIS1 100
@@ -38,7 +38,6 @@ volatile uint8_t input = 0x00; // bevat de gestuurde byte
 
 /* function prototypes */
 uint8_t ontcijfer_input(uint8_t input);
-
 
 /* ISR */
 ISR (TIMER1_COMPB_vect) { // aangeroepen op frequentie defined door FREQUENCY
@@ -129,11 +128,9 @@ void IR_send(uint8_t waarde) {
 		} else {
 			OCR1B = BITIS0F38
 		}
-	}
 	#else
 	// exception error, geen (geldige) khz gekozen
 	#endif
-	OCR1B = STOPBITVALUE38;
 }
 
 
@@ -145,6 +142,3 @@ uint8_t IR_receive(void) {
 
 //======================================================================
 
-uint8_t ontcijfer_input(uint8_t input) { // van tijden naar byte
-	
-}
