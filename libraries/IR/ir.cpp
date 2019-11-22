@@ -128,6 +128,8 @@ void IR_send(uint8_t waarde) {
 		} else {
 			OCR1B = BITIS0F38
 		}
+	}
+	OCR1B = STOPBITVALUES;
 	#else
 	// exception error, geen (geldige) khz gekozen
 	#endif
@@ -142,3 +144,6 @@ uint8_t IR_receive(void) {
 
 //======================================================================
 
+uint8_t ontcijfer_input(uint8_t input) { // van tijden naar byte
+	
+}
