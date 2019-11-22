@@ -39,10 +39,9 @@ ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 int main(void) {
 	/* setup */
 	init_2();
-
-	Serial.begin(9600);
-	tft.begin();
-	tft.fillScreen(ILI9341_YELLOW);
+	//Serial.begin(9600);
+	//tft.begin();
+	//tft.fillScreen(0xFFE0);
 
 	/* loop */
 	for(;;){
@@ -56,6 +55,9 @@ int main(void) {
 void init_2() {
 	// init Wire
 	USART_Init();// init UART
+	Serial.begin(9600);
+	tft.begin();
+	tft.fillScreen(ILI9341_RED);
 	// init IR
 	// init CSPI
 	//timer0_init();
