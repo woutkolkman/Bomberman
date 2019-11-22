@@ -81,6 +81,7 @@ void IR_prepare_send(void) {
 	OCR1A = TOTALBIT56; //totaal 1 bit 56 KHz
 	#else
 	// exception error, geen (geldige) khz gekozen
+	#pragma GCC error "geen geldige frequentie gekozen"
 	#endif
 
 	/* TIMER1 - Bepaald informatie in signaal */
