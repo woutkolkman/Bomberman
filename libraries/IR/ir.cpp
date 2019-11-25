@@ -67,17 +67,17 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 		}
 		#elif FREQUENCY == 56
 		if (diffcounter >= (STARTBITVALUE56 - OFFSET) && diffcounter <= (STARTBITVALUE56 + OFFSET)) { // startbit
-
-                } else if (diffcounter >= (STOPBITVALUE56 - OFFSET) && diffcounter <= (STOPBITVALUE56 + OFFSET)) { // stopbit
-
-                } else { // byte informatie
-                        input = (input>>1); // shift input 1 naar rechts, nieuwe bit komt links
-                        if (diffcounter >= (BITIS156 - OFFSET) && diffcounter <= (BITIS156 + OFFSET)) { // bit is een 1
-                                input |= (1<<7); // zet MSB op 1
-                        } else if (diffcounter >= (BITIS056 - OFFSET) && diffcounter <= (BITIS056 + OFFSET)) { // bit is een 0
-                                input &= ~(1<<7); // zet MSB op 0 (mag weggelaten worden)
-                        }
-                }
+			
+        } else if (diffcounter >= (STOPBITVALUE56 - OFFSET) && diffcounter <= (STOPBITVALUE56 + OFFSET)) { // stopbit
+			
+        } else { // byte informatie
+            input = (input>>1); // shift input 1 naar rechts, nieuwe bit komt links
+            if (diffcounter >= (BITIS156 - OFFSET) && diffcounter <= (BITIS156 + OFFSET)) { // bit is een 1
+                input |= (1<<7); // zet MSB op 1
+            } else if (diffcounter >= (BITIS056 - OFFSET) && diffcounter <= (BITIS056 + OFFSET)) { // bit is een 0
+                input &= ~(1<<7); // zet MSB op 0 (mag weggelaten worden)
+            }
+        }
 		#else
 		#pragma GCC error "geen geldige frequentie gekozen"
 		#endif
@@ -143,20 +143,20 @@ void IR_send(uint8_t waarde) {
 	OCR1B = STOPBITVALUE38; // stop bit
 	while(TCNT1 != 0);
 
-        #elif FREQUENCY == 56
-        OCR1B = STARTBITVALUE56; // start bit
-        while(TCNT1 != 0); //wacht tot niewe bit
-        for (int i=0; i<=7; i++) {
-                if (waarde & (1<<i)) { //is bit i 1?
-                        OCR1B = BITIS156; //wacht tot nieuwe bit
-                        while(TCNT1 != 0);
-                } else { //bit i is 0
-                        OCR1B = BITIS056;
-                        while(TCNT1 != 0);
-                }
-        }
-        OCR1B = STOPBITVALUE56; // stop bit
-        while(TCNT1 != 0);
+    #elif FREQUENCY == 56
+    OCR1B = STARTBITVALUE56; // start bit
+    while(TCNT1 != 0); //wacht tot niewe bit
+    for (int i=0; i<=7; i++) {
+            if (waarde & (1<<i)) { //is bit i 1?
+                    OCR1B = BITIS156; //wacht tot nieuwe bit
+                    while(TCNT1 != 0);
+            } else { //bit i is 0
+                    OCR1B = BITIS056;
+                    while(TCNT1 != 0);
+            }
+    }
+    OCR1B = STOPBITVALUE56; // stop bit
+    while(TCNT1 != 0);
 
 	#else
 	#pragma GCC error "geen geldige frequentie gekozen"
