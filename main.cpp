@@ -54,8 +54,9 @@ int main(void) {
 	/* loop */
 	for(;;) {
 		_delay_ms(1000);
-//		irsend.sendNEC(0xAA, NUMBITS);
+//		for (long i=0; i<2000000; i++) {}
 		IR_send(0x76);
+//		TCCR2A ^= (1<<COM2B1);
 //		USART_Transmit(0xFF);
 	}
 
