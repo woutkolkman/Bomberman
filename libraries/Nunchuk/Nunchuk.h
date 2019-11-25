@@ -26,8 +26,16 @@ class NunChuk {
 		static uint8_t id[];
 		uint8_t getState(uint8_t address);
 		ncState state;
+                void printStates();
+		uint8_t X_Axis();
+                uint8_t Y_Axis();
+	        uint8_t Acc_X_Axis();
+		uint8_t Acc_Y_Axis();
+		uint8_t Acc_Z_Axis();
+		uint8_t Z_Button();
+		uint8_t C_Button();
 
-	private:
+	
 		static uint8_t response[];
 		uint8_t _read(uint8_t address, uint8_t offset);
 		void _getid(uint8_t address);
