@@ -6,21 +6,15 @@
 /* defines */
 #define KHZ38 52 //timer2 prescale 8
 #define DUTYCYCLE38 26 //duty cycle 50% 38KHz
-#define TOTALBIT38 20800 //400 keer knipperen
-#define STARTBITVALUE38 16640 //80%
-#define BITIS138 15600 //75%
-#define BITIS038 10400 //50%
-#define STOPBITVALUE38 5200 //25%
-
+#define TOTALBIT38 1040 //40 keer knipperen
 #define KHZ56 36 //timer2 prescale 8
 #define DUTYCYCLE56 18 //duty cycle 50% 56KHz
-#define TOTALBIT56 14400 //400 keer knipperen
-#define STARTBITVALUE56 11520 //80%
-#define BITIS156 10800 //75%
-#define BITIS056 7200 //50%
-#define STOPBITVALUE56 3600 //25%
-
-#define OFFSET 100 // offset waarde voor kleine afwijking
+#define TOTALBIT56 720 //40 keer knipperen
+#define BITIS1 100 // INVULLEN, kleiner of gelijk aan 719
+#define BITIS0 200 // INVULLEN, kleiner of gelijk aan 719
+#define STARTBITVALUE 400 // INVULLEN, kleiner of gelijk aan 719 (wat veel te groot is)
+#define STOPBITVALUE 400 // INVULLEN, kleiner of gelijk aan 719
+#define OFFSET 5 // offset waarde voor kleine afwijking
 
 /* includes */
 #include "ir.h"
@@ -32,15 +26,18 @@ volatile uint8_t diffcounter;
 volatile uint8_t input = 0x00; // bevat de gestuurde byte
 //volatile uint8_t values[];
 
+
 /* function prototypes */
 uint8_t ontcijfer_input(uint8_t input);
 
+
 /* ISR */
-ISR (TIMER1_COMPB_vect) { // aangeroepen op frequentie defined door FREQUENCY
-	TCCR2A ^= (1<<WGM20); //switch counter2 off/CTC
-	TCCR2A ^= (1<<WGM21); //switch counter2 off/CTC
-	TCCR2B ^= (1<<WGM22); //switch counter2 off/CTC fastPWM
-}
+//ISR (TIMER1_COMPB_vect) { // aangeroepen op frequentie defined door FREQUENCY
+//	TCCR2A ^= (1<<WGM20); //switch counter2 off/CTC
+//	TCCR2A ^= (1<<WGM21); //switch counter2 off/CTC
+//	TCCR2B ^= (1<<WGM22); //switch counter2 off/CTC fastPWM
+//}
+
 
 ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van ontvanger
 	/*
@@ -49,39 +46,22 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 	 * meet de tijd tussen deze interrupts, dus een 0 of 1
 	 */
 
-	if (DDRD & (1<<DDD2)) { // opgaande flank (0 -> 1)
+	if (DDRD & (1<<PD2)) { // opgaande flank (0 -> 1)
 		// bepaal verschil huidige counterstand en vorige counterstand
-		diffcounter = TCNT1 - prevcounter; //TCNT1 - prevcounter;
-		#if FREQUENCY == 38
-		if (diffcounter >= (STARTBITVALUE38 - OFFSET) && diffcounter <= (STARTBITVALUE38 + OFFSET)) { // startbit
-
-		} else if (diffcounter >= (STOPBITVALUE38 - OFFSET) && diffcounter <= (STOPBITVALUE38 + OFFSET)) { // stopbit
-
+		diffcounter = TCNT1 - prevcounter; // TCNT1 - prevcounter;
+		
+		if (diffcounter >= (STARTBITVALUE - OFFSET) && diffcounter <= (STARTBITVALUE + OFFSET)) { // startbit
+			
+		} else if (diffcounter >= (STOPBITVALUE - OFFSET) && diffcounter <= (STOPBITVALUE + OFFSET)) { // stopbit
+			
 		} else { // byte informatie
 			input = (input>>1); // shift input 1 naar rechts, nieuwe bit komt links
-			if (diffcounter >= (BITIS138 - OFFSET) && diffcounter <= (BITIS138 + OFFSET)) { // bit is een 1
+			if (diffcounter >= (BITIS1 - OFFSET) && diffcounter <= (BITIS1 + OFFSET)) { // bit is een 1
 				input |= (1<<7); // zet MSB op 1
-			} else if (diffcounter >= (BITIS038 - OFFSET) && diffcounter <= (BITIS038 + OFFSET)) { // bit is een 0
+			} else if (diffcounter >= (BITIS0 - OFFSET) && diffcounter <= (BITIS0 + OFFSET)) { // bit is een 0
 				input &= ~(1<<7); // zet MSB op 0 (mag weggelaten worden)
 			}
 		}
-		#elif FREQUENCY == 56
-		if (diffcounter >= (STARTBITVALUE56 - OFFSET) && diffcounter <= (STARTBITVALUE56 + OFFSET)) { // startbit
-			
-        } else if (diffcounter >= (STOPBITVALUE56 - OFFSET) && diffcounter <= (STOPBITVALUE56 + OFFSET)) { // stopbit
-			
-        } else { // byte informatie
-            input = (input>>1); // shift input 1 naar rechts, nieuwe bit komt links
-            if (diffcounter >= (BITIS156 - OFFSET) && diffcounter <= (BITIS156 + OFFSET)) { // bit is een 1
-                input |= (1<<7); // zet MSB op 1
-            } else if (diffcounter >= (BITIS056 - OFFSET) && diffcounter <= (BITIS056 + OFFSET)) { // bit is een 0
-                input &= ~(1<<7); // zet MSB op 0 (mag weggelaten worden)
-            }
-        }
-		#else
-		#pragma GCC error "geen geldige frequentie gekozen"
-		#endif
-
 	} else { // neergaande flank
 		prevcounter = TCNT1; // onthoud counterstand, als het goed is 0, anders dicht in de buurt van 0.
 	}
@@ -128,41 +108,20 @@ void IR_prepare_receive(void) {
 
 
 void IR_send(uint8_t waarde) {
-	#if FREQUENCY == 38
-	OCR1B = STARTBITVALUE38; // start bit
+	OCR1B = STARTBITVALUE; // start bit
 	while(TCNT1 != 0); //wacht tot niewe bit
-	for (int i=0; i<=7; i++) {
+	for (int i=0; i<=7; i++) { // verstuur bits van rechts naar links
 		if (waarde & (1<<i)) { //is bit i 1?
-			OCR1B = BITIS138; //wacht tot nieuwe bit
-			while(TCNT1 != 0);
+			OCR1B = BITIS1;
+			while(TCNT1 != 0); //wacht tot nieuwe bit
 		} else { //bit i is 0
-			OCR1B = BITIS038;
-			while(TCNT1 != 0);
+			OCR1B = BITIS0;
+			while(TCNT1 != 0); //wacht tot nieuwe bit
 		}
 	}
-	OCR1B = STOPBITVALUE38; // stop bit
-	while(TCNT1 != 0);
-
-    #elif FREQUENCY == 56
-    OCR1B = STARTBITVALUE56; // start bit
-    while(TCNT1 != 0); //wacht tot niewe bit
-    for (int i=0; i<=7; i++) {
-            if (waarde & (1<<i)) { //is bit i 1?
-                    OCR1B = BITIS156; //wacht tot nieuwe bit
-                    while(TCNT1 != 0);
-            } else { //bit i is 0
-                    OCR1B = BITIS056;
-                    while(TCNT1 != 0);
-            }
-    }
-    OCR1B = STOPBITVALUE56; // stop bit
-    while(TCNT1 != 0);
-
-	#else
-	#pragma GCC error "geen geldige frequentie gekozen"
-	#endif
+	OCR1B = STOPBITVALUE; // start bit	
+	while(TCNT1 != 0); // ??
 }
-
 
 
 // weghalen? (ook uit .h)
@@ -170,6 +129,7 @@ uint8_t IR_receive(void) {
 	// mogelijk functie aanpassen om interrupt te genereren op ontvangst informatie
 	return 0x00;
 }
+
 
 uint8_t getInput(void) {
 	return input;
