@@ -68,10 +68,11 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 /* functions */
 void IR_prepare_send(void) {
 	/* TIMER2 - Standaard LED frequentie */
+	DDRD |= (1<<DDD3); //pin 3 output
 	TCCR2A |= (1<<WGM21) | (1<<WGM20); //CTC, fast PWM
 	TCCR2B |= (1<<WGM22); //CTC, fast PWM
 	TCCR2A |= (1<<COM2B1); // clear on compare, non-inverting-mode
-	TCCR2B |= /*(1<<CS22) |*/ (1<<CS21) /*| (1<<CS20)*/; // timer2 no prescaling (prescaler 1), Prescaler 1 maakt 38 en 56 KHz nagenoeg onmogelijk om te realiseren
+	TCCR2B |= (1<<CS21); // timer2 prescaling 8, (Prescaler 1 maakt 38 en 56 KHz nagenoeg onmogelijk (zeer ingewikkeld om te realiseren)
 
 	#if FREQUENCY == 38
 	OCR2A = KHZ38; //maximum 1 knipper 38 KHz
@@ -83,7 +84,7 @@ void IR_prepare_send(void) {
 	// exception error, geen (geldige) khz gekozen
 	#pragma GCC error "geen geldige frequentie gekozen"
 	#endif
-	OCR1A = TOTALBIT
+	OCR1A = TOTALBIT; //set bitlength
 
 	/* TIMER1 - Bepaald informatie in signaal */
 	TCCR1A |= (1<<WGM10) | (1<<WGM11); //fast PWM CTC
@@ -94,8 +95,10 @@ void IR_prepare_send(void) {
 
 void IR_prepare_receive(void) {
 	// zie pagina 8 technisch ontwerp
+	DDD &= ~(1<<DDD2); //pin 2 input
+	PORTD |= (1<<PORTD2); //pull-up resistor pin 2
 	PCICR |= (1<<PCIE2); // pin change interrupt enable 2 (PCINT[23:16])
-	PCMSK2 |= (1<<PCINT18); // pin PD2 interrupts doorlaten
+	PCMSK2 |= (1<<PCINT18); // pin 2 interrupts doorlaten
 
 	// intstellen timer2, technisch ontwerp pagina 9
 	// zelfde instellingen als IR_prepare_send, roep ook deze functie aan?
