@@ -23,7 +23,10 @@ void setup(){
   //USART_Transmit(0x76);
   Serial.begin(9600);
   tft.begin();
+  /* achtergrond kleuren  */
   tft.fillScreen(ILI9341_GREEN);
+  /* pixel tekenen op x en y as */
+  tft.drawPixel(128, 50, ILI9341_RED);
 
 }
 

@@ -10,13 +10,11 @@
 #include "libraries/IR/ir.h" // IR library
 #include <Adafruit_ILI9341.h> // LCD library
 #include <Adafruit_GFX.h>// LCD library
-#include <Arduino.h>
-//#include "libraries/TFT/TFT.h"
-//#include <tft.h>
+#include <Arduino.h> // LCD library
+#include <avr/io.h> // LCD library
 #include <SPI.h>
 #include <cspi.h>
 #include <usart.h>
-
 
 /* global variables */
 volatile uint8_t brightness = 0;
@@ -28,7 +26,6 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 void adc_init();
 void init_2();
 
-
 /* ISR */
 ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 	brightness = (ADC>>2); // 10 bits, gooi 2 LSB weg, uitkomst 8 bits
@@ -36,15 +33,16 @@ ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 	// brightness toepassen op beeldscherm
 }
 
+void setup(){
+	Serial.begin(9600);
+	tft.begin();
+	tft.fillScreen(ILI9341_RED);
+}
 
 int main(void) {
 	/* setup */
 	//USART_Transmit(0x76);
 	init_2();
-	//Serial.begin(9600);
-	
-	//tft.begin();
-	//tft.fillScreen(0xFFE0);
 
 	/* loop */
 	for(;;){
@@ -60,9 +58,6 @@ int main(void) {
 void init_2() {
 	// init Wire
 	USART_Init();// init UART
-	Serial.begin(9600);
-	tft.begin();
-	tft.fillScreen(ILI9341_RED);
 	// init IR
 	// init CSPI
 	//timer0_init();
