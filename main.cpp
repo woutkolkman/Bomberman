@@ -54,11 +54,12 @@ int main(void) {
 	/* loop */
 	for(;;) {
 //		for (long i=0; i<2000000; i++) {}
-//		IR_send(10101010);
+//		IR_send(0xAA); // 10101010
 //		IR_send(0xFF);
+//		IR_send(0x00);
 //		TCCR2A ^= (1<<COM2B1);
 //		USART_Transmit(getInput());
-//		_delay_ms(50000);
+		_delay_ms(6000);
 	}
 
 
@@ -73,6 +74,7 @@ void init() {
 	// init CSPI
 //	timer0_init();
 //	timer1_init();
+//	timer2_init();
 //	adc_init();
 
 	// pin in/outputs
