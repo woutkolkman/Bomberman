@@ -53,11 +53,12 @@ int main(void) {
 
 	/* loop */
 	for(;;) {
-		_delay_ms(10);
 //		for (long i=0; i<2000000; i++) {}
-//		IR_send(0x76);
+//		IR_send(10101010);
+//		IR_send(0xFF);
 //		TCCR2A ^= (1<<COM2B1);
-		USART_Transmit(getInput());
+//		USART_Transmit(getInput());
+//		_delay_ms(50000);
 	}
 
 

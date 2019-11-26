@@ -10,12 +10,13 @@
 #define KHZ56 36 // timer2 prescale 8
 #define DUTYCYCLE56 18 // duty cycle 50% 56KHz
 //#define TOTALBIT56 14400 // 400 keer knipperen
-#define BITIS1 400 // INVULLEN, kleiner of gelijk aan 719
-#define BITIS0 200 // INVULLEN, kleiner of gelijk aan 719
-#define STARTBITVALUE 600 // INVULLEN, kleiner of gelijk aan 719 (wat veel te groot is)
-#define STOPBITVALUE 400 // INVULLEN, kleiner of gelijk aan 719
-#define OFFSET 10 // offset waarde voor kleine afwijking
+#define BITIS1 20 // INVULLEN, kleiner of gelijk aan 719
+#define BITIS0 10 // INVULLEN, kleiner of gelijk aan 719
+#define STARTBITVALUE 70 // INVULLEN, kleiner of gelijk aan 719 (wat veel te groot is)
+#define STOPBITVALUE 50 // INVULLEN, kleiner of gelijk aan 719
+#define OFFSET 5 // offset waarde voor kleine afwijking
 #define TIJD1 20 // tijd waarop led tussen een 1/0 aan is, niet belangrijk voor de informatie
+
 
 /* includes */
 #include "ir.h"
@@ -34,6 +35,8 @@ volatile uint8_t aantal_bits_verzonden = 0x00;
 
 
 /* function prototypes */
+uint8_t getInput(void);
+
 
 /* ISR */
 ISR (TIMER1_COMPA_vect/*TIMER1_OVF_vect*/) { // ISR toggled output van timer2 voor verzenden bits
@@ -85,7 +88,7 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 	 * meet de tijd tussen deze interrupts, dus een 0 of 1
 	 */
 
-	if (DDRD & (1<<DDD2)) { // opgaande flank (0 -> 1)
+	if (DDRD & (1<<PD2)) { // opgaande flank (0 -> 1)
 		// bepaal verschil huidige counterstand en vorige counterstand
 		diffcounter = TCNT1 - prevcounter; // TCNT1 - prevcounter;
 		if (diffcounter >= (STARTBITVALUE - OFFSET) && diffcounter <= (STARTBITVALUE + OFFSET)) { // startbit
@@ -112,7 +115,7 @@ void IR_prepare(void) {
 	DDRD |= (1<<DDD3); //pin 3 output
 	TCCR2A |= (1<<WGM21) | (1<<WGM20); //CTC, fast PWM
 	TCCR2B |= (1<<WGM22); //CTC, fast PWM
-	TCCR2A |= (1<<COM2B1); // clear on compare, non-inverting-mode
+//	TCCR2A |= (1<<COM2B1); // clear on compare, non-inverting-mode
 	TCCR2B |= (1<<CS21); // timer2 prescaling 8, (Prescaler 1 maakt 38 en 56 KHz nagenoeg onmogelijk (zeer ingewikkeld om te realiseren)
 
 	#if FREQUENCY == 38
@@ -131,9 +134,9 @@ void IR_prepare(void) {
 	/* TIMER1 - Bepaald informatie in signaal */
 //	TCCR1A |= (1<<WGM10) | (1<<WGM11); //fast PWM CTC
 //	TCCR1B |= (1<<WGM12) | (1<<WGM13); //fast PWM CTC
-//	TCCR1B |= (1<<CS11); //prescaler 8
+	TCCR1B |= (1<<CS11); //prescaler 8
 	TCCR1A |= (1<<WGM12); // CTC / clear timer on compare match, top OCR1A
-	TCCR1B |= (1<<CS12) |/* (1<<CS11) | */(1<<CS10); // prescaler 1
+//	TCCR1B |= /*(1<<CS12) |*/ (1<<CS11) | (1<<CS10); // prescaler 1
 	TIMSK1 |= (1<<OCIE1A); // output compare a match interrupt enable
 
 	// zie pagina 8 technisch ontwerp
@@ -147,45 +150,26 @@ void IR_prepare(void) {
 
 
 void IR_send(uint8_t waarde) {
-	//#define STEFAN
-	#ifdef STEFAN
-	OCR1B = STARTBITVALUE; // start bit
-	while(TCNT1 != 0); //wacht tot niewe bit
-	for (int i=0; i<=7; i++) { // verstuur bits van reclhts naar links
-		if (waarde & (1<<i)) { //is bit i 1?
-			OCR1B = BITIS1;
-			while(TCNT1 != 0); //wacht tot nieuwe bit
-		} else { //bit i is 0
-			OCR1B = BITIS0;
-			while(TCNT1 != 0); //wacht tot nieuwe bit
-		}
-	}
-	OCR1B = STOPBITVALUE; // start bit
-	while(TCNT1 != 0); // ??
-
-
-	#else
-	IR_prepare_send();
 	output = waarde; // instellen output
 	TCCR2A |= (1<<COM2B1); // PWM output vast aanzetten
 	TCNT1 = 0; // timer0 op 0 zetten zodat volledige lange start signaal wordt verzonden
-	OCR1A = 2000; // lang start signaal voor laten aanpassen ontvanger
+	OCR1A = 60000; // lang start signaal voor laten aanpassen ontvanger
 	// /\ waarde nog niet definitief
 	aan_het_verzenden = 1; // activeren verzenden
-	#endif
 }
 
 
 // weghalen? (ook uit .h)
 uint8_t IR_receive(void) {
 	// mogelijk functie aanpassen om interrupt te genereren op ontvangst informatie
-	return 0x00;
+	return getInput();
 }
 
 
 uint8_t getInput(void) {
-	IR_prepare_receive();
+//	IR_prepare();
 	return input;
 }
 
 //======================================================================
+
