@@ -10,12 +10,12 @@
 #define KHZ56 36 // timer2 prescale 8
 #define DUTYCYCLE56 18 // duty cycle 50% 56KHz
 #define TOTALBIT56 14400 // 400 keer knipperen
-#define BITIS1 50 // INVULLEN, kleiner of gelijk aan 719
-#define BITIS0 25 // INVULLEN, kleiner of gelijk aan 719
-#define STARTBITVALUE 100 // INVULLEN, kleiner of gelijk aan 719 (wat veel te groot is)
-#define STOPBITVALUE 75 // INVULLEN, kleiner of gelijk aan 719
+#define BITIS1 30 // INVULLEN, kleiner of gelijk aan 719
+#define BITIS0 15 // INVULLEN, kleiner of gelijk aan 719
+#define STARTBITVALUE 60 // INVULLEN, kleiner of gelijk aan 719 (wat veel te groot is)
+#define STOPBITVALUE 45 // INVULLEN, kleiner of gelijk aan 719
 #define OFFSET 10 // offset waarde voor kleine afwijking
-#define TIJD1 50 // tijd waarop led tussen een 1/0 aan is, niet belangrijk voor de informatie
+#define TIJD1 20 // tijd waarop led tussen een 1/0 aan is, niet belangrijk voor de informatie
 
 /* includes */
 #include "ir.h"
@@ -38,10 +38,13 @@ uint8_t ontcijfer_input(uint8_t input);
 
 
 /* ISR */
-ISR (/*TIMER1_COMPA_vect*/TIMER1_OVF_vect) { // ISR toggled output van timer2 voor verzenden bits
+ISR (TIMER1_COMPA_vect/*TIMER1_OVF_vect*/) { // ISR toggled output van timer2 voor verzenden bits
+//	#define STEFAN
+	#ifdef STEFAN
 //	TCCR2A ^= (1<<WGM20); //switch counter2 off/CTC
 //	TCCR2A ^= (1<<WGM21); //switch counter2 off/CTC
 //	TCCR2B ^= (1<<WGM22); //switch counter2 off/CTC fastPWM
+	#else
 
 	if (aan_het_verzenden == 1) {
 		if (TCCR2A & (1<<COM2B1)) { // als PWM poort aan staat
@@ -60,10 +63,10 @@ ISR (/*TIMER1_COMPA_vect*/TIMER1_OVF_vect) { // ISR toggled output van timer2 vo
 					state++;
 				}
 			} else if (state == 2) { // stopbit verzenden
+				aantal_bits_verzonden = 0;
 				OCR1A = STOPBITVALUE;
 				state++;
 			} else if (state == 3) { // stopbit en bericht afsluiten
-				aantal_bits_verzonden = 0;
 				aan_het_verzenden = 0;
 				state = 0;
 			}
@@ -73,6 +76,7 @@ ISR (/*TIMER1_COMPA_vect*/TIMER1_OVF_vect) { // ISR toggled output van timer2 vo
 			OCR1A = TIJD1; // ..totdat timer1 deze waarde heeft behaald
 		}
 	}
+	#endif
 }
 
 
@@ -89,7 +93,7 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 		if (diffcounter >= (STARTBITVALUE - OFFSET) && diffcounter <= (STARTBITVALUE + OFFSET)) { // startbit
 			
 		} else if (diffcounter >= (STOPBITVALUE - OFFSET) && diffcounter <= (STOPBITVALUE + OFFSET)) { // stopbit
-			input = raw_input; // input teruggeven aan game wanneer alles binnen is
+			input = raw_input; // input teruggeven aan programma wanneer alles binnen is
 		} else { // byte informatie
 			raw_input = (raw_input>>1); // shift input 1 naar rechts, nieuwe bit komt links
 			if (diffcounter >= (BITIS1 - OFFSET) && diffcounter <= (BITIS1 + OFFSET)) { // bit is een 1
@@ -128,10 +132,10 @@ void IR_prepare_send(void) {
 	/* TIMER1 - Bepaald informatie in signaal */
 //	TCCR1A |= (1<<WGM10) | (1<<WGM11); //fast PWM CTC
 //	TCCR1B |= (1<<WGM12) | (1<<WGM13); //fast PWM CTC
-//	TCCR1B |= (1<<CS11); //prescaler 8
+	TCCR1B |= (1<<CS11); //prescaler 8
 	TCCR1A |= (1<<WGM12); // CTC / clear timer on compare match, top OCR1A
-	TCCR1B |= /*(1<<CS12) | (1<<CS11) | */(1<<CS10); // prescaler 1
-//	TIMSK1 |= (1<<OCIE1A); // output compare a match interrupt enable
+//	TCCR1B |= /*(1<<CS12) | (1<<CS11) | */(1<<CS10); // prescaler 1
+	TIMSK1 |= (1<<OCIE1A); // output compare a match interrupt enable
 }
 
 
@@ -166,9 +170,9 @@ void IR_send(uint8_t waarde) {
 
 	#else
 	output = waarde; // instellen output
-	TCCR2A ^= (1<<COM2B1); // PWM output vast aanzetten
+	TCCR2A |= (1<<COM2B1); // PWM output vast aanzetten
 	TCNT1 = 0; // timer0 op 0 zetten zodat volledige lange start signaal wordt verzonden
-	OCR1A = 500; // lang start signaal voor laten aanpassen ontvanger
+	OCR1A = 254; // lang start signaal voor laten aanpassen ontvanger
 	// /\ waarde nog niet definitief
 	aan_het_verzenden = 1; // activeren verzenden
 	#endif
