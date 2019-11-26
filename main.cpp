@@ -29,7 +29,7 @@ volatile uint8_t brightness = 0;
 void adc_init();
 void init();
 void timer0_init();
-void timer1_init();
+//void timer1_init();
 //void timer2_init();
 void ir_init();
 
@@ -54,8 +54,9 @@ int main(void) {
 	/* loop */
 	for(;;) {
 		_delay_ms(1000);
-//		irsend.sendNEC(0xAA, NUMBITS);
+//		for (long i=0; i<2000000; i++) {}
 		IR_send(0x76);
+//		TCCR2A ^= (1<<COM2B1);
 //		USART_Transmit(0xFF);
 	}
 
@@ -71,7 +72,7 @@ void init() {
 	// init CSPI
 //	timer0_init();
 //	timer1_init();
-	adc_init();
+//	adc_init();
 
 	// pin in/outputs
 	/*
@@ -102,9 +103,13 @@ void timer0_init() {
 	
 }
 
-void timer1_init() {
-	
-}
+//void timer1_init() {
+//	
+//}
+
+//void timer2_init() {
+//	
+//}
 
 void adc_init() { // initialiseer ADC, voor podmeter / brightness scherm
 	ADMUX |= (1<<REFS0); // reference voltage on AVCC (5V)
