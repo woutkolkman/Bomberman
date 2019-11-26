@@ -53,7 +53,7 @@ ISR (TIMER1_COMPA_vect/*TIMER1_OVF_vect*/) { // ISR toggled output van timer2 vo
 				OCR1A = STARTBITVALUE;
 				state++;
 			} else if (state == 1) { // informatie verzenden
-				if (output & 1) {
+				if (output & (1<<0)) {
 					OCR1A = BITIS1; // verzend 1
 				} else {
 					OCR1A = BITIS0; // verzend 0
@@ -88,7 +88,7 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 	 * meet de tijd tussen deze interrupts, dus een 0 of 1
 	 */
 
-	if (DDRD & (1<<PD2)) { // opgaande flank (0 -> 1)
+	if (DDRD & (1<<DDD2)) { // opgaande flank (0 -> 1)
 		// bepaal verschil huidige counterstand en vorige counterstand
 		diffcounter = TCNT1 - prevcounter; // TCNT1 - prevcounter;
 		if (diffcounter >= (STARTBITVALUE - OFFSET) && diffcounter <= (STARTBITVALUE + OFFSET)) { // startbit
