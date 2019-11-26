@@ -25,10 +25,27 @@ void setup(){
   tft.begin();
   /* achtergrond kleuren  */
   tft.fillScreen(ILI9341_GREEN);
-  /* pixel tekenen op x en y as */
-  tft.drawPixel(128, 50, ILI9341_RED);
-
+  /* pixel tekenen op y en x as */
+  tft.drawPixel(90, 30, ILI9341_RED);
+  tft.drawPixel(90, 31, ILI9341_RED);
+  tft.drawPixel(91, 30, ILI9341_RED);
+  tft.drawPixel(91, 31, ILI9341_RED);
 }
 
 /* loop */
-void loop(){}
+void loop(){
+	/* max resolutie is 240x320  */
+	for(int y=-150; y<320; y++){ // loop for het bepalen van de y as
+		tft.drawFastVLine(129, y, 120, ILI9341_RED); // tekenen pixels, teken 60 pixels op x-as: 128, y-as: y
+		tft.drawFastVLine(128, y, 120, ILI9341_RED);
+		tft.drawFastVLine(127, y, 120, ILI9341_RED);
+		tft.drawFastVLine(126, y, 120, ILI9341_RED);
+
+		delay(5); // snelheid van het bewegen van de lijn, hoger getal is lagere snelheid
+		tft.drawFastVLine(129, y, 120, ILI9341_GREEN); // teken de 60 eerder getekende pixels weer de kleur van de achtergrond
+		tft.drawFastVLine(128, y, 120, ILI9341_GREEN);
+		tft.drawFastVLine(127, y, 120, ILI9341_GREEN);
+		tft.drawFastVLine(126, y, 120, ILI9341_GREEN);;
+
+	}
+}
