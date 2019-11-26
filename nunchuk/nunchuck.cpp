@@ -1,24 +1,35 @@
-#include <Nunchuk.h>
 #include <avr/io.h>
 #include <Wire.h>
+#include <Nunchuk.h>
+#include <Arduino.h>
 #include <util/delay.h>
 
-#define ADDRESS 0x52 // address Nunchuk
+#define ADDRESS 0x52
 
 int main(void) {
 
-//  Serial.begin(9600);
-    Wire.begin();
+  // initialize Nunchuk
+  init();
+
+  Serial.begin(9600); // set baudrate
+  Wire.begin(); // enable I2C communication
+
+  Nunchuk.begin(ADDRESS); // start communication with Arduino and Nunchuk
+  Serial.print("ID: "); // retrieve ID Nunchuk and display
+  for (uint8_t i = 0; i < FRAMELEN; i++) {
+    Serial.print(Nunchuk.id[i], HEX);
+  }
+  Serial.println("");
+
+  _delay_ms(500); // wait
 
   while (1) {
 
-  Nunchuk.begin(ADDRESS); // start communication between Nunchuk 1 and Arduino
-  Nunchuk.getState(ADDRESS); // get states of joystick and buttons (defined in .h & .cpp file)
-  Nunchuk._getid(ADDRESS); // get ID of Nunchuk 1
+    Nunchuk.getState(ADDRESS); // get states (defined in .h and .cpp)
+    Nunchuk.printStates(); // print states of joystick and buttons
 
-    if (Nunchuk._read(ADDRESS, 0x00)) { // if Nunchuk 1 is being read --> print states
-      Nunchuk.printStates();
-    }
-    _delay_ms(500);
+    _delay_ms(500); // wait
+    
   }
+  return(0);
 }
