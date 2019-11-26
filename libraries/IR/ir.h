@@ -14,8 +14,7 @@
 #include "ir.cpp" // snelle fix voor linking error
 
 /* function prototypes */
-void IR_prepare_send(void);
-void IR_prepare_receive(void);
+void IR_prepare(void);
 void IR_send(uint8_t waarde);
 uint8_t IR_receive(void); // functie weghalen?
 uint8_t getInput(void);

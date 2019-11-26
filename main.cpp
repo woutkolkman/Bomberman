@@ -53,9 +53,9 @@ int main(void) {
 
 	/* loop */
 	for(;;) {
-		_delay_ms(1000);
+		_delay_ms(5000);
 //		for (long i=0; i<2000000; i++) {}
-		IR_send(0x76);
+		IR_send(0x30);
 //		TCCR2A ^= (1<<COM2B1);
 //		USART_Transmit(0xFF);
 	}
@@ -95,8 +95,7 @@ void init() {
 }
 
 void ir_init() {
-	IR_prepare_send();
-	IR_prepare_receive();
+	IR_prepare();
 }
 
 void timer0_init() {
