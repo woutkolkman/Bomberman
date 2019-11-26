@@ -17,16 +17,6 @@
 #define OFFSET 10 // offset waarde voor kleine afwijking
 #define TIJD1 20 // tijd waarop led tussen een 1/0 aan is, niet belangrijk voor de informatie
 
-#define KHZ56 36 //timer2 prescale 8
-#define DUTYCYCLE56 18 //duty cycle 50% 56KHz
-#define TOTALBIT56 14400 //400 keer knipperen
-#define STARTBITVALUE56 11520 //80%
-#define BITIS156 10800 //75%
-#define BITIS056 7200 //50%
-#define STOPBITVALUE56 3600 //25%
-
-#define OFFSET 100 // offset waarde voor kleine afwijking
-
 /* includes */
 #include "ir.h"
 
@@ -44,8 +34,6 @@ volatile uint8_t aantal_bits_verzonden = 0x00;
 
 
 /* function prototypes */
-uint8_t ontcijfer_input(uint8_t input);
-
 
 /* ISR */
 ISR (TIMER1_COMPA_vect/*TIMER1_OVF_vect*/) { // ISR toggled output van timer2 voor verzenden bits
@@ -97,7 +85,7 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 	 * meet de tijd tussen deze interrupts, dus een 0 of 1
 	 */
 
-	if (DDRD & (1<<PD2)) { // opgaande flank (0 -> 1)
+	if (DDRD & (1<<DDD2)) { // opgaande flank (0 -> 1)
 		// bepaal verschil huidige counterstand en vorige counterstand
 		diffcounter = TCNT1 - prevcounter; // TCNT1 - prevcounter;
 		if (diffcounter >= (STARTBITVALUE - OFFSET) && diffcounter <= (STARTBITVALUE + OFFSET)) { // startbit
@@ -139,7 +127,6 @@ void IR_prepare(void) {
 	// exception error, geen (geldige) khz gekozen
 	#pragma GCC error "geen geldige frequentie gekozen"
 	#endif
-	OCR1A = TOTALBIT; //set bitlength
 
 	/* TIMER1 - Bepaald informatie in signaal */
 //	TCCR1A |= (1<<WGM10) | (1<<WGM11); //fast PWM CTC
@@ -150,7 +137,7 @@ void IR_prepare(void) {
 	TIMSK1 |= (1<<OCIE1A); // output compare a match interrupt enable
 
 	// zie pagina 8 technisch ontwerp
-	DDD &= ~(1<<DDD2); //pin 2 input
+	DDRD &= ~(1<<DDD2); //pin 2 input
 	PORTD |= (1<<PORTD2); //pull-up resistor pin 2
 	PCICR |= (1<<PCIE2); // pin change interrupt enable 2 (PCINT[23:16])
 	PCMSK2 |= (1<<PCINT18); // pin 2 interrupts doorlaten
@@ -178,6 +165,7 @@ void IR_send(uint8_t waarde) {
 
 
 	#else
+	IR_prepare_send();
 	output = waarde; // instellen output
 	TCCR2A |= (1<<COM2B1); // PWM output vast aanzetten
 	TCNT1 = 0; // timer0 op 0 zetten zodat volledige lange start signaal wordt verzonden
@@ -196,6 +184,7 @@ uint8_t IR_receive(void) {
 
 
 uint8_t getInput(void) {
+	IR_prepare_receive();
 	return input;
 }
 
