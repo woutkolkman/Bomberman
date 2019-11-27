@@ -36,6 +36,7 @@
 #define backgroundColour ILI9341_ORANGE
 
 #define standardPosition tft.fillRect(100, 140, 35, 45, ILI9341_BLACK);
+#define clearStandardPosition tft.fillRect(100, 140, 35, 45, backgroundColour);
 #define clearUp tft.fillRect(100 + y, 140, 35 , 45, backgroundColour);
 #define clearDown tft.fillRect(100 - y, 140, 35, 45, backgroundColour);
 #define clearLeft tft.fillRect(100, 140 - x, 35, 45, backgroundColour);
@@ -108,28 +109,17 @@ void loop() {
      Z-button: released: 0 - pressed: 1
      C-button: released: 0 - pressed: 1 */
 
-     if (Nunchuk.Y_Axis() == 128 && Nunchuk.X_Axis() == 127) {
-	standardPosition;
-     }
-     
-     // Y-axis
-     if (Nunchuk.Y_Axis() == 255) {
+     if (Nunchuk.X_Axis() == 255) { // right
+       clearLeft; clearUp; clearDown;
+       moveRight();
+     } else if (Nunchuk.X_Axis() == 0) { // left
+        clearRight; clearUp; clearDown;
+        moveLeft();
+     } else if (Nunchuk.Y_Axis() == 255) { // up
+        clearLeft; clearRight; clearDown;
         moveUp();
-        } else if (Nunchuk.Y_Axis() == 0) {
-           moveDown();
-        } else {
-           clearUp;
-           clearDown;
-        }
-
-     // X-axis 
-     if (Nunchuk.X_Axis() == 0) {
-         moveLeft();
-     	} else if (Nunchuk.X_Axis() == 255) {
-	    moveRight();
-        } else {
-            clearLeft;	
-            clearRight;
-        }
-
+     } else if (Nunchuk.Y_Axis() == 0) { // down
+        clearLeft; clearRight; clearUp;
+        moveDown();
+     }
 }
