@@ -34,8 +34,8 @@
 /* global variables */
 volatile uint8_t prevcounter;
 volatile uint8_t diffcounter;
-volatile uint8_t input = 0x00; // bevat de gestuurde byte
-volatile uint8_t raw_input = 0x00; // wordt overgezet naar "input" bij stopbit
+volatile uint8_t input; // bevat de gestuurde byte
+volatile uint8_t raw_input; // wordt overgezet naar "input" bij stopbit
 
 volatile uint8_t output = 0x00; // gegevens om te verzenden
 volatile uint8_t aan_het_verzenden = 0; // staat op 1 als er iets verzonden wordt (/ moet worden)
@@ -67,7 +67,7 @@ ISR (TIMER1_COMPA_vect/*TIMER1_OVF_vect*/) { // ISR toggled output van timer2 vo
 				OCR1A = STARTBITVALUE;
 				state++;
 			} else if (state == 1) { // informatie verzenden
-				if (output & 1) {
+				if (output & (1<<0)) {
 					OCR1A = BITIS1; // verzend 1
 					#ifdef USART_SEND
 					USART_Transmit(0x31);
