@@ -6,7 +6,7 @@
 
 #define ADDRESS 0x52
 #define RESETBS PORTB &= ~(1 << PORT5);
-#define BS PORTB |= (1 << PINB5);
+#define BS 	PORTB |= (1 << PINB5);
 
 int main(void) { 
   // input & output
