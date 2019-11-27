@@ -10,13 +10,21 @@
 #define KHZ56 36 // timer2 prescale 8
 #define DUTYCYCLE56 18 // duty cycle 50% 56KHz
 //#define TOTALBIT56 14400 // 400 keer knipperen
-#define BITIS1 0x0035 // INVULLEN, kleiner of gelijk aan 719
-#define BITIS0 0x00FF // INVULLEN, kleiner of gelijk aan 719
-#define STARTBITVALUE 0x0FFF // INVULLEN, kleiner of gelijk aan 719 (wat veel te groot is)
-#define STOPBITVALUE 0x0AFF // INVULLEN, kleiner of gelijk aan 719
-#define OFFSET 0x05 // offset waarde voor kleine afwijking (ontvangen)
-#define TIJD1 0x0020 // tijd waarop led tussen een 1/0 aan is, niet belangrijk voor de informatie
+#define BITIS1 0x00FF // INVULLEN, kleiner of gelijk aan 719
+#define BITIS0 0x00AA // INVULLEN, kleiner of gelijk aan 719
+#define STARTBITVALUE 0x3FFF // INVULLEN, kleiner of gelijk aan 719 (wat veel te groot is)
+#define STOPBITVALUE 0x0FFF // INVULLEN, kleiner of gelijk aan 719
+#define OFFSET 0x0010 // offset waarde voor kleine afwijking (ontvangen)
+#define TIJD0 0x0020 // tijd waarop led tussen een 1/0 aan is, niet belangrijk voor de informatie
 //#define USART_SEND // als defined, print bits in serial console
+/*
+ * 1 0x00FF
+ * 0 0x00AA
+ * start 0x3FFF
+ * stop 0x0FFF
+ * off 0x0010
+ * tijd0 0x0020
+ */
 
 
 /* includes */
@@ -47,7 +55,7 @@ ISR (TIMER1_COMPA_vect/*TIMER1_OVF_vect*/) { // ISR toggled output van timer2 vo
 //		TCNT1 = 0x00; // zet register op 0 (wordt al automatisch gedaan?)
 		if (TCCR2A & (1<<COM2B1)) { // als PWM poort aan staat
 			TCCR2A ^= (1<<COM2B1); // schakel PWM poort (uit)
-			OCR1A = TIJD1; // ..totdat timer1 deze waarde heeft behaald
+			OCR1A = TIJD0; // ..totdat timer1 deze waarde heeft behaald
 
 			if (state == 3) { // afsluiten bericht
 				state = 0;
@@ -92,7 +100,7 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 	 * meet de tijd tussen deze interrupts, dus een 0 of 1
 	 */
 
-	if (DDRD & (1<<PD2)) { // opgaande flank (0 -> 1)
+	if (PIND & (1<<PD2)) { // opgaande flank (0 -> 1)
 		// bepaal verschil huidige counterstand en vorige counterstand
 		diffcounter = TCNT1 - prevcounter; // TCNT1 - prevcounter;
 		if (diffcounter >= (STARTBITVALUE - OFFSET) && diffcounter <= (STARTBITVALUE + OFFSET)) { // startbit
@@ -108,6 +116,7 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 			}
 		}
 	} else { // neergaande flank
+		TCNT1 = 0; // TCNT1 op 0 zetten? Hoeft niet?
 		prevcounter = TCNT1; // onthoud counterstand, als het goed is 0, anders dicht in de buurt van 0.
 	}
 }
@@ -155,7 +164,7 @@ void IR_prepare(void) {
 
 
 void IR_send(uint8_t waarde) {
-	/*// test voor laten aanpassen ontvanger
+	/*l// test voor laten aanpassen ontvanger
 	TCCR2A ^= (1<<COM2B1);
 	_delay_ms(400);
 	TCCR2A ^= (1<<COM2B1);

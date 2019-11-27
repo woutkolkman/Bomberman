@@ -57,6 +57,7 @@ int main(void) {
 //		IR_send(0xAA); // 10101010
 //		IR_send(0xFF);
 //		IR_send(0x00);
+//		IR_send(0x39);
 //		TCCR2A ^= (1<<COM2B1);
 //		USART_Transmit(getInput());
 		_delay_ms(6000);
