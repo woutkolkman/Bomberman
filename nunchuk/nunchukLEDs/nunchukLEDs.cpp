@@ -6,7 +6,7 @@
 
 #define ADDRESS 0x52
 #define RESETBS PORTB &= ~(1 << PORT5);
-#define BS      PORTB |= (1 << PINB5);
+#define BS PORTB |= (1 << PINB5);
 
 int main(void) { 
   // input & output
@@ -20,7 +20,7 @@ int main(void) {
 
   Nunchuk.begin(ADDRESS); // start communication with Arduino and Nunchuk
   
-  Serial.print("ID: "); // retrieve ID Nunchuk and display
+  Serial.print("ID: 0x"); // retrieve ID Nunchuk and display
   for (uint8_t i = 0; i < FRAMELEN; i++) {
     Serial.print(Nunchuk.id[i], HEX);
   }
@@ -32,39 +32,26 @@ int main(void) {
 
     Nunchuk.getState(ADDRESS); // get states of joystick and buttons (defined in .h and .cpp)
 
-    /* X-axis: left: 0 - middle: 127 - right: 255
+  /* X-axis: left: 0 - middle: 127 - right: 255
      Y-axis: up: 255 - middle: 128 - down: 0
      Z-button: released: 0 - pressed: 1
      C-button: released: 0 - pressed: 1 */
 
     // check how LEDs (joystick and buttons) react to Nunchuk values
-    if (Nunchuk.Y_Axis() == 128 && Nunchuk.X_Axis() == 127) { // beginstate
-      BS;
-    }
-
-    // move LED over X-axis
-    if (Nunchuk.X_Axis() == 0) { // to the left
-      PORTB |= (1 << PINB3); 
-      RESETBS;
-    } else if (Nunchuk.X_Axis() == 255) { // to the right
+    // X-axis
+    if (Nunchuk.X_Axis() == 255) { // right
+      PORTB &= ~(1 << PINB1) & ~(1 << PINB3) & ~(1 << PINB4);
       PORTB |= (1 << PINB2);
-      RESETBS;
-    } else { // in the middle
-      PORTB &= ~(1 << PINB3);
-      PORTB &= ~(1 << PINB2);
-    }
-
-    // move LED over Y-axis
-    if (Nunchuk.Y_Axis() == 255) { // go up
+    } else if (Nunchuk.X_Axis() == 0) { // up
+      PORTB |= (1 << PINB3);
+      PORTB &= ~(1 << PINB1) & ~(1 << PINB2) & ~(1 << PINB4);
+    } else if (Nunchuk.Y_Axis() == 255) { // up
       PORTB |= (1 << PINB4);
-      RESETBS;
-    } else if (Nunchuk.Y_Axis() == 0) { // go down
+      PORTB &= ~(1 << PINB1) & ~(1 << PINB2) & ~(1 << PINB3);
+    } else if (Nunchuk.Y_Axis() == 0) { // down 
       PORTB |= (1 << PINB1);
-      RESETBS;
-    } else { // in the middle
-      PORTB &= ~(1 << PINB4); 
-      PORTB &= ~(1 << PINB1);
-    } 
+      PORTB &= ~(1 << PINB4) & ~(1 << PINB2) & ~(1 << PINB3);
+    }
   }
   return(0);
-} 
+}
