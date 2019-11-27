@@ -24,7 +24,7 @@
 #define ILI9341_GREENYELLOW 0xAFE5  ///< 173, 255,  41
 #define ILI9341_PINK        0xFC18  ///< 255, 130, 198
 
-#define Backgroundcolor ILI9341_YELLOW
+#define Backgroundcolor ILI9341_OLIVE
 
 /* includes */
 #include <Adafruit_ILI9341.h> // LCD library
@@ -65,26 +65,37 @@ void mannetje_tekenen(){
 
 }
 
+int main(void){
+	init();
+	tft.begin();
+	tft.fillScreen(Backgroundcolor);
+
+	while(1){
+	tekenen_Lijn();
+	}
+	return(0);
+}
+
 /* setup */
-void setup(){
+//void setup(){
   //USART_Init();
   //USART_Transmit(0x76);
-  DDRB |= (1<<DDB1) | (1<<DDB2) | (1<<DDB3) | (1<<DDB4) | (1<<DDB5); // TFT scherm
+  //DDRB |= (1<<DDB1) | (1<<DDB2) | (1<<DDB3) | (1<<DDB4) | (1<<DDB5); // TFT scherm
   //USART_Transmit(0x76);
-  Serial.begin(9600);
-  tft.begin();
+  //Serial.begin(9600);
+  //tft.begin();
   /* achtergrond kleuren  */
   //tft.fillScreen(ILI9341_GREEN);
-  tft.fillScreen(Backgroundcolor);
+  //tft.fillScreen(Backgroundcolor);
   /* pixel tekenen op y en x as */
   //tft.drawPixel(90, 30, ILI9341_RED);
   //tft.drawPixel(90, 31, ILI9341_RED);
   //tft.drawPixel(91, 30, ILI9341_RED);
   //tft.drawPixel(91, 31, ILI9341_RED);
-}
+//}
 
 /* loop */
-void loop(){
+//void loop(){
 	//tekenen_Lijn();
-	mannetje_tekenen();
-}
+//	mannetje_tekenen();
+//}

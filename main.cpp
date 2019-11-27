@@ -33,16 +33,12 @@ ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 	// brightness toepassen op beeldscherm
 }
 
-void setup(){
-	Serial.begin(9600);
-	tft.begin();
-	tft.fillScreen(ILI9341_RED);
-}
-
 int main(void) {
 	/* setup */
 	//USART_Transmit(0x76);
-	init_2();
+	init();
+	tft.begin();
+	tft.fillScreen(ILI9341_PINK);
 
 	/* loop */
 	for(;;){
