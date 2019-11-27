@@ -59,7 +59,7 @@ void setup() {
   Wire.begin(); // allow I2C communication
   tft.begin(); // allow SPI communication
 
-  tft.fillScreen(backgroundColour); 
+  tft.fillScreen(backgroundColour); // background
 
   // nunchuk
   init();
