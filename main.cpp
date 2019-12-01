@@ -36,10 +36,6 @@ void ir_init();
 
 
 /* ISR */
-//ISR(TIMER1_COMPA_vect) {
-//	TCCR2A ^= (1<<COM2A1); //toggle timer2 fastPWM/off
-//}
-
 ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 	brightness = (ADC>>2); // 10 bits, gooi 2 LSB weg, uitkomst 8 bits
 
@@ -50,7 +46,7 @@ ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 int main(void) {
 	/* setup */
 	init(); // initialize
-
+//	prepare_receive();
 
 	/* loop */
 	for(;;) {
@@ -58,9 +54,9 @@ int main(void) {
 //		IR_send(0xAA); // 10101010
 //		IR_send(0xFF);
 //		IR_send(0x00);
-//		IR_send(0x39);
+//		IR_send(0x32);
 //		TCCR2A ^= (1<<COM2B1);
-//		USART_Transmit(getInput());
+		USART_Transmit(IR_receive());
 		_delay_ms(6000);
 	}
 
