@@ -16,6 +16,7 @@
 #include <Wire.h>
 #include <stdint.h>
 #include "libraries/IR/ir.h" // IR library
+//#include "ir.h"
 //#include "./libraries/IRremote-2.2.3/IRremote.h" // test library voor IR
 // ... // LCD library
 
