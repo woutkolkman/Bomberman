@@ -33,20 +33,9 @@
 #define ILI9341_ORANGE      0xFD20  ///< 255, 165,   0
 #define ILI9341_GREENYELLOW 0xAFE5  ///< 173, 255,  41
 #define ILI9341_PINK        0xFC18  ///< 255, 130, 198
-#define backgroundColour ILI9341_ORANGE
+#define backgroundColour ILI9341_RED
 
 #define standardPosition tft.fillRect(100, 140, 35, 45, ILI9341_BLACK);
-<<<<<<< HEAD
-#define clearStandardPosition tft.fillRect(100, 140, 35, 45, backgroundColour);
-=======
->>>>>>> nunchuck
-#define clearUp tft.fillRect(100 + y, 140, 35 , 45, backgroundColour);
-#define clearDown tft.fillRect(100 - y, 140, 35, 45, backgroundColour);
-#define clearLeft tft.fillRect(100, 140 - x, 35, 45, backgroundColour);
-#define clearRight tft.fillRect(100, 140 + x, 35, 45, backgroundColour);
-
-#define y 50
-#define x 50
 
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 
@@ -54,11 +43,6 @@ void setup() {
 
   DDRB |= (1 << DDB1) | (1 << DDB2) | (1 << DDB3) | (1 << DDB4) | (1 << DDB5); // TFT scherm
 
-  PCICR |= (1 << PCIE1); // enable interrupt on C Port
-  PCMSK1 |= (1 << PCINT12); // enable interrupt on I/O pin
-  sei(); // enable interrupts
-
-  Serial.begin(9600);
   Wire.begin(); // allow I2C communication
   tft.begin(); // allow SPI communication
 
@@ -78,31 +62,6 @@ void setup() {
   _delay_ms(500);
 }
 
-void moveUp() {
-
-   tft.fillRect(100 + y, 140, 35 , 45, ILI9341_BLACK);
-}
-
-void moveRight() {
-
-   tft.fillRect(100, 140 + x, 35, 45, ILI9341_BLACK);
-}
-
-void moveLeft() {
-   
-   tft.fillRect(100, 140 - x, 35, 45, ILI9341_BLACK);
-}
-
-void moveDown() {
- 
-   tft.fillRect(100 - y, 140, 35, 45, ILI9341_BLACK);
-}  
-
-ISR(PCINT1_vect) {
-
-   
-}
-
 void loop() {
 
   Nunchuk.getState(ADDRESS); // retrieve states (defined in .h and .cpp)
@@ -112,7 +71,6 @@ void loop() {
      Z-button: released: 0 - pressed: 1
      C-button: released: 0 - pressed: 1 */
 
-<<<<<<< HEAD
      if (Nunchuk.X_Axis() == 255) { // right
        clearLeft; clearUp; clearDown;
        moveRight();
@@ -126,30 +84,4 @@ void loop() {
         clearLeft; clearRight; clearUp;
         moveDown();
      }
-=======
-     if (Nunchuk.Y_Axis() == 128 && Nunchuk.X_Axis() == 127) {
-	standardPosition;
-     }
-     
-     // Y-axis
-     if (Nunchuk.Y_Axis() == 255) {
-        moveUp();
-        } else if (Nunchuk.Y_Axis() == 0) {
-           moveDown();
-        } else {
-           clearUp;
-           clearDown;
-        }
-
-     // X-axis 
-     if (Nunchuk.X_Axis() == 0) {
-         moveLeft();
-     	} else if (Nunchuk.X_Axis() == 255) {
-	    moveRight();
-        } else {
-            clearLeft;	
-            clearRight;
-        }
-
->>>>>>> nunchuck
 }
