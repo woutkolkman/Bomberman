@@ -9,15 +9,16 @@
  * sommige defines moeten handmatig uitgerekend en ingevoerd worden tegen het afronden van de compiler
  */
 #if FREQUENCY == 38
-#define KHZ 53/*52*/ // timer2 OVF count 38KHZ
+#define KHZ 0x35/*53*//*52*/ // timer2 OVF count 38KHZ
 #define DUTYCYCLE (KHZ / 2) // duty cycle 50% 38KHZ
 #elif FREQUENCY == 56
-#define KHZ 36/*36*/ // timer2 OVF count 56KHZ
+#define KHZ 0x24/*36*/ // timer2 OVF count 56KHZ
 #define DUTYCYCLE (KHZ / 2) // duty cycle 50% 56KHZ
 #else
 // exception error, geen (geldige) khz gekozen
 #pragma GCC error "geen geldige frequentie gekozen"
 #endif
+
 #define BITIS1_MS 30 // ms waarop LED aanstaat voor 1
 #define BITIS1 215 /*(BITIS1_MS / MS_PER_TICK)*/
 #define BITIS0_MS 20 // ms waarop LED aanstaat voor 0
@@ -34,6 +35,9 @@
 #ifdef DYNAMIC_TIJD0
 #define MAXTIJD_PER_BIT 60 // tijd van bit + TIJD0, moet groter zijn dan BITIS1_MS & BITIS0_MS
 #endif
+#define AANTAL_BITS 8
+#define AANTAL_BITS_TYPE uint8_t
+#define PRINT_ONTVANGST // debug
 
 
 /* includes */
@@ -43,10 +47,12 @@
 /* global variables */
 volatile uint8_t prevcounter;
 volatile uint8_t diffcounter;
-volatile uint8_t input = 0x37/*test*/; // bevat de gestuurde byte
-volatile uint8_t raw_input; // wordt overgezet naar "input" bij stopbit
-volatile uint8_t timer2_ovfs; // telt aantal overflows bij ontvangen data
-volatile int aantal_bits; // telt aantal bits of dit geldig is
+volatile AANTAL_BITS_TYPE input = 0x37/*test*/; // bevat de gestuurde byte
+volatile AANTAL_BITS_TYPE raw_input = 0x00; // wordt overgezet naar "input" bij stopbit
+volatile uint8_t timer2_ovfs = 0; // telt aantal overflows bij ontvangen data
+volatile int aantal_bits = 0; // telt aantal bits of dit geldig is
+volatile uint8_t nieuwe_input = 0; // wordt op 1 gezet bij nieuwe input en gereset bij uitlezen
+
 
 /* function prototypes */
 void schakel_IR_LED(uint8_t aan);
@@ -61,10 +67,12 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 	 * sla stand van hardware counter op (timer2)
 	 * vergelijk huidige stand met vorige stand
 	 * meet de tijd tussen deze interrupts, dus een 0 of 1
+	 *
+	 * er is gekozen om alles in de ISR te laten omdat al deze stappen toch al
+	 * uitgevoerd moeten worden voordat nieuwe bits verwerkt kunnen worden
 	 */
 
 	if (PIND & (1<<PD2)) { // opgaande flank (0 -> 1)
-//		USART_Transmit(0x21); // test
 
 		// bepaal verschil huidige counterstand en vorige counterstand
 		if (TCNT2 < prevcounter) { // als huidige counterstand lager is dan opgeslagen, tel rond
@@ -77,32 +85,50 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 			diffcounter += (OCR2A * timer2_ovfs); // aantal overflows bijop tellen
 		}
 
+		// bepaal welke bit ontvangen is
 		if (diffcounter >= (STARTBIT - OFFSET) && diffcounter <= (STARTBIT + OFFSET)) { // startbit
 			aantal_bits = 0; // aantal bits check resetten
+
+			#ifdef PRINT_ONTVANGST
 			USART_Transmit(0x41); // test
+			#endif
 		} else if (diffcounter >= (STOPBIT - OFFSET) && diffcounter <= (STOPBIT + OFFSET)) { // stopbit
-			if (8 == aantal_bits) { // aantal bits checken op geldigheid
+			if (AANTAL_BITS == aantal_bits) { // aantal bits checken op geldigheid
 				input = raw_input; // input teruggeven aan programma wanneer alles binnen is
 				aantal_bits = 0; // aantal bits check resetten
+				nieuwe_input = 1;
+
+				// hardwarematige interrupt genereren?
 			}
+
+			#ifdef PRINT_ONTVANGST
 			USART_Transmit(0x4F); // test
+			#endif
 		} else { // byte informatie
 			raw_input = (raw_input>>1); // shift input 1 naar rechts, nieuwe bit komt links
 			if (diffcounter >= (BITIS1 - OFFSET) && diffcounter <= (BITIS1 + OFFSET)) { // bit is een 1
 				raw_input |= (1<<7); // zet MSB op 1
+				aantal_bits++;
+
+				#ifdef PRINT_ONTVANGST
 				USART_Transmit(0x31); // test
+				#endif
 			} else if (diffcounter >= (BITIS0 - OFFSET) && diffcounter <= (BITIS0 + OFFSET)) { // bit is een 0
 				raw_input &= ~(1<<7); // zet MSB op 0 (mag weggelaten worden)
+				aantal_bits++;
+
+				#ifdef PRINT_ONTVANGST
 				USART_Transmit(0x30); // test
+				#endif
 			} else {
+				#ifdef PRINT_ONTVANGST
 				USART_Transmit(0x21); // test
+				#endif
 			}
-			aantal_bits++;
 		}
 
 		TIMSK2 &= ~(1<<OCIE2A); // OCR2A compare match interrupt uitschakelen, weer aanzetten bij neergaande flank
 	} else { // neergaande flank (1 -> 0)
-//		TCNT1 = 0; // TCNT1 op 0 zetten? Hoeft niet?
 		prevcounter = TCNT2; // onthoud counterstand, als het goed is 0, anders dicht in de buurt van 0.
 		TIMSK2 |= (1<<OCIE2A); // OCR2A compare match interrupt, tel aantal overflows in TIMER2_COMPA_vect ISR
 		timer2_ovfs = 0;
@@ -110,12 +136,8 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 }
 
 ISR (TIMER2_COMPA_vect) { // wordt aangeroepen bij timer2 overflows, wanneer data wordt ontvangen om tijd te meten
-	if (PCMSK2 & (1<<PCINT18)) { // kijk of er wordt ontvangen
-		// aangeroepen om de 16,384 ms met prescaler 1024
-		timer2_ovfs++;
-	} else { // er wordt verzonden
-		TCNT2 = 0;
-	}
+	// aangeroepen om de 16,384 ms met prescaler 1024
+	timer2_ovfs++;
 }
 
 
@@ -123,7 +145,7 @@ ISR (TIMER2_COMPA_vect) { // wordt aangeroepen bij timer2 overflows, wanneer dat
 void IR_prepare(void) {
 	DDRD |= (1<<PD3); // pin 3 output (IR LED)
 
-	/* PCINT - Voor IR ontvanger */ // zie pagina 8 technisch ontwerp
+	/* PCINT - Voor IR ontvanger */
 	DDRD &= ~(1<<DDD2); //pin 2 input
 	PORTD |= (1<<PORTD2); //pull-up resistor pin 2
 	PCICR |= (1<<PCIE2); // pin change interrupt enable 2 (PCINT[23:16])
@@ -144,12 +166,6 @@ void IR_send(uint8_t waarde) {
 	// variabelen
 	int vorige_bit_ms = 0;
 
-//	// AGC tijd
-//	schakel_IR_LED(1);
-//	_delay_ms(AGC_TIJD_ONTVANGER_MS);
-//	schakel_IR_LED(0);
-//	_delay_ms(TIJD0_MS);
-
 	// startbit
 	schakel_IR_LED(1);
 	_delay_ms(STARTBIT_MS);
@@ -157,7 +173,7 @@ void IR_send(uint8_t waarde) {
 	_delay_ms(TIJD0_MS);
 
 	// byte
-	for (uint8_t i=1; i<=8; i++) {
+	for (int i=1; i<=AANTAL_BITS; i++) {
 		schakel_IR_LED(1);
 		if (waarde & (1<<0)) { // LSB is 1
 			_delay_ms(BITIS1_MS);
@@ -188,15 +204,20 @@ void IR_send(uint8_t waarde) {
 	_delay_ms(STOPBIT_MS);
 	schakel_IR_LED(0);
 
-	// misschien nog toepassen dat berichten even lang duren door uit-tijd dynamisch aan te passen
-
 	// luisteren naar nieuwe input ontvanger
 	prepare_receive();
 }
 
 
+// returned 1 als er nieuwe input is dat nog niet is uitgelezen
+uint8_t IR_nieuwe_input(void) {
+	return nieuwe_input;
+}
+
+
 uint8_t IR_receive(void) {
 	// mogelijk functie aanpassen om interrupt te genereren op ontvangst informatie
+	nieuwe_input = 0;
 	return input;
 }
 
@@ -223,18 +244,18 @@ void prepare_send(void) {
 	PCMSK2 &= ~(1<<PCINT18); // tijdelijk geen interrupts van ontvanger doorlaten
 
 	/* TIMER2 - Standaard LED frequentie */
-//	GTCCR |= (1<<PSRASY); // reset prescaler timer2
+	TCCR2A = 0; // resetten timer
+	TCCR2B = 0; // resetten timer
+	GTCCR |= (1<<PSRASY); // reset prescaler timer2
 	TCCR2A |= (1<<WGM21) | (1<<WGM20); // fast PWM
-//	TCCR2B |= (1<<WGM22); // fast PWM
+	TCCR2B |= (1<<WGM22); // fast PWM
 	TCCR2B |= /*(1<<CS22) | */(1<<CS21)/* | (1<<CS20)*/; // prescaler 8, (Prescaler 1 maakt 38 en 56 KHz nagenoeg onmogelijk (zeer ingewikkeld om te realiseren)
-	TCCR2B &= ~(1<<CS22) & (1<<CS20); // uitzetten settings receive
+//	TCCR2B &= ~(1<<CS22) & (1<<CS20); // uitzetten settings receive
 	/*
 	 * TCCR2A |= (1<<COM2B1); // clear on compare, non-inverting-mode
 	 * deze regel wordt gebruikt om IR LED aan/uit te zetten,
 	 * het wordt aangeroepen in IR_send()
 	 */
-	TCCR2A |= (1<<COM2A0);
-//	TIFR2 |= (1<<OCF2A); // compare interrupt OCR2A
 
 	OCR2A = KHZ;
 	OCR2B = DUTYCYCLE;
@@ -242,15 +263,13 @@ void prepare_send(void) {
 
 void prepare_receive(void) {
 	/* TIMER2 - Voor tellen delays */
-//	GTCCR |= (1<<PSRASY); // reset prescaler timer2
+	TCCR2A = 0; // resetten timer
+	TCCR2B = 0; // resetten timer
+	GTCCR |= (1<<PSRASY); // reset prescaler timer2
 	TCCR2A |= (1<<WGM21); // CTC, OCRA top
-	TCCR2B &= ~(1<<WGM20); // uitzetten settings send
-//	TCCR2B &= ~(1<<WGM22); // uitzetten settings send
 	TCCR2B |= (1<<CS22) | (1<<CS21) | (1<<CS20); // prescaler 1024
-	OCR2A = 255; // max 2^8 = 255 (256-1)
+	OCR2A = 0xFF/*255*/; // max 2^8 = 255 (256-1)
 	OCR2B = 0; // uitzetten settings send
-	TCCR2B &= ~(1<<COM2A0);
-//	TIFR2 &= ~(1<<OCF2A); // uitzetten settings send
 	/*
 	 * TIMSK2 |= (1<<OCIE2A); // OCR2A compare match interrupt, ga naar TIMER2_COMPA_vect ISR
 	 * deze regel wordt in de ISR aangeroepen zodat alleen interrupts worden gegenereerd wanneer nodig

@@ -18,5 +18,6 @@
 void IR_prepare(void);
 void IR_send(uint8_t waarde);
 uint8_t IR_receive(void);
+uint8_t IR_nieuwe_input(void);
 
 #endif // IR_H
