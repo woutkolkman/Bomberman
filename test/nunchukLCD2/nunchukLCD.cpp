@@ -75,9 +75,35 @@ void setup() {
   Nunchuk.begin(ADDRESS); // start communication with Arduino and Nunchuk
 }
 
-ISR(TIMER1_COMPA_vect) {
- 
-  PORTD ^= (1 << PIND4);
+ISR(TIMER1_COMPA_vect) { /* timer interrupt to make block change position every 1.5 seconds while joystick is positioned
+			    at its right */
+  uint16_t x_position = 280; // startposition
+  counter = 0; // set counter
+
+   if (Nunchuk.X_Axis() == 255) { // if joystick is positioned at its right
+     counter++; // increment counter until counter == OCR1A
+
+     if (counter >= OCR1A) {
+	counter = 0; // reset counter
+        moveRight(x_position);
+
+        TCNT1 = 0;
+    }
+  }
+}
+
+void moveRight(uint16_t x) {
+
+   for (x = 0; x <= 8; x++) { // loops through amount of elements in array
+     tft.fillRect(20, x_positions[x], 25, 25, ILI9341_BLACK); // takes each value from array
+  }
+}
+
+void clearMoveRight(uint16_t x) {
+    
+   for (x = 0; x <= 8; x++) { // loops through amount of elements in array
+      tft.fillRect(20, clear_x_positions[x], 25, 25, backgroundColour); // takes each value from array
+  }
 }
 
 void loop() {

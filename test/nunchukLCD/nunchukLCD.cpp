@@ -35,31 +35,19 @@
 #define ILI9341_PINK        0xFC18  ///< 255, 130, 198
 #define backgroundColour ILI9341_RED
 
-#define standardPosition tft.fillRect(20, 280, 25, 25, ILI9341_BLACK);
+#define standardPosition tft.fillRect(100, 140, 35, 45, ILI9341_BLACK);
 
-// positions X-axis (to move to the right)
-uint16_t x_positions[9] = {250, 220, 190, 160, 130, 100, 70, 40, 10}; // move to right
-uint16_t clear_x_positions[9] = {250, 220, 190, 160, 130, 100, 70, 40, 10}; // clear positions
+ISR(TIMER1_COMPA_vect) {
+   
+   PORTD ^= (1 << PIND4);
+}
 
-// setup LCD hardware
-Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
+int main(void) {
 
-// variables
-volatile unsigned int counter = 0;
-
-// function prototypes
-void moveRight(uint16_t x);
-void clearMoveRight(uint16_t x);
-
-void setup() {
+  Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 
   DDRB |= (1 << DDB1) | (1 << DDB2) | (1 << DDB3) | (1 << DDB4) | (1 << DDB5); // TFT scherm
   DDRD |= (1 << DDD4);
-
-  Wire.begin(); // allow I2C communication
-  tft.begin(); // allow SPI communication
-
-  tft.fillScreen(backgroundColour); // background
 
   // timer1 interrupt
   TCNT1 = 0;
@@ -69,18 +57,17 @@ void setup() {
   TIMSK1 |= (1 << OCIE1A); // enable OCR1A 
   sei();
 
+  Wire.begin(); // allow I2C communication
+  tft.begin(); // allow SPI communication
+
+  tft.fillScreen(backgroundColour); // background
+
   // nunchuk
   init();
 
   Nunchuk.begin(ADDRESS); // start communication with Arduino and Nunchuk
-}
 
-ISR(TIMER1_COMPA_vect) {
- 
-  PORTD ^= (1 << PIND4);
-}
-
-void loop() {
+  while (1) {
 
   Nunchuk.getState(ADDRESS); // retrieve states (defined in .h and .cpp)
 
@@ -90,4 +77,5 @@ void loop() {
      C-button: released: 0 - pressed: 1 */
 
      
+  }
 }
