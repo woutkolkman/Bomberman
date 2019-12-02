@@ -1,8 +1,7 @@
 /* defines */
-#define FREQUENCY 38 // 38/56
+#define FREQUENCY 56 // 38/56
 #define BAUD 9600
-#define IR_RECEIVE_PIN PD2
-#define IR_SEND_PIN PD3
+#define PLAYER 1 // 1/2
 #define NUMBITS 8
 
 
@@ -47,16 +46,17 @@ int main(void) {
 	/* setup */
 	init(); // initialize
 //	prepare_receive();
+//	prepare_send();
 
 	/* loop */
 	for(;;) {
 //		for (long i=0; i<2000000; i++) {}
-//		IR_send(0xAA); // 10101010
+//		IR_send(0xAA); // 1010 1010
 //		IR_send(0xFF);
 //		IR_send(0x00);
-//		IR_send(0x32);
+		IR_send(0x32); // 0011 0010
 //		TCCR2A ^= (1<<COM2B1);
-		USART_Transmit(IR_receive());
+//		USART_Transmit(IR_receive());
 		_delay_ms(6000);
 	}
 
