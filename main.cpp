@@ -2,7 +2,6 @@
 #define FREQUENCY 56 // 38/56
 #define BAUD 9600
 #define PLAYER 1 // 1/2
-#define NUMBITS 8
 
 
 /* includes */
@@ -56,8 +55,9 @@ int main(void) {
 //		IR_send(0x00);
 		IR_send(0x32); // 0011 0010
 //		TCCR2A ^= (1<<COM2B1);
+//		TCCR2A |= (1<<COM2B1);
 //		USART_Transmit(IR_receive());
-		_delay_ms(6000);
+		_delay_ms(1500);
 	}
 
 

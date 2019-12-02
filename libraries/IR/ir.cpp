@@ -9,10 +9,10 @@
  * sommige defines moeten handmatig uitgerekend en ingevoerd worden tegen het afronden van de compiler
  */
 #if FREQUENCY == 38
-#define KHZ 52 // timer2 OVF count 38KHZ
+#define KHZ 53/*52*/ // timer2 OVF count 38KHZ
 #define DUTYCYCLE (KHZ / 2) // duty cycle 50% 38KHZ
 #elif FREQUENCY == 56
-#define KHZ 36 // timer2 OVF count 56KHZ
+#define KHZ 36/*36*/ // timer2 OVF count 56KHZ
 #define DUTYCYCLE (KHZ / 2) // duty cycle 50% 56KHZ
 #else
 // exception error, geen (geldige) khz gekozen
@@ -110,8 +110,12 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 }
 
 ISR (TIMER2_COMPA_vect) { // wordt aangeroepen bij timer2 overflows, wanneer data wordt ontvangen om tijd te meten
-	// aangeroepen om de 16,384 ms met prescaler 1024
-	timer2_ovfs++;
+	if (PCMSK2 & (1<<PCINT18)) { // kijk of er wordt ontvangen
+		// aangeroepen om de 16,384 ms met prescaler 1024
+		timer2_ovfs++;
+	} else { // er wordt verzonden
+		TCNT2 = 0;
+	}
 }
 
 
@@ -221,7 +225,7 @@ void prepare_send(void) {
 	/* TIMER2 - Standaard LED frequentie */
 //	GTCCR |= (1<<PSRASY); // reset prescaler timer2
 	TCCR2A |= (1<<WGM21) | (1<<WGM20); // fast PWM
-	TCCR2B |= (1<<WGM22); // fast PWM
+//	TCCR2B |= (1<<WGM22); // fast PWM
 	TCCR2B |= /*(1<<CS22) | */(1<<CS21)/* | (1<<CS20)*/; // prescaler 8, (Prescaler 1 maakt 38 en 56 KHz nagenoeg onmogelijk (zeer ingewikkeld om te realiseren)
 	TCCR2B &= ~(1<<CS22) & (1<<CS20); // uitzetten settings receive
 	/*
@@ -229,6 +233,8 @@ void prepare_send(void) {
 	 * deze regel wordt gebruikt om IR LED aan/uit te zetten,
 	 * het wordt aangeroepen in IR_send()
 	 */
+	TCCR2A |= (1<<COM2A0);
+//	TIFR2 |= (1<<OCF2A); // compare interrupt OCR2A
 
 	OCR2A = KHZ;
 	OCR2B = DUTYCYCLE;
@@ -239,10 +245,12 @@ void prepare_receive(void) {
 //	GTCCR |= (1<<PSRASY); // reset prescaler timer2
 	TCCR2A |= (1<<WGM21); // CTC, OCRA top
 	TCCR2B &= ~(1<<WGM20); // uitzetten settings send
-	TCCR2B &= ~(1<<WGM22); // uitzetten settings send
+//	TCCR2B &= ~(1<<WGM22); // uitzetten settings send
 	TCCR2B |= (1<<CS22) | (1<<CS21) | (1<<CS20); // prescaler 1024
 	OCR2A = 255; // max 2^8 = 255 (256-1)
 	OCR2B = 0; // uitzetten settings send
+	TCCR2B &= ~(1<<COM2A0);
+//	TIFR2 &= ~(1<<OCF2A); // uitzetten settings send
 	/*
 	 * TIMSK2 |= (1<<OCIE2A); // OCR2A compare match interrupt, ga naar TIMER2_COMPA_vect ISR
 	 * deze regel wordt in de ISR aangeroepen zodat alleen interrupts worden gegenereerd wanneer nodig
