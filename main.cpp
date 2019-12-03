@@ -180,5 +180,5 @@ void drawBomb(uint8_t x, uint8_t y) {
 	tft.fillCircle(x*lw + XUP + (0.3*lw), y*lw + YUP + (0.3*lw), 5, ILI9341_BLACK); //teken een cirkeltje
 }
 void drawTon(uint8_t x, uint8_t y) {
-	
+//hoi	
 }
