@@ -1,6 +1,6 @@
 // TEST
-int main(void){
+//int main(void){
 
 	/* never reached  */
-	return 0;
-}
+//	return 0;
+//}
