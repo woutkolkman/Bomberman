@@ -142,6 +142,7 @@ void ir_verzenden() {
 
 	// bepaal volgende type informatie en stel laatste 3 bits in
 	// ...
+	// data alleen versturen als het is veranderd van de vorige keer?
 
 	// haal informatie op en stel rest van de bits in
 	// ...
