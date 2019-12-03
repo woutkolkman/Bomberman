@@ -54,7 +54,6 @@ void clearMoveRight(uint16_t x);
 void setup() {
 
   DDRB |= (1 << DDB1) | (1 << DDB2) | (1 << DDB3) | (1 << DDB4) | (1 << DDB5); // TFT scherm
-  DDRD |= (1 << DDD4);
 
   Wire.begin(); // allow I2C communication
   tft.begin(); // allow SPI communication
