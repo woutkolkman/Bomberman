@@ -3,12 +3,14 @@
 #define TFT_DC 9 // initialisatie LCD
 #define TFT_CS 10 // initialisatie LCD
 #define AANTALLENGTEBREEDTE 9//aantal hokjes in lengte en breedte
-#define LIGHTBROWN 0x7A00
-#define DARKBROWN 0x5980
-#define XUP 10
-#define YUP 50
-#define OBJOFFSET 2
-#define MAXOBJ 8
+#define LIGHTBROWN 0x7A00 //lightbrown codee
+#define DARKBROWN 0x5980 //darkbrown code
+#define XUP 50 //offset from screen border
+#define YUP 10 //ofset from screen border
+#define OBJOFFSET 2 //no overlap with line
+#define MAXOBJ 8 //object max x/y axis
+#define ROTATION 3 //rotation of screen
+#define HOFFSET 1 //don't draw over line
 
 /* includes */
 #include <avr/interrupt.h>
@@ -26,6 +28,8 @@
 /* global variables */
 volatile uint8_t brightness = 0;
 uint8_t lw = 220 / AANTALLENGTEBREEDTE;
+uint8_t livesleft = 3; //REMOVE
+
 
 /* Use Hardware SPI (on Uno, #13, #12, #11) and #10 and # 9for  CS/DC   */
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
@@ -34,13 +38,15 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 void adc_init();
 void init_2();
 void timer1_init();
+void initGame();
 void drawGrid();
-void drawHeartLeft();
-void drawHeartRight();
+void drawPlayer1Field();
+void drawPlayer2Field();
 void drawPlayer1(uint8_t x, uint8_t y);
 void drawPlayer2(uint8_t x, uint8_t y);
 void drawBomb(uint8_t x, uint8_t y);
 void drawTon(uint8_t x, uint8_t y);
+
 /* ISR */
 ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 	brightness = (ADC>>2); // 10 bits, gooi 2 LSB weg, uitkomst 8 bits
@@ -56,15 +62,15 @@ int main(void) {
 	//USART_Transmit(0x76);
 	init();
 	tft.begin();
+	initGame();
 	//scherm is 240 * 320 pixels
-	tft.fillScreen(LIGHTBROWN);
 	//tft.drawRect(10, 50, 220, 220, ILI9341_WHITE);
-	drawHeartLeft();
-	drawHeartRight();
+	drawPlayer1Field();
+	drawPlayer2Field();
 	drawGrid();
-	drawPlayer1(8, 0);
-	drawPlayer2(0, 8);
-	drawBomb(4, 2);
+	drawPlayer1(0, 0);
+	drawPlayer2(8, 8);
+	drawBomb(0, 1);
 
 	/* loop */
 	for(;;){
@@ -128,30 +134,50 @@ TIMSK1 |= (1<<TOIE1); //overflow interupt enable
 //TIMSK1 |= (1<<OCIEA); //compare output interrupt enable
 }
 
+void initGame() {
+	tft.setRotation(3); //set rotation;
+	tft.fillScreen(LIGHTBROWN); //lichtbruine achtergrond volledige scherm
+}
+
 void drawGrid() {
-        tft.fillRect(XUP, YUP, AANTALLENGTEBREEDTE*lw, AANTALLENGTEBREEDTE*lw, DARKBROWN);
+        tft.fillRect(XUP /*niet op grens van scherm X */, YUP/*niet op grens van scherm Y*/, AANTALLENGTEBREEDTE*lw /*volledige game-grid*/, AANTALLENGTEBREEDTE*lw /*volledige game-grid*/, DARKBROWN /*donkerbruine achtergrond*/);
         for(int x = 0; x < 9; x++) {
                 for(int y = 0; y < 9; y++) {
-                        tft.drawRect((x*lw) + XUP, (y*lw) + YUP, lw+1, lw+1, ILI9341_BLACK);
+                        tft.drawRect((x*lw) + XUP, (y*lw) + YUP, lw+1, lw+1, ILI9341_BLACK); //lijnen tussen grid
                 }
         }
 }
-void drawHeartLeft() {
-	tft.fillTriangle(190, 25, 200, 15, 200, 35, ILI9341_RED);
-	tft.fillCircle(203, 30, 5, ILI9341_RED);
-	tft.fillCircle(203, 20, 5, ILI9341_RED);
-}
-void drawHeartRight() {
 
+void drawHeart(uint16_t x, uint16_t y, uint16_t b, uint16_t h) {
+	tft.fillTriangle((x + 0.5*b), (y + h), x, (y + 0.44*h), (x + b), (y + 0.44*h), ILI9341_RED); //driehoek van hartje
+	tft.fillCircle((x+0.25*b), (y + 0.28*h), (0.25*b), ILI9341_RED); //cirkel linksboven van hartje
+        tft.fillCircle((x+0.75*b), (y + 0.28*h), (0.25*b), ILI9341_RED); //cirkel rechtsboven van hartje
+}
+
+void drawPlayer1Field() {
+	drawHeart(15, 20, 20, 18); //teken hartje
+	if(livesleft >= 2) {
+		drawHeart(15, 40, 20, 18); //als 2 levens, teken 2e hartje
+	}if(livesleft == 3) {
+		drawHeart(15, 60, 20, 18); //als 3 levens, teken 3e hartje
+	}
+}
+void drawPlayer2Field() {
+	drawHeart(285, 200, 20, 18); //teken hartje
+	if(livesleft >= 2) {
+		drawHeart(285, 180, 20, 18); //als 2 levens, teken 2e hartje
+	} if(livesleft == 3) {
+		drawHeart(285, 160, 20, 18); //als 3 levens, teken 3e hartje
+	}
 }
 void drawPlayer1(uint8_t x, uint8_t y) {
-	tft.fillRect(x*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET + 1, lw - 2*OBJOFFSET + 1, ILI9341_CYAN);
+	tft.fillRect(x*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET + 1, lw - 2*OBJOFFSET + 1, ILI9341_CYAN);//teken een vakje
 }
 void drawPlayer2(uint8_t x, uint8_t y) {
-	tft.fillRect(x*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET + 1, lw - 2*OBJOFFSET + 1, ILI9341_RED);
+	tft.fillRect(x*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET + 1, lw - 2*OBJOFFSET + 1, ILI9341_GREEN);//teken een vakje
 }
 void drawBomb(uint8_t x, uint8_t y) {
-	tft.fillCircle(x*lw + XUP + (0.3*lw), y*lw + YUP + (0.3*lw), 5, ILI9341_BLACK);
+	tft.fillCircle(x*lw + XUP + (0.3*lw), y*lw + YUP + (0.3*lw), 5, ILI9341_BLACK); //teken een cirkeltje
 }
 void drawTon(uint8_t x, uint8_t y) {
 	
