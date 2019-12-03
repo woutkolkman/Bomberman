@@ -1,5 +1,5 @@
 /*
- *	IR communication library
+ *	IR communication library - half-duplex
  */
 
 
@@ -7,37 +7,34 @@
 /*
  * #define MS_PER_TICK (1/(16000000/1024)) // prescaler 1024 timer2 TIJDENS ONTVANGEN, 0,064ms
  * sommige defines moeten handmatig uitgerekend en ingevoerd worden tegen het afronden van de compiler
+ * waarden van de counter lopen niet lineair op, waarschijnlijk door het gebruik van delays
  */
-#if FREQUENCY == 38
-#define KHZ 0x35/*53*//*52*/ // timer2 OVF count 38KHZ
-#define DUTYCYCLE (KHZ / 2) // duty cycle 50% 38KHZ
-#elif FREQUENCY == 56
-#define KHZ 0x24/*36*/ // timer2 OVF count 56KHZ
-#define DUTYCYCLE (KHZ / 2) // duty cycle 50% 56KHZ
-#else
-// exception error, geen (geldige) khz gekozen
-#pragma GCC error "geen geldige frequentie gekozen"
-#endif
 
 #define BITIS1_MS 30 // ms waarop LED aanstaat voor 1
-#define BITIS1 215 /*(BITIS1_MS / MS_PER_TICK)*/
+#define BITIS1 725 /*(BITIS1_MS / MS_PER_TICK)*/
 #define BITIS0_MS 20 // ms waarop LED aanstaat voor 0
-#define BITIS0 60 /*(BITIS0_MS / MS_PER_TICK)*/
+#define BITIS0 575 /*(BITIS0_MS / MS_PER_TICK)*/
 #define STARTBIT_MS 400 // ms waarop LED aanstaat voor startbit
-#define STARTBIT 80 /*(STARTBIT_MS / MS_PER_TICK)*/
+#define STARTBIT 6490 /*(STARTBIT_MS / MS_PER_TICK)*/
 #define STOPBIT_MS 200 // ms waarop LED aanstaat voor stopbit
-#define STOPBIT 40 /*(STOPBIT_MS / MS_PER_TICK)*/
-#define OFFSET 10 /*(4 / MS_PER_TICK)*/ // offset waarde voor kleine afwijking (ontvangen), constante geeft ms aan
+#define STOPBIT 3370 /*(STOPBIT_MS / MS_PER_TICK)*/
+#define OFFSET 15 /*(4 / MS_PER_TICK)*/ // offset waarde voor kleine afwijking (ontvangen)
 #define TIJD0_MS 20 // tijd waarop LED tussen bits uit is
-#define AGC_TIJD_ONTVANGER_MS 600 // tijd waarop de Automatic Gain Control op de ontvanger moet aanpassen
 
+#define KHZ_1 0x35/*53*//*52*/ // timer2 OVF count 38KHZ
+#define KHZ_2 0x24/*36*/ // timer2 OVF count 56KHZ
+#define DUTYCYCLE_1 (KHZ_1 / 2) // dutycycle 50% 38KHZ
+#define DUTYCYCLE_2 (KHZ_2 / 2) // dutycycle 50% 56KHZ
+#define FREQUENCY_1_SETNAME 38 // KHZ
+#define FREQUENCY_2_SETNAME 56 // KHZ
+#define DEFAULT_FREQUENCY_SETNAME FREQUENCY_1_SETNAME // als er geen geldige frequentie meegegeven is, is dit de standaard frequentie
 #define DYNAMIC_TIJD0 // als defined, pas TIJD0 dynamisch aan aan de tijdsduur van de gestuurde bit
 #ifdef DYNAMIC_TIJD0
 #define MAXTIJD_PER_BIT 60 // tijd van bit + TIJD0, moet groter zijn dan BITIS1_MS & BITIS0_MS
 #endif
-#define AANTAL_BITS 8
-#define AANTAL_BITS_TYPE uint8_t
-#define PRINT_ONTVANGST // debug
+#define AANTAL_BITS 8 // geeft direct aantal bits aan, pas ook type aan
+#define AANTAL_BITS_TYPE uint8_t // pas dit aan als aantal bits wordt aangepast
+#define PRINT_ONTVANGST // debug, print via USART
 
 
 /* includes */
@@ -45,20 +42,20 @@
 
 
 /* global variables */
+volatile uint8_t khz = KHZ_1; // huidige frequentie voor IR_send, standaard frequentie 1
+volatile uint8_t dutycycle = DUTYCYCLE_1; // huidige dutycycle voor IR_send, standaard dutycycle 1
 volatile uint8_t prevcounter;
-volatile uint8_t diffcounter;
-volatile AANTAL_BITS_TYPE input = 0x37/*test*/; // bevat de gestuurde byte
-volatile AANTAL_BITS_TYPE raw_input = 0x00; // wordt overgezet naar "input" bij stopbit
+volatile unsigned int diffcounter; // 0-65535 / 0-4294967295
+volatile AANTAL_BITS_TYPE input; // bevat de gestuurde byte
+volatile AANTAL_BITS_TYPE raw_input; // wordt overgezet naar "input" bij stopbit
 volatile uint8_t timer2_ovfs = 0; // telt aantal overflows bij ontvangen data
 volatile int aantal_bits = 0; // telt aantal bits of dit geldig is
 volatile uint8_t nieuwe_input = 0; // wordt op 1 gezet bij nieuwe input en gereset bij uitlezen
+volatile uint8_t informatie_aan_het_ontvangen = 0; // wordt op 1 gezet bij het ontvangen van informatie, zodat zender ondertussen niet aangaat
 
 
-/* function prototypes */
-void schakel_IR_LED(uint8_t aan);
-void var_delay_ms(int ms);
-void prepare_send(void);
-void prepare_receive(void);
+///* function prototypes */
+// ...
 
 
 /* ISR */
@@ -88,6 +85,7 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 		// bepaal welke bit ontvangen is
 		if (diffcounter >= (STARTBIT - OFFSET) && diffcounter <= (STARTBIT + OFFSET)) { // startbit
 			aantal_bits = 0; // aantal bits check resetten
+			informatie_aan_het_ontvangen = 1;
 
 			#ifdef PRINT_ONTVANGST
 			USART_Transmit(0x41); // test
@@ -98,8 +96,9 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 				aantal_bits = 0; // aantal bits check resetten
 				nieuwe_input = 1;
 
-				// hardwarematige interrupt genereren?
+				// softwarematige interrupt genereren met PCINT?
 			}
+			informatie_aan_het_ontvangen = 0;
 
 			#ifdef PRINT_ONTVANGST
 			USART_Transmit(0x4F); // test
@@ -124,6 +123,7 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 				#ifdef PRINT_ONTVANGST
 				USART_Transmit(0x21); // test
 				#endif
+//				informatie_aan_het_ontvangen = 0;
 			}
 		}
 
@@ -135,6 +135,7 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 	}
 }
 
+
 ISR (TIMER2_COMPA_vect) { // wordt aangeroepen bij timer2 overflows, wanneer data wordt ontvangen om tijd te meten
 	// aangeroepen om de 16,384 ms met prescaler 1024
 	timer2_ovfs++;
@@ -142,7 +143,7 @@ ISR (TIMER2_COMPA_vect) { // wordt aangeroepen bij timer2 overflows, wanneer dat
 
 
 /* functions */
-void IR_prepare(void) {
+void IR_prepare(uint8_t frequentie) {
 	DDRD |= (1<<PD3); // pin 3 output (IR LED)
 
 	/* PCINT - Voor IR ontvanger */
@@ -154,12 +155,28 @@ void IR_prepare(void) {
 	 * dit wordt toegepast in functie prepare_receive() zodat dit getoggled kan worden
 	 */
 
+	if ((frequentie != FREQUENCY_1_SETNAME) && (frequentie != FREQUENCY_2_SETNAME)) {
+		frequentie = DEFAULT_FREQUENCY_SETNAME;
+	}
+
+	if (frequentie == FREQUENCY_1_SETNAME) { // wordt in variabelen ingesteld zodat main.cpp dit aan kan passen
+		khz = KHZ_1;
+		dutycycle = DUTYCYCLE_1;
+	} else if (frequentie == FREQUENCY_2_SETNAME) {
+		khz = KHZ_2;
+		dutycycle = DUTYCYCLE_2;
+	}
+
 	prepare_receive(); // standaard voor luisteren/meten input
 //	sei();
 }
 
 
 void IR_send(uint8_t waarde) {
+	// wacht tot informatie is ontvangen
+	while (informatie_aan_het_ontvangen) { _delay_ms(1); }
+	// gaat niet goed als er geen stopbit wordt gelezen
+
 	// voorbereiding
 	prepare_send();
 
@@ -221,7 +238,9 @@ uint8_t IR_receive(void) {
 	return input;
 }
 
+
 // ===========================================================================
+
 
 // voor aan- en uitschakelen IR LED
 void schakel_IR_LED(uint8_t aan) {
@@ -232,6 +251,7 @@ void schakel_IR_LED(uint8_t aan) {
 	}
 }
 
+
 // variabele delays, gebruik alleen voor kleine delays
 void var_delay_ms(int ms) {
 	while (0 < ms) {
@@ -239,6 +259,7 @@ void var_delay_ms(int ms) {
 		ms--;
 	}
 }
+
 
 void prepare_send(void) {
 	PCMSK2 &= ~(1<<PCINT18); // tijdelijk geen interrupts van ontvanger doorlaten
@@ -257,9 +278,10 @@ void prepare_send(void) {
 	 * het wordt aangeroepen in IR_send()
 	 */
 
-	OCR2A = KHZ;
-	OCR2B = DUTYCYCLE;
+	OCR2A = khz;
+	OCR2B = dutycycle;
 }
+
 
 void prepare_receive(void) {
 	/* TIMER2 - Voor tellen delays */

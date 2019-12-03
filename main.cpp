@@ -1,8 +1,9 @@
 /* defines */
-#define FREQUENCY 38 // 38/56
-#define BAUD 9600
+#define FREQUENCY 56 // 38/56, geef frequentie aan IR LED
+#define BAUD 9600 // baudrate USART
 #define PLAYER 1 // 1/2
 //#define ADC_FREERUNNING // als dit defined is werkt de ADC op freerunning
+#define VAR_TYPE_IR uint8_t // variabele type voor IR communicatie
 
 
 /* includes */
@@ -15,6 +16,7 @@
 #include <Wire.h>
 #include <stdint.h>
 #include "libraries/IR/ir.h" // IR library
+//#include "ir.h"
 // ... // LCD library
 
 
@@ -23,14 +25,16 @@ volatile uint8_t brightness = 0;
 
 
 /* function prototypes */
-void adc_init();
-void init();
-void timer0_init();
+void adc_init(void);
+void init(void);
+void timer0_init(void);
+void test_ir(void); // test
 //void timer1_init();
-void ir_init();
 #ifndef ADC_FREERUNNING
-void single_conversion();
+void single_conversion(void);
 #endif
+void ir_ontcijfer(VAR_TYPE_IR input);
+void ir_verzenden(void);
 
 
 /* ISR */
@@ -44,8 +48,6 @@ ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 int main(void) {
 	/* setup */
 	init(); // initialize
-//	prepare_receive(); // test
-//	prepare_send(); // test
 
 	/* loop */
 	for(;;) {
@@ -53,24 +55,7 @@ int main(void) {
 //		single_conversion();
 		#endif
 
-//		IR_send(0xAA); // 1010 1010
-//		IR_send(0xFF);
-//		IR_send(0x00);
-//		IR_send(0x32); // 0011 0010
-//		USART_Transmit(IR_receive()); // test
-		_delay_ms(3000);
-
-		#define TEST 0 // 0(uit)/1/2
-		#if TEST == 1
-		if (IR_nieuwe_input()) { IR_send(IR_receive() + 1); }
-		#elif TEST == 2
-		uint8_t test_input;
-		test_input = USART_Receive();
-		if (test_input != 0x00) { IR_send(test_input); }
-		test_input = 0x00;
-		_delay_ms(3000);
-		if (IR_nieuwe_input()) { USART_Transmit(IR_receive()); }
-		#endif
+		test_ir();
 	}
 
 
@@ -82,7 +67,7 @@ int main(void) {
 void init() {
 	// init Wire
 	USART_Init(); // init serial
-	ir_init(); // init IR
+	IR_prepare(FREQUENCY); // init IR
 	// init CSPI
 //	timer0_init();
 //	timer1_init();
@@ -106,8 +91,62 @@ void init() {
 }
 
 
-void ir_init() {
-	IR_prepare();
+void test_ir() {
+	#define IR_TEST 3 // 0(uit)/1/2/3/4
+
+	#if IR_TEST == 1
+	if (IR_nieuwe_input()) { IR_send((IR_receive() + 1)); }
+	#elif IR_TEST == 2
+	VAR_TYPE_IR test_input;
+	test_input = USART_Receive();
+	if (test_input != 0x00) { IR_send(test_input); }
+	test_input = 0x00;
+	_delay_ms(3000);
+	if (IR_nieuwe_input()) { USART_Transmit(IR_receive()); }
+	#elif IR_TEST == 3
+//	IR_send(0xAA); // 1010 1010
+//	IR_send(0xFF);
+//	IR_send(0x00);
+	IR_send(0x32); // 0011 0010, print '2'
+	_delay_ms(1500);
+	#elif IR_TEST == 4
+	USART_Transmit(IR_receive());
+	_delay_ms(3000);
+	#endif
+}
+
+
+// functie voor het ontcijferen en verwerken van nieuwe IR input
+void ir_ontcijfer(VAR_TYPE_IR input) {
+	// roep functie aan bij nieuwe informatie (PCINT?)
+
+	// bepaal type informatie (zie laatste 3 bits)
+	VAR_TYPE_IR kopie = input;
+	kopie = (kopie>>5);
+	if (kopie == 0x00) {
+		// type 1
+	} else if (kopie == 0x01) {
+		// type 2
+	} // etc.
+
+	// verwerk input naar variabelen
+	// ...
+}
+
+
+// functie voor het verzamelen en verzenden van IR output
+void ir_verzenden() {
+	// roep functie aan op gameticks
+
+	VAR_TYPE_IR waarde = 0x00;
+
+	// bepaal volgende type informatie en stel laatste 3 bits in
+	// ...
+
+	// haal informatie op en stel rest van de bits in
+	// ...
+
+	IR_send(waarde);
 }
 
 
