@@ -36,7 +36,7 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 
 // function prototypes
 void nunchuk_init();
-void moveCharacterRight(uint8_t x);
+void moveCharacterRight();
 void drawGrid();
 void drawHeartLeft();
 void drawHeartRight();
@@ -78,8 +78,7 @@ int main(void) {
 
      Nunchuk.getState(ADDRESS); // retrieve states joystick and buttons Nunchuk
 
-     uint8_t x_position = 0;
-     moveCharacterRight(x_position); // start position player 1
+     moveCharacterRight();
      
    }
    return 0;
@@ -90,11 +89,11 @@ void nunchuk_init() {
     Nunchuk.begin(ADDRESS); // start communication with Arduino and Nunchuk
 }
 
-void moveCharacterRight(uint8_t x) {
+void moveCharacterRight() {
 
      if (Nunchuk.X_Axis() == 255) {
       drawPlayer1(8, p1_x++);
-      _delay_ms(125);
+      _delay_ms(75);
          if (p1_x > 8) {
           p1_x = 8;    
        } else {
