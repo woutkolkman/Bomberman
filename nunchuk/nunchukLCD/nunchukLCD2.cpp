@@ -36,10 +36,10 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 
 // function prototypes
 void nunchuk_init();
-void moveCharacterRight();
-void moveCharacterLeft();
-void moveCharacterUp();
-void moveCharacterDown();
+void moveCharacterRight(uint8_t y_position);
+void moveCharacterLeft(uint8_t y_position);
+void moveCharacterUp(uint8_t x_position);
+void moveCharacterDown(uint8_t x_position);
 void drawGrid();
 void drawHeartLeft();
 void drawHeartRight();
@@ -81,10 +81,13 @@ int main(void) {
 
      Nunchuk.getState(ADDRESS); // retrieve states joystick and buttons Nunchuk
 
-     moveCharacterRight();
-     moveCharacterLeft();
-     moveCharacterUp();
-     moveCharacterDown();
+     // code to move block over x axis and y axis (on sides)
+     moveCharacterRight(8);
+     moveCharacterLeft(0);
+     moveCharacterUp(8);
+     moveCharacterDown(8);
+
+    
      
    }
    return 0;
@@ -95,55 +98,55 @@ void nunchuk_init() {
     Nunchuk.begin(ADDRESS); // start communication with Arduino and Nunchuk
 }
 
-void moveCharacterLeft() {
+void moveCharacterLeft(uint8_t y_position) {
 
     if (Nunchuk.X_Axis() == 0) {
-	drawPlayer1(8, p1--);
+	drawPlayer1(y_position, p1--);
 	_delay_ms(75);
 	 if (p1 < 0) {
-	   p1 = 0;
+	   p1++;
 	 } else {
- 	  clearDrawPlayer1(8, clear_p1--);
+ 	  clearDrawPlayer1(y_position, clear_p1--);
       }
    }
 }
 
-void moveCharacterRight() {
+void moveCharacterRight(uint8_t y_position) {
 
     if (Nunchuk.X_Axis() == 255) {
-        drawPlayer1(8, p1++);
+        drawPlayer1(y_position, p1++);
         _delay_ms(75);
          if (p1 > 8) {
           p1 = 8;
          } else {
-	  clearDrawPlayer1(8, clear_p1++);
+	  clearDrawPlayer1(y_position, clear_p1++);
      }
    }
 }
 
-void moveCharacterUp() {
+void moveCharacterUp(uint8_t x_position) {
 
     if (Nunchuk.Y_Axis() == 255) {
-       drawPlayer1(p1++, 8);
+       drawPlayer1(p1++, x_position);
        _delay_ms(75);
 	if (p1 > 8) {
 	  p1 = 8;
       } else {
-	clearDrawPlayer1(clear_p1++, 8);
+	clearDrawPlayer1(clear_p1++, x_position);
       }
    }
 }
  
 
-void moveCharacterDown() {
+void moveCharacterDown(uint8_t x_position) {
 
     if (Nunchuk.Y_Axis() == 0) {
-      drawPlayer1(p1--, 8);
+      drawPlayer1(p1--, x_position);
       _delay_ms(75);
        if (p1 < 0) {
 	 p1 = 0;
      } else {
-  	clearDrawPlayer1(clear_p1--, 8);
+  	clearDrawPlayer1(clear_p1--, x_position);
      }
    }
 } 
