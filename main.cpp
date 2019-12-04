@@ -1,3 +1,9 @@
+/* defines */
+#define GAMETICK_FREQUENCY 0.3 // gameticks in HZ, max 0,119HZ, min 7812,5HZ
+#define FCLK 16000000 // arduino clock frequency
+#define PRESCALER_TIMER1 1024 // prescaler, zie ook functie timer1_init()
+
+
 /* includes */
 #include <avr/interrupt.h>
 #include <avr/io.h>
@@ -5,18 +11,17 @@
 #include "libraries/IR/ir.h" // IR library
 // ... // LCD library
 
-// Nadia Kraken test 2
 
-/* defines and global variables */
+/* global variables */
 volatile uint8_t brightness = 0;
 
-=======
-/* defines */
->>>>>>> Stashed changes:code.cpp
 
 /* function prototypes */
-void adc_init();
-void init();
+void adc_init(void);
+void init(void);
+void timer0_init(void);
+void timer1_init(void);
+void adc_init(void);
 
 
 /* ISR */
@@ -27,10 +32,14 @@ ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 }
 
 
+ISR(TIMER1_COMPA_vect) { // gameticks
+	
+}
+
+
 int main(void) {
 	/* setup */
 	init(); // initialize
-
 
 	/* loop */
 	for(;;) {
@@ -42,15 +51,15 @@ int main(void) {
 	return 0;
 }
 
-void init() {
+
+void init(void) {
 	// init Wire
 	// init UART
 	// init IR
 	// init CSPI
 	timer0_init();
 	timer1_init();
-	timer2_init();
-	adc_init();
+//	adc_init();
 
 	// pin in/outputs
 	/*
@@ -63,30 +72,34 @@ void init() {
 	 * ? : analog 2
 	 * Nunchuck : analog 4, 5
 	 */
-	DDRD |= (1<<DDD3); // IR-zender
-	DDRD |= (1<<DDD2); // IR-ontvanger
-	DDRB |= (1<<DDB1) | (1<<DDB2) | (1<<DDB3) | (1<<DDB4) | (1<<DDB5); // TFT scherm
-	//DDRB |= (1<<PB0); //touchscreen
-	//DDRD |= (1<<PD4); //SD lezer
-	DDRD |= (1<<DDD0) | (1<<DDD1); //UART
-	DDRC |= (1<<DDC4) /*?*/ | (1<<DDC5); //nunchuck I2C
+//	DDRB |= (1<<DDB1) | (1<<DDB2) | (1<<DDB3) | (1<<DDB4) | (1<<DDB5); // TFT scherm
+//	DDRB |= (1<<PB0); //touchscreen
+//	DDRD |= (1<<PD4); //SD lezer
 
 	sei(); // set global interrupt flag
 }
 
-void timer0_init() {
+
+void timer0_init(void) {
 	
 }
 
-void timer1_init() {
-	
+
+void timer1_init(void) { // gameticks timer 1
+	TCCR1B |= (1<<WGM12); // CTC, OCR1A top
+	OCR1A = (FCLK / (GAMETICK_FREQUENCY * 2 * PRESCALER_TIMER1)); // frequentie aangeven
+
+	#if PRESCALER_TIMER1 == 1024
+	TCCR1B |= (1<<CS12) /*| (1<<CS11)*/ | (1<<CS10); // prescaler 1024
+	#else
+	#pragma GCC error "geen bruikbare prescaler ingesteld"
+	#endif
+
+	TIMSK1 |= (1<<OCIE1A); // output compare match interrupt A enable
 }
 
-void timer2_init() {
-	
-}
 
-void adc_init() { // initialiseer ADC
+void adc_init(void) { // initialiseer ADC
 	ADMUX |= (1<<REFS0); // reference voltage on AVCC (5V)
 	ADCSRA |= (1<<ADIE); // ADC interrupt enable
 	ADCSRA |= (1<<ADPS2) | (1<<ADPS1) | (1<<ADPS0); // ADC clock prescaler ...(nog kiezen)
@@ -97,4 +110,3 @@ void adc_init() { // initialiseer ADC
 	ADCSRA |= (1<<ADEN); // enable ADC
         ADCSRA |= (1<<ADSC); // start eerste meting
 }
-
