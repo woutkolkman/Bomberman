@@ -1,14 +1,44 @@
 /* defines */
 #define BAUD 9600
-#define TFT_DC 9 // initialisatie LCD
-#define TFT_CS 10 // initialisatie LCD
 #define AANTALLENGTEBREEDTE 9//aantal hokjes in lengte en breedte
 #define XUP 50 //offset from screen border
 #define YUP 10 //ofset from screen border
 #define OBJOFFSET 2 //no overlap with line
 #define MAXOBJ 8 //object max x/y axis
+
+//LCD init defines
+#define TFT_DC 9 // initialisatie LCD
+#define TFT_CS 10 // initialisatie LCD
 #define ROTATION 3 //rotation of screen
-#define HOFFSET 1 //don't draw over line
+
+//title
+#define TITLETPOSX 50
+#define TITLETPOSY 10
+#define TITLETSIZE 4 //start button text size
+//mainmenucolors
+#define ACOLOR ILI9341_PURPLE
+#define BCOLOR ILI9341_YELLOW
+#define ECOLOR DARKBROWN
+#define MCOLOR ILI9341_RED
+#define NCOLOR ILI9341_NAVY
+#define OCOLOR ILI9341_CYAN
+#define RCOLOR ILI9341_WHITE
+#define TEXTCOLOR ILI9341_BLACK
+#define SELECTEDTEXTCOLOR ILI9341_GREEN
+#define SHADOWCOLOR ILI9341_LIGHTGREY
+
+//startbutton defines
+#define STARTBUTRX 50 //start button rectangle position x
+#define STARTBUTRY 50 //start button rectangle position y
+#define STARTBUTRW 220 //start button rectangle width
+#define STARTBUTRH 40 //start button rectangle height
+#define STARTBUTTPOSX 125 //start button text position x
+#define STARTBUTTPOSY 65 //start button text position y
+#define STARTBUTTSIZE 2 //start button text size
+#define STARTBUTSELCOLOR ILI9341_YELLOW
+#define STARTBUTSTPOSX STARTBUTTPOSX + 2
+#define STARTBUTSTPOSY STARTBUTTPOSY - 2
+#define STARTBUTCOLOR ILI9341_RED
 
 /* Colour defines */
 #define LIGHTBROWN 0x7A00
@@ -24,6 +54,7 @@
 #define LONT 0xFDAB
 #define LONT2 0xDC29
 #define FIRE 0xF9E1
+#define MAINMENUCOLOR ILI9341_BLACK
 
 /* includes */
 #include <avr/interrupt.h>
@@ -60,6 +91,10 @@ void drawPlayer2(uint8_t x, uint8_t y);
 void drawBomb(uint8_t x, uint8_t y);
 void drawTon(uint8_t x, uint8_t y);
 void drawMap();
+void drawMainMenu();
+void drawTitle();
+void drawStart();
+void drawHighScore();
 
 /* ISR */
 ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
@@ -78,7 +113,8 @@ int main(void) {
 	init();
 	tft.begin();
 	initGame();
-	drawMap(); //
+	//drawMap(); //draw Map
+	drawMainMenu();
 
 	//scherm is 240 * 320 pixels
 
@@ -164,6 +200,12 @@ void drawMap(){
 	drawTon(5, 7);
 	drawTon(1, 3);
 	drawTon(2, 0);
+}
+
+void drawMainMenu() {
+	tft.fillScreen(MAINMENUCOLOR);
+	drawTitle();
+	drawStart();
 }
 
 void drawGrid() {
@@ -292,4 +334,51 @@ void drawTon(uint8_t x, uint8_t y) {
 	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 2,   7   , TONBROWN);	// lichaam ton
 	tft.fillRect(x*lw + XUP + OBJOFFSET +  3, (y*lw) + YUP + OBJOFFSET + 5 , lw - 2*OBJOFFSET - 5, lw - 2*OBJOFFSET - 17, ILI9341_BLACK); // details
 	tft.fillRect(x*lw + XUP + OBJOFFSET + 3 , (y*lw) + YUP + OBJOFFSET + 13, lw - 2*OBJOFFSET - 5, lw - 2*OBJOFFSET - 17, ILI9341_BLACK); // details
+}
+
+void drawTitle() {
+	tft.setCursor(TITLETPOSX, TITLETPOSY); //startpositie tekst
+	tft.setTextSize(TITLETSIZE); //textsize
+	tft.setTextColor(BCOLOR);
+	tft.print("B"); //startpositie tekst
+	tft.setTextColor(OCOLOR);
+	tft.print("O");
+	tft.setTextColor(MCOLOR);
+	tft.print("M");
+	tft.setTextColor(BCOLOR);
+        tft.print("B");
+        tft.setTextColor(ECOLOR);
+        tft.print("E");
+	tft.setTextColor(RCOLOR);
+        tft.print("R");
+        tft.setTextColor(MCOLOR);
+        tft.print("M");
+	tft.setTextColor(ACOLOR);
+        tft.print("A");
+        tft.setTextColor(NCOLOR);
+        tft.print("N");
+
+
+
+}
+
+void drawStart() {
+//	if(selected) { //voor nunchuck
+		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, STARTBUTSELCOLOR);
+		tft.setCursor(STARTBUTSTPOSX, STARTBUTSTPOSY);
+		tft.setTextColor(SHADOWCOLOR);
+		tft.setTextSize(STARTBUTTSIZE);
+		tft.println("START");
+//	} else {
+//		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, STARTBUTCOLOR);
+//	}
+	tft.drawRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, ILI9341_BLACK);
+	tft.setCursor(STARTBUTTPOSX, STARTBUTTPOSY);
+	tft.setTextColor(TEXTCOLOR);
+	tft.setTextSize(STARTBUTTSIZE);
+	tft.println("START");
+}
+
+void drawHighScore() {
+	
 }
