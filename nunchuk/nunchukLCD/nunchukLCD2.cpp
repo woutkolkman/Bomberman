@@ -28,8 +28,8 @@ volatile uint8_t brightness = 0;
 volatile unsigned int counter = 0;
 volatile uint8_t lw = 220 / AANTALLENGTEBREEDTE;
 volatile uint8_t x_positions[8] = {1, 2, 3, 4, 5, 6, 7, 8};
-volatile uint8_t p1_x;
-volatile uint8_t clear_p1_x;
+volatile uint8_t p1;
+volatile uint8_t clear_p1;
 
 // use hardware SPI (on Uno, #13, #12, #11) and #10 and #9 for CS/DC
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
@@ -37,6 +37,9 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 // function prototypes
 void nunchuk_init();
 void moveCharacterRight();
+void moveCharacterLeft();
+void moveCharacterUp();
+void moveCharacterDown();
 void drawGrid();
 void drawHeartLeft();
 void drawHeartRight();
@@ -79,6 +82,9 @@ int main(void) {
      Nunchuk.getState(ADDRESS); // retrieve states joystick and buttons Nunchuk
 
      moveCharacterRight();
+     moveCharacterLeft();
+     moveCharacterUp();
+     moveCharacterDown();
      
    }
    return 0;
@@ -89,18 +95,58 @@ void nunchuk_init() {
     Nunchuk.begin(ADDRESS); // start communication with Arduino and Nunchuk
 }
 
-void moveCharacterRight() {
+void moveCharacterLeft() {
 
-     if (Nunchuk.X_Axis() == 255) {
-      drawPlayer1(8, p1_x++);
-      _delay_ms(75);
-         if (p1_x > 8) {
-          p1_x = 8;    
-       } else {
-         clearDrawPlayer1(8, clear_p1_x++); 
+    if (Nunchuk.X_Axis() == 0) {
+	drawPlayer1(8, p1--);
+	_delay_ms(75);
+	 if (p1 < 0) {
+	   p1 = 0;
+	 } else {
+ 	  clearDrawPlayer1(8, clear_p1--);
       }
    }
 }
+
+void moveCharacterRight() {
+
+    if (Nunchuk.X_Axis() == 255) {
+        drawPlayer1(8, p1++);
+        _delay_ms(75);
+         if (p1 > 8) {
+          p1 = 8;
+         } else {
+	  clearDrawPlayer1(8, clear_p1++);
+     }
+   }
+}
+
+void moveCharacterUp() {
+
+    if (Nunchuk.Y_Axis() == 255) {
+       drawPlayer1(p1++, 8);
+       _delay_ms(75);
+	if (p1 > 8) {
+	  p1 = 8;
+      } else {
+	clearDrawPlayer1(clear_p1++, 8);
+      }
+   }
+}
+ 
+
+void moveCharacterDown() {
+
+    if (Nunchuk.Y_Axis() == 0) {
+      drawPlayer1(p1--, 8);
+      _delay_ms(75);
+       if (p1 < 0) {
+	 p1 = 0;
+     } else {
+  	clearDrawPlayer1(clear_p1--, 8);
+     }
+   }
+} 
 
 void drawGrid() {
         tft.fillRect(XUP, YUP, AANTALLENGTEBREEDTE * lw, AANTALLENGTEBREEDTE * lw, DARKBROWN);
