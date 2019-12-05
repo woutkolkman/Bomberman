@@ -18,7 +18,6 @@
 //#include <Arduino.h>
 #include <Wire.h>
 //#include "libraries/Nunchuk/Nunchuk.h"
-#include <Nunchuk.h>
 #include "nunchuk.cpp"
 
 
