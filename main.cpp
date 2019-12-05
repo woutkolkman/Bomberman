@@ -10,6 +10,9 @@
 #include <util/delay.h>
 #include "libraries/IR/ir.h" // IR library
 // ... // LCD library
+#include <Wire.h>
+#include "libraries/Nunchuk/Nunchuk.h"
+#include "nunchuk.cpp"
 
 
 /* global variables */
