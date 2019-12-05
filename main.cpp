@@ -90,6 +90,7 @@
 #define FIRE 0xF9E1
 #define MAINMENUCOLOR ILI9341_BLACK
 #define FIRESPREAD ILI9341_RED
+#define WALL 0x6B8E
 
 /* includes */
 #include <avr/interrupt.h>
@@ -134,6 +135,9 @@ void drawQuit();
 void drawBombExplosie(uint8_t x, uint8_t y);
 void fireSpread(uint8_t x, uint8_t y);
 void drawTitleBomb();
+void drawWall(uint8_t x, uint8_t y);
+void drawMap2();
+
 /* ISR */
 ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 	brightness = (ADC>>2); // 10 bits, gooi 2 LSB weg, uitkomst 8 bits
@@ -153,6 +157,7 @@ int main(void) {
 	initGame();
 	//drawMap(); //draw Map
 	drawMainMenu();
+	//drawMap2(); 
 
 	//scherm is 240 * 320 pixels
 
@@ -226,6 +231,7 @@ void initGame() {
 void drawMap(){
 	//scherm is 240 * 320 pixels
 	tft.fillScreen(MOOIEBRUIN);
+	drawWall();
 	drawPlayer1Field();
 	drawPlayer2Field();
 	drawGrid();
@@ -249,6 +255,66 @@ void drawMap(){
 	drawBombExplosie(3, 8); 
 }
 
+void drawMap2(){ 
+	tft.fillScreen(MOOIEBRUIN);
+	drawGrid();
+	drawPlayer1Field(); // hartjes
+	drawPlayer2Field();
+	/* draw walls */	
+	for(int x = 1; x < 8; x = x+2){
+		for(int y = 1; y < 8; y = y+2){
+			drawWall(x,y);		
+		}	
+	}	
+	//drawBombExplosie(2, 1);
+	//drawBombExplosie(4, 3);
+	/* draw tonnetjes */
+	for(int x = 2; x < 8; x++){	//x = 0, y = 0
+			int y = 0;		
+			drawTon(x,y);	
+	}
+	for(int x = 0; x < 8; x = x+2){	//x = 1 , y = 1
+		if(x != 0){
+			int y = 1;		
+			drawTon(x,y);}	
+	}
+	for(int x = 0; x < 9; x++){	//x = 2 , y = 2
+			int y = 2;		
+			drawTon(x,y);	
+	}
+	for(int x = 0; x < 8; x++){	//x = 3 , y = 3
+		if(x == 0 || x == 6){
+			int y = 3;		
+			drawTon(x,y);}	
+	}
+	for(int x = 0; x < 9; x++){	//x = 4 , y = 4
+		if(x != 6){
+			int y = 4;		
+			drawTon(x,y);}	
+	}	
+	for(int x = 0; x < 9; x = x+2){	//x = 5 , y = 5
+			int y = 5;		
+			drawTon(x,y);	
+	}
+	for(int x = 1; x < 9; x++){	//x = 6 , y = 6
+		if(x != 2){
+			int y = 6;		
+			drawTon(x,y);}	
+	}
+	for(int x = 0; x < 9; x = x+2){	//x = 7 , y = 7
+		if(x != 6 && x != 8){			
+			int y = 7;		
+			drawTon(x,y);}	
+	}
+	for(int x = 0; x < 9; x++){	//x = 8 , y = 8
+		if(x != 2 && x != 7 && x != 8){
+			int y = 8;		
+			drawTon(x,y);}	
+	}
+	drawPlayer1(0, 0); // spelers
+	drawPlayer2(8, 8);				
+}
+
 void drawMainMenu() {
 	tft.fillScreen(MAINMENUCOLOR);
 	drawTitle();
@@ -265,6 +331,10 @@ void drawGrid() {
                         tft.drawRect((x*lw) + XUP, (y*lw) + YUP, lw+1, lw+1, ILI9341_BLACK); //lijnen tussen grid
                 }
         }
+}
+
+void drawWall(uint8_t x, uint8_t y){
+	tft.fillRect(x*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET, WALL);
 }
 
 void drawHeart(uint16_t x, uint16_t y, uint16_t b, uint16_t h) {
@@ -423,36 +493,36 @@ void drawBombExplosie(uint8_t x, uint8_t y){
 }
 
 void fireSpread(uint8_t x, uint8_t y) {
-	if((x >= 0 || x <= 8) && (y >= 0 || y <= 8)){			
+	if((x >= 0 && x <= 8) && (y >= 0 && y <= 8) && (!(x % 2) || !(y % 2))){			
 		tft.fillRect(x*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, FIRESPREAD); // vuur op bom
 	}
-	if((x -1 >= 0 && x -1 <= 8) && (y >= 0 || y <= 8)){
+	if((x -1 >= 0 && x -1 <= 8) && (y >= 0 && y <= 8) && (!(x - 1 % 2) || !(y % 2))){
 		tft.fillRect((x-1)*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, FIRESPREAD); // vuur links van bom
 	}	
-	if((x +1 >= 0 && x +1 <= 8) && (y >= 0 && y <= 8)){
+	if((x +1 >= 0 && x +1 <= 8) && (y >= 0 && y <= 8) && (!(x + 1 % 2) || !(y % 2))){
 		tft.fillRect((x+1)*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, FIRESPREAD); // vuur rechts van bom
 	}	
-	if((x >= 0 && x <= 8) && (y -1 >= 0 && y -1 <= 8)){
+	if((x >= 0 && x <= 8) && (y -1 >= 0 && y -1 <= 8) && (!(x % 2) || !(y - 1 % 2))){
 		tft.fillRect(x*lw + XUP + OBJOFFSET, ((y-1)*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, FIRESPREAD); // vuur boven van bom	
 	}	
-	if((x >= 0 && x <= 8) && (y +1 >= 0 && y +1 <= 8)){
+	if((x >= 0 && x <= 8) && (y +1 >= 0 && y +1 <= 8) && (!(x % 2) || !(y + 1 % 2))){
 		tft.fillRect(x*lw + XUP + OBJOFFSET, ((y+1)*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, FIRESPREAD); // vuur onder van bom
 	}
 	
 	_delay_ms(700); // timer firespread
-	if((x >= 0 || x <= 8) && (y >= 0 || y <= 8)){			
+	if((x >= 0 && x <= 8) && (y >= 0 && y <= 8) && (!(x % 2) || !(y % 2))){			
 		tft.fillRect(x*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, GRIDCOLOUR); // vuur op bom
 	}
-	if((x -1 >= 0 && x -1 <= 8) && (y >= 0 || y <= 8)){
+	if((x -1 >= 0 && x -1 <= 8) && (y >= 0 && y <= 8) && (!(x - 1 % 2) || !(y % 2))){
 		tft.fillRect((x-1)*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, GRIDCOLOUR); // vuur links van bom
 	}	
-	if((x +1 >= 0 && x +1 <= 8) && (y >= 0 && y <= 8)){
+	if((x +1 >= 0 && x +1 <= 8) && (y >= 0 && y <= 8) && (!(x + 1 % 2) || !(y % 2))){
 		tft.fillRect((x+1)*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, GRIDCOLOUR); // vuur rechts van bom
 	}	
-	if((x >= 0 && x <= 8) && (y -1 >= 0 && y -1 <= 8)){
+	if((x >= 0 && x <= 8) && (y -1 >= 0 && y -1 <= 8) && (!(x % 2) || !(y - 1 % 2))){
 		tft.fillRect(x*lw + XUP + OBJOFFSET, ((y-1)*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, GRIDCOLOUR); // vuur boven van bom	
 	}	
-	if((x >= 0 && x <= 8) && (y +1 >= 0 && y +1 <= 8)){
+	if((x >= 0 && x <= 8) && (y +1 >= 0 && y +1 <= 8) && (!(x % 2) || !(y + 1 % 2))){
 		tft.fillRect(x*lw + XUP + OBJOFFSET, ((y+1)*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, GRIDCOLOUR); // vuur onder van bom
 	}
 }
