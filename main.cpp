@@ -137,7 +137,7 @@ void fireSpread(uint8_t x, uint8_t y);
 void drawTitleBomb();
 void drawWall(uint8_t x, uint8_t y);
 void drawMap2();
-
+void Walls();
 /* ISR */
 ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 	brightness = (ADC>>2); // 10 bits, gooi 2 LSB weg, uitkomst 8 bits
@@ -155,7 +155,6 @@ int main(void) {
 	init();
 	tft.begin();
 	initGame();
-	//drawMap(); //draw Map
 	drawMainMenu();
 	//drawMap2(); 
 
@@ -225,47 +224,38 @@ TIMSK1 |= (1<<TOIE1); //overflow interupt enable
 
 void initGame() {
 	tft.setRotation(3); //set rotation;
-	//tft.fillScreen(LIGHTBROWN); //lichtbruine achtergrond volledige scherm
+}
+
+void initMap() {
+	tft.fillScreen(MOOIEBRUIN);
+	drawGrid();
+	Walls();
+	drawPlayer1Field();
+	drawPlayer2Field();
 }
 
 void drawMap(){
 	//scherm is 240 * 320 pixels
-	tft.fillScreen(MOOIEBRUIN);
-	drawWall();
-	drawPlayer1Field();
-	drawPlayer2Field();
-	drawGrid();
+	initMap();
 	drawPlayer1(0, 0);
 	drawPlayer2(8, 8);
-	drawBomb(4, 2);
-	drawTon(4, 3);
-	drawTon(6, 6);
-	drawTon(7, 5);
-	drawTon(5, 7);
-	drawTon(1, 3);
-	drawTon(2, 0);
 	drawBombExplosie(0, 3);
-	livesleft = 2;
 	drawPlayer2Field();
 	drawBombExplosie(4, 0);
 	drawPlayer1Field();
-	drawBombExplosie(8, 3); 
-	livesleft = 1;
+	drawBombExplosie(8, 3);
 	drawPlayer1Field();
-	drawBombExplosie(3, 8); 
+	drawBombExplosie(3, 8);
 }
 
 void drawMap2(){ 
-	tft.fillScreen(MOOIEBRUIN);
-	drawGrid();
-	drawPlayer1Field(); // hartjes
-	drawPlayer2Field();
-	/* draw walls */	
+	initMap();
+	/* draw walls */
 	for(int x = 1; x < 8; x = x+2){
 		for(int y = 1; y < 8; y = y+2){
-			drawWall(x,y);		
-		}	
-	}	
+			drawWall(x,y);
+		}
+	}
 	//drawBombExplosie(2, 1);
 	//drawBombExplosie(4, 3);
 	/* draw tonnetjes */
@@ -346,6 +336,8 @@ void drawHeart(uint16_t x, uint16_t y, uint16_t b, uint16_t h) {
 }
 
 void drawPlayer1Field() {
+	tft.fillRect(10, 40, 30, 210, MOOIEBRUIN);
+	tft.drawRect(10, 40, 30, 210, ILI9341_BLACK);
 	drawHeart(15, 20, 20, 18); //teken hartje
 	if(livesleft >= 2) {
 		drawHeart(15, 40, 20, 18); //als 2 levens, teken 2e hartje
@@ -355,6 +347,8 @@ void drawPlayer1Field() {
 }
 
 void drawPlayer2Field() {
+	tft.fillRect(280, 100, 30, 210, MOOIEBRUIN);
+	tft.drawRect(280, 100, 30, 210, ILI9341_BLACK);
 	drawHeart(285, 200, 20, 18); //teken hartje
 	if(livesleft >= 2) {
 		drawHeart(285, 180, 20, 18); //als 2 levens, teken 2e hartje
@@ -490,6 +484,14 @@ void drawBombExplosie(uint8_t x, uint8_t y){
 	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 2 ,lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 17, GRIDCOLOUR); // fire
 	
 	fireSpread(x, y);
+}
+void Walls() {
+	for(int x = 1; x < 8; x = x+2){
+                for(int y = 1; y < 8; y = y+2){
+                        drawWall(x,y);
+                }
+        }
+
 }
 
 void fireSpread(uint8_t x, uint8_t y) {
