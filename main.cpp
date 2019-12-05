@@ -52,6 +52,7 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 void nunchuk_init();
 void moveCharacterRight(uint8_t y_position);
 void moveCharacterLeft(uint8_t y_position);
+void moveCharacter(void);
 void drawGrid();
 void drawHeartLeft();
 void drawHeartRight();
@@ -61,12 +62,13 @@ void drawPlayer2(uint8_t x, uint8_t y);
 void drawBomb(uint8_t x, uint8_t y);
 void drawTon(uint8_t x, uint8_t y);
 void adc_init(void);
-//void init(void);
+void init(void);
 void timer0_init(void);
 void timer1_init(void);
 void adc_init(void);
 void game_init(void);
 void screen_init(void);
+void draw_screen(void);
 
 
 /* ISR */
@@ -78,7 +80,8 @@ ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 
 
 ISR(TIMER1_COMPA_vect) { // gameticks
-	
+	moveCharacter();
+	draw_screen();
 }
 
 
@@ -90,8 +93,11 @@ int main(void) {
 	for(;;) {
      		Nunchuk.getState(ADDRESS); // retrieve states joystick and buttons Nunchuk
 
-		// code to move block over x axis and y axis (on sides)
-		moveCharacterRight(4);
+//		// code to move block over x axis and y axis (on sides)
+//		moveCharacterRight(4);
+		moveCharacter();
+        	draw_screen();
+		_delay_ms(10);
 	}
 
 	/* never reached */
@@ -129,14 +135,30 @@ void screen_init(void) {
 	tft.setRotation(2); // rotate screen
 
 	// screen is 240 x 320
-	tft.fillScreen(LIGHTBROWN);
+        tft.fillScreen(LIGHTBROWN);
 
-	drawHeartLeft();
-	drawHeartRight();
-	drawGrid();
-//	drawPlayer1(8, 0);
-//	drawPlayer2(0, 8);
-	drawBomb(4, 2);
+//        drawHeartLeft();
+//        drawHeartRight();
+//        drawGrid();
+//      drawPlayer1(8, 0);
+//      drawPlayer2(0, 8);
+//        drawBomb(4, 2);
+//        moveCharacter();
+//        drawPlayer1(player1_y, player1_x);
+}
+
+void draw_screen(void) {
+	// screen is 240 x 320
+//        tft.fillScreen(LIGHTBROWN);
+
+        drawHeartLeft();
+        drawHeartRight();
+//	tft.fillRect(XUP, YUP, AANTALLENGTEBREEDTE * lw, AANTALLENGTEBREEDTE * lw, DARKBROWN);
+        drawGrid();
+//      drawPlayer1(8, 0);
+//      drawPlayer2(0, 8);
+        drawBomb(4, 2);
+	drawPlayer1(player1_y, player1_x);
 }
 
 void nunchuk_init() {
@@ -144,8 +166,30 @@ void nunchuk_init() {
 	Nunchuk.begin(ADDRESS); // start communication with Arduino and Nunchuk
 }
 
-oid moveCharacterRight(uint8_t y_position) {
+void moveCharacter() {
+	if (Nunchuk.X_Axis() == 255) {
+		if (player1_x <= 8) {
+			player1_x++;
+		}
+	}
+	if (Nunchuk.X_Axis() == 0) {
+		if (player1_x >= 0) {
+			player1_x--;
+		}
+	}
+	if (Nunchuk.Y_Axis() == 255) {
+                if (player1_y <= 8) {
+                        player1_y++;
+                }
+        }
+        if (Nunchuk.Y_Axis() == 0) {
+                if (player1_y >= 0) {
+                        player1_y--;
+                }
+        }
+}
 
+void moveCharacterRight(uint8_t y_position) {
     if (Nunchuk.X_Axis() == 255) {
       if (p1 >= 0 && p1 <= 8) {
        drawPlayer1(4, p1++);
