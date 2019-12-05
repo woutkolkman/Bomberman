@@ -34,6 +34,7 @@ volatile uint8_t lw = 220 / AANTALLENGTEBREEDTE;
 volatile uint8_t x_positions[8] = {1, 2, 3, 4, 5, 6, 7, 8};
 volatile uint8_t p1;
 volatile uint8_t clear_p1;
+volatile uint8_t currentPosition; 
 
 // use hardware SPI (on Uno, #13, #12, #11) and #10 and #9 for CS/DC
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
@@ -41,6 +42,7 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 // function prototypes
 void nunchuk_init();
 void moveCharacterRight(uint8_t y_position);
+void moveCharacterLeft(uint8_t y_position);
 void drawGrid();
 void drawHeartLeft();
 void drawHeartRight();
@@ -73,7 +75,7 @@ int main(void) {
   drawHeartLeft();
   drawHeartRight();
   drawGrid();
-  drawPlayer1(8, 0);
+//drawPlayer1(8, 0);
 //drawPlayer2(0, 8);
   drawBomb(4, 2);
 
@@ -82,9 +84,11 @@ int main(void) {
 
      Nunchuk.getState(ADDRESS); // retrieve states joystick and buttons Nunchuk
 
-     // code to move block over x axis and y axis (on sides)
-     moveCharacterRight(4);
-    
+
+     uint8_t y_position = 0;
+
+     moveCharacterLeft(y_position);
+     moveCharacterRight(y_position);
     
      
    }
@@ -98,39 +102,39 @@ void nunchuk_init() {
 
 void moveCharacterRight(uint8_t y_position) {
 
-    uint8_t currentPosition;
-
     if (Nunchuk.X_Axis() == 255) {
       if (p1 >= 0 && p1 <= 8) {
        drawPlayer1(4, p1++);
-        _delay_ms(75);
+       _delay_ms(75);
 
           if (p1 >= 0 && p1 <= 8) {
 	    clearDrawPlayer1(4, clear_p1++);
 	    currentPosition = p1;
 	    drawPlayer1(4, currentPosition);
+		
+            
          }
       }  
    } 
 }
 
-void moveCharacterLeft(uint8_t y position) {
-
-    uint8_t currentPosition;
+void moveCharacterLeft(uint8_t y_position) {
 
     if (Nunchuk.X_Axis() == 0) {
-       if (p1 >= 0 && p1 <= 8) {
-         drawPlayer1(4, p1--);
-         _delay_ms(75);
+      if (p1 >= 0 && p1 <= 8) {
+	drawPlayer1(4, p1--);
+       _delay_ms(75);
+
+	 if (p1 >= 0 && p1 <= 8) {
+	   clearDrawPlayer1(4, clear_p1--);
+	   currentPosition = p1;
+	   drawPlayer1(4, currentPosition);
            
-           if (p1 >= 0 && p1 <= 8) {
-      	     clearDrawPlayer1(4, clear_p1--);
-	     currentPosition = p1;
-	     drawPlayer1(4, currentPosition);
+           
          }
       }
    }
-}
+} 
 
 
 void drawGrid() {
