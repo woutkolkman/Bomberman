@@ -16,19 +16,18 @@
 #define BORDERDOWN 0
 
 // includes
-#include <avr/interrupt.h>
-#include <avr/io.h>
+//#include <avr/interrupt.h>
+//#include <avr/io.h>
 #include <util/delay.h>
-#include <Adafruit_ILI9341.h> // LCD library
-#include <Adafruit_GFX.h>// LCD library
-#include <Arduino.h> // LCD library
-#include <avr/io.h> // LCD library
+#include <Adafruit_ILI9341.h>
+#include <Adafruit_GFX.h>
+//#include <Arduino.h>
+//#include <avr/io.h>
 #include <SPI.h>
-#include <Wire.h>
+//#include <Wire.h>
 #include <Nunchuk.h>
 
 // global variables
-volatile uint8_t brightness = 0;
 volatile unsigned int counter = 0;
 volatile uint8_t lw = 220 / AANTALLENGTEBREEDTE;
 volatile uint8_t x_positions[8] = {1, 2, 3, 4, 5, 6, 7, 8};
@@ -52,54 +51,27 @@ void drawPlayer1(uint8_t x, uint8_t y);
 void drawPlayer2(uint8_t x, uint8_t y);
 void drawBomb(uint8_t x, uint8_t y);
 void drawTon(uint8_t x, uint8_t y);
+void screen_init();
 
-int main(void) {
+void screen_init() {
+	DDRB |= (1 << DDB1) | (1 << DDB2) | (1 << DDB3) | (1 << DDB4) | (1 << DDB5); // TFT scherm
 
-  // input & output
-  DDRB |= (1 << DDB1) | (1 << DDB2) | (1 << DDB3) | (1 << DDB4) | (1 << DDB5); // TFT scherm
-  DDRC &= ~(1 << DDC4) & ~(1 << DDC5); // Nunchuk
+	tft.setRotation(2); // rotate screen
 
-  // initializiations
-  init();
-  tft.begin(); // enable SPI communication
-  Wire.begin(); // enable TWI communication
-  nunchuk_init(); // start communication between Nunchuk and Arduino
+	// screen is 240 x 320
+	tft.fillScreen(LIGHTBROWN);
 
-  tft.setRotation(2); // rotate screen
-
-  // enable global interrupts
-  sei();
-  
-  // screen is 240 x 320
-  tft.fillScreen(LIGHTBROWN);
-
-  drawHeartLeft();
-  drawHeartRight();
-  drawGrid();
-  drawPlayer1(8, 0);
-  drawPlayer2(0, 8);
-  drawBomb(4, 2);
-
-	
-   for(;;) {
-
-     Nunchuk.getState(ADDRESS); // retrieve states joystick and buttons Nunchuk
-
-     // code to move block over x axis and y axis (on sides)
-     moveCharacterRight(8);
-     moveCharacterLeft(0);
-     moveCharacterUp(8);
-     moveCharacterDown(8);
-
-    
-     
-   }
-   return 0;
+	drawHeartLeft();
+	drawHeartRight();
+	drawGrid();
+	drawPlayer1(8, 0);
+	drawPlayer2(0, 8);
+	drawBomb(4, 2);
 }
 
 void nunchuk_init() {
-   
-    Nunchuk.begin(ADDRESS); // start communication with Arduino and Nunchuk
+	DDRC &= ~(1 << DDC4) & ~(1 << DDC5); // Nunchuk
+    	Nunchuk.begin(ADDRESS); // start communication with Arduino and Nunchuk
 }
 
 void moveCharacterLeft(uint8_t y_position) {

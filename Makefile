@@ -1,7 +1,7 @@
 BOARD_TAG = uno
 USER_LIB_PATH = libraries
 ARDUINO_LIB_PATH = /home/$(USER)/sketchbook/libraries
-ARDUINO_LIBS = Wire USART CSPI IR
+ARDUINO_LIBS = Wire USART SPI CSPI IR Nunchuk Adafruit-GFX-Library Adafruit_ILI9341
 
 //LOCAL_CPP_SRCS += $(wildcard libraries/IR/*.cpp)
 LOCAL_CPP_SRCS += $(wildcard libraries/Nunchuk/*.cpp)
