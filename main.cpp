@@ -13,9 +13,9 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include "libraries/IR/ir.h" // IR library
-//#include <Adafruit_ILI9341.h>
-//#include <Adafruit_GFX.h>
-//#include <Arduino.h>
+#include <Adafruit_ILI9341.h>
+#include <Adafruit_GFX.h>
+#include <Arduino.h>
 #include <Wire.h>
 //#include "libraries/Nunchuk/Nunchuk.h"
 #include "nunchuk.cpp"
