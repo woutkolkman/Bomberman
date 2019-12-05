@@ -81,6 +81,7 @@
 #define LONT2 0xDC29
 #define FIRE 0xF9E1
 #define MAINMENUCOLOR ILI9341_BLACK
+#define FIRESPREAD ILI9341_RED
 
 /* includes */
 #include <avr/interrupt.h>
@@ -226,6 +227,10 @@ void drawMap(){
 	drawTon(5, 7);
 	drawTon(1, 3);
 	drawTon(2, 0);
+	drawBombExplosie(0, 3);
+	drawBombExplosie(4, 0); 
+	drawBombExplosie(8, 3); 
+	drawBombExplosie(3, 8); 
 }
 
 void drawMainMenu() {
@@ -347,6 +352,94 @@ void drawBomb(uint8_t x, uint8_t y) {
 	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 2 ,lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 17, FIRE); // fire
 }
 
+void drawBombExplosie(uint8_t x, uint8_t y){
+	/* Bom tekeken */
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 9.5, (y*lw) + YUP + OBJOFFSET + 3 , lw - 2*OBJOFFSET - 18  , lw - 2*OBJOFFSET - 13, LONT2); // lontje bom	
+	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 7, 5, ILI9341_BLACK); // lichaam bom
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 8, (y*lw) + YUP + OBJOFFSET + 9 , ILI9341_WHITE); // details
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET + 10 , ILI9341_WHITE);
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 2 ,lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 17, FIRE); // fire
+	/* Bom tikt */	
+	_delay_ms(1000);	// explosie timer
+	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 7, 5, ILI9341_RED); // lichaam bom // explosie
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 8, (y*lw) + YUP + OBJOFFSET + 9 , ILI9341_WHITE); // details
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET + 10 , ILI9341_WHITE);
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 2 ,lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 17, FIRE); // fire
+	_delay_ms(1000);	// explosie timer
+	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 7, 5, ILI9341_BLACK); // lichaam bom
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 8, (y*lw) + YUP + OBJOFFSET + 9 , ILI9341_WHITE); // details
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET + 10 , ILI9341_WHITE);
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 2 ,lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 17, FIRE); // fire
+	_delay_ms(650);	// explosie timer
+	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 7, 5, ILI9341_RED); // lichaam bom // explosie
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 8, (y*lw) + YUP + OBJOFFSET + 9 , ILI9341_WHITE); // details
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET + 10 , ILI9341_WHITE);
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 2 ,lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 17, FIRE); // fire
+	_delay_ms(650);	// explosie timer
+	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 7, 5, ILI9341_BLACK); // lichaam bom // explosie
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 8, (y*lw) + YUP + OBJOFFSET + 9 , ILI9341_WHITE); // details
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET + 10 , ILI9341_WHITE);
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 2 ,lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 17, FIRE); // fire
+	_delay_ms(350);	// explosie timer
+	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 7, 5, ILI9341_RED); // lichaam bom // explosie
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 8, (y*lw) + YUP + OBJOFFSET + 9 , ILI9341_WHITE); // details
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET + 10 , ILI9341_WHITE);
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 2 ,lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 17, FIRE); // fire
+	_delay_ms(350);	// explosie timer
+	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 7, 5, ILI9341_BLACK); // lichaam bom // explosie
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 8, (y*lw) + YUP + OBJOFFSET + 9 , ILI9341_WHITE); // details
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET + 10 , ILI9341_WHITE);
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 2 ,lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 17, FIRE); // fire
+	_delay_ms(350);	// explosie timer
+	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 7, 5, ILI9341_RED); // lichaam bom // explosie
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 8, (y*lw) + YUP + OBJOFFSET + 9 , ILI9341_WHITE); // details
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET + 10 , ILI9341_WHITE);
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 2 ,lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 17, FIRE); // fire
+	/* bom ge-explodeerd */
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 9.5, (y*lw) + YUP + OBJOFFSET + 3 , lw - 2*OBJOFFSET - 18  , lw - 2*OBJOFFSET - 13, GRIDCOLOUR); // lontje bom	
+	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 7, 5, GRIDCOLOUR); // lichaam bom
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 8, (y*lw) + YUP + OBJOFFSET + 9 , GRIDCOLOUR); // details
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET + 10 , GRIDCOLOUR);
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 2 ,lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 17, GRIDCOLOUR); // fire
+	
+	fireSpread(x, y);
+}
+
+void fireSpread(uint8_t x, uint8_t y) {
+	if((x >= 0 || x <= 8) && (y >= 0 || y <= 8)){			
+		tft.fillRect(x*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, FIRESPREAD); // vuur op bom
+	}
+	if((x -1 >= 0 && x -1 <= 8) && (y >= 0 || y <= 8)){
+		tft.fillRect((x-1)*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, FIRESPREAD); // vuur links van bom
+	}	
+	if((x +1 >= 0 && x +1 <= 8) && (y >= 0 && y <= 8)){
+		tft.fillRect((x+1)*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, FIRESPREAD); // vuur rechts van bom
+	}	
+	if((x >= 0 && x <= 8) && (y -1 >= 0 && y -1 <= 8)){
+		tft.fillRect(x*lw + XUP + OBJOFFSET, ((y-1)*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, FIRESPREAD); // vuur boven van bom	
+	}	
+	if((x >= 0 && x <= 8) && (y +1 >= 0 && y +1 <= 8)){
+		tft.fillRect(x*lw + XUP + OBJOFFSET, ((y+1)*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, FIRESPREAD); // vuur onder van bom
+	}
+	
+	_delay_ms(700); // timer firespread
+	if((x >= 0 || x <= 8) && (y >= 0 || y <= 8)){			
+		tft.fillRect(x*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, GRIDCOLOUR); // vuur op bom
+	}
+	if((x -1 >= 0 && x -1 <= 8) && (y >= 0 || y <= 8)){
+		tft.fillRect((x-1)*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, GRIDCOLOUR); // vuur links van bom
+	}	
+	if((x +1 >= 0 && x +1 <= 8) && (y >= 0 && y <= 8)){
+		tft.fillRect((x+1)*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, GRIDCOLOUR); // vuur rechts van bom
+	}	
+	if((x >= 0 && x <= 8) && (y -1 >= 0 && y -1 <= 8)){
+		tft.fillRect(x*lw + XUP + OBJOFFSET, ((y-1)*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, GRIDCOLOUR); // vuur boven van bom	
+	}	
+	if((x >= 0 && x <= 8) && (y +1 >= 0 && y +1 <= 8)){
+		tft.fillRect(x*lw + XUP + OBJOFFSET, ((y+1)*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, GRIDCOLOUR); // vuur onder van bom
+	}
+}
+
 void drawTon(uint8_t x, uint8_t y) { 
 	//lw = 220 / 9 = 24,444  objoffset = 2 24,444 - 2*2 = 20,444
 	// x = 4, lw = 220/9, XUP = 10 x*lw+xup+0.3*lw = 4*220/9 +10+ 0.3*220/9 = 115,11111111111111
@@ -385,9 +478,6 @@ void drawTitle() {
         tft.print("A");
         tft.setTextColor(NCOLOR);
         tft.print("N");
-
-
-
 }
 
 void drawStart() {

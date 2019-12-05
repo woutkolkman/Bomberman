@@ -1,23 +1,61 @@
 /* defines */
 #define BAUD 9600
+#define AANTALLENGTEBREEDTE 9//aantal hokjes in lengte en breedte
+#define XUP 50 //offset from screen border
+#define YUP 10 //ofset from screen border
+#define OBJOFFSET 2 //no overlap with line
+#define MAXOBJ 8 //object max x/y axis
+
+//LCD init defines
 #define TFT_DC 9 // initialisatie LCD
 #define TFT_CS 10 // initialisatie LCD
-#define AANTALLENGTEBREEDTE 9//aantal hokjes in lengte en breedte
-#define XUP 10
-#define YUP 50
-#define OBJOFFSET 2
-#define MAXOBJ 8
+#define ROTATION 3 //rotation of screen
 
-/* Colour defines */ // toegevoegd
+//title
+#define TITLETPOSX 50
+#define TITLETPOSY 10
+#define TITLETSIZE 4 //start button text size
+//mainmenucolors
+#define ACOLOR ILI9341_PURPLE
+#define BCOLOR ILI9341_YELLOW
+#define ECOLOR DARKBROWN
+#define MCOLOR ILI9341_RED
+#define NCOLOR ILI9341_NAVY
+#define OCOLOR ILI9341_CYAN
+#define RCOLOR ILI9341_WHITE
+#define TEXTCOLOR ILI9341_BLACK
+#define SELECTEDTEXTCOLOR ILI9341_GREEN
+#define SHADOWCOLOR ILI9341_LIGHTGREY
+
+//startbutton defines
+#define STARTBUTRX 50 //start button rectangle position x
+#define STARTBUTRY 50 //start button rectangle position y
+#define STARTBUTRW 220 //start button rectangle width
+#define STARTBUTRH 40 //start button rectangle height
+#define STARTBUTTPOSX 125 //start button text position x
+#define STARTBUTTPOSY 65 //start button text position y
+#define STARTBUTTSIZE 2 //start button text size
+#define STARTBUTSELCOLOR ILI9341_YELLOW
+#define STARTBUTSTPOSX STARTBUTTPOSX + 2
+#define STARTBUTSTPOSY STARTBUTTPOSY - 2
+#define STARTBUTCOLOR ILI9341_RED
+
+/* Colour defines */
 #define LIGHTBROWN 0x7A00
-#define TONBROWN 0x28A0 // toegevoegd
+#define TONBROWN 0x28A0
 #define DARKBROWN 0x5980
-#define SKIN 0xF5D0 // toegevoegd
-#define PLAYER1 0x135F // toegevoegd
-#define PLAYER2 ILI9341_RED // toegevoegd
-#define GRIDCOLOUR DARKBROWN // toegevoegd
-#define MAPCOLOUR LIGHTBROWN // toegevoegd
-#define HEARTCOLOUR ILI9341_RED // toegevoegd
+#define SKIN 0xF5D0
+#define PLAYER1 0x135F
+#define PLAYER2 0xF2EB
+#define GRIDCOLOUR DARKBROWN
+#define MAPCOLOUR LIGHTBROWN
+#define HEARTCOLOUR ILI9341_RED
+#define MOOIEBRUIN 0x6101
+#define LONT 0xFDAB
+#define LONT2 0xDC29
+#define FIRE 0xF9E1
+#define MAINMENUCOLOR ILI9341_BLACK
+#define FIRESPREAD ILI9341_RED
 
 /* includes */
 #include <avr/interrupt.h>
@@ -35,6 +73,8 @@
 /* global variables */
 volatile uint8_t brightness = 0;
 uint8_t lw = 220 / AANTALLENGTEBREEDTE;
+uint8_t livesleft = 3; //REMOVE
+
 
 /* Use Hardware SPI (on Uno, #13, #12, #11) and #10 and # 9for  CS/DC   */
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
@@ -43,13 +83,21 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 void adc_init();
 void init_2();
 void timer1_init();
+void initGame();
 void drawGrid();
-void drawHeartLeft();
-void drawHeartRight();
+void drawPlayer1Field();
+void drawPlayer2Field();
 void drawPlayer1(uint8_t x, uint8_t y);
 void drawPlayer2(uint8_t x, uint8_t y);
 void drawBomb(uint8_t x, uint8_t y);
 void drawTon(uint8_t x, uint8_t y);
+void drawMap();
+void drawMainMenu();
+void drawTitle();
+void drawStart();
+void drawHighScore();
+void drawBombExplosie(uint8_t x, uint8_t y); // toegevoegd
+void fireSpread(uint8_t x, uint8_t y); // toegevoegd
 
 /* ISR */
 ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
@@ -57,6 +105,7 @@ ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 
 	// brightness toepassen op beeldscherm
 }
+
 ISR(TIMER1_OVF_vect /*TIMER1_COMPA_vect*/) {
 //	gametick
 }
@@ -66,13 +115,18 @@ int main(void) {
 	//USART_Transmit(0x76);
 	init();
 	tft.begin();
-	drawMap(); // toegevoegd
+	initGame();
+	drawMap(); //draw Map // toegevoegd
+	//drawMainMenu(); // toegevoegd
+
+	//scherm is 240 * 320 pixels
 
 	/* loop */
 	for(;;){
 		//USART_Transmit(0x76);
 		//_delay_ms(1000);
 	}
+
 
 	/* never reached */
 	return 0;
@@ -129,71 +183,240 @@ TIMSK1 |= (1<<TOIE1); //overflow interupt enable
 //TIMSK1 |= (1<<OCIEA); //compare output interrupt enable
 }
 
-void drawMap(){ // toegevoegd
-	//scherm is 240 * 320 pixels
-	tft.fillScreen(MAPCOLOUR);
-	drawHeartLeft();
-	drawHeartRight();
-	drawGrid();
-	drawPlayer1(8, 0);
-	drawPlayer2(0, 8);
-	drawBomb(4, 2);
-	drawTon(4, 3);// toegevoegd
-	drawTon(6, 6);// toegevoegd
-	drawTon(7, 5);// toegevoegd
-	drawTon(5, 7);// toegevoegd
-	drawTon(1, 3);// toegevoegd
-	drawTon(2, 0);// toegevoegd
+void initGame() {
+	tft.setRotation(3); //set rotation;
+	tft.fillScreen(LIGHTBROWN); //lichtbruine achtergrond volledige scherm
 }
 
-void drawGrid() { // toegevoegd
-	// Grid size = 220 * 220
-        tft.fillRect(XUP, YUP, AANTALLENGTEBREEDTE*lw, AANTALLENGTEBREEDTE*lw, GRIDCOLOUR);
+void drawMap(){
+	//scherm is 240 * 320 pixels
+	tft.fillScreen(MOOIEBRUIN);
+	drawPlayer1Field();
+	drawPlayer2Field();
+	drawGrid();
+	drawTon(4, 3);
+	drawTon(6, 6);
+	drawTon(7, 5);
+	drawTon(5, 7);
+	drawTon(1, 3);
+	drawTon(2, 0);
+	drawPlayer1(0, 0);
+	drawPlayer2(8, 8);
+	drawBomb(4, 2);
+	drawBombExplosie(0, 3); // toegevoegd
+	drawBombExplosie(4, 0); // toegevoegd
+	drawBombExplosie(8, 3); // toegevoegd
+	drawBombExplosie(3, 8); // toegevoegd
+	
+
+}
+
+void drawMainMenu() {
+	tft.fillScreen(MAINMENUCOLOR);
+	drawTitle();
+	drawStart();
+}
+
+void drawGrid() {
+        tft.fillRect(XUP /*niet op grens van scherm X */, YUP/*niet op grens van scherm Y*/, AANTALLENGTEBREEDTE*lw /*volledige game-grid*/, AANTALLENGTEBREEDTE*lw /*volledige game-grid*/, GRIDCOLOUR /*donkerbruine achtergrond*/);
         for(int x = 0; x < 9; x++) {
                 for(int y = 0; y < 9; y++) {
-                        tft.drawRect((x*lw) + XUP, (y*lw) + YUP, lw+1, lw+1, ILI9341_BLACK);
+                        tft.drawRect((x*lw) + XUP, (y*lw) + YUP, lw+1, lw+1, ILI9341_BLACK); //lijnen tussen grid
                 }
         }
 }
 
-void drawHeartLeft() { // toegevoegd
-	tft.fillTriangle(190, 25, 200, 15, 200, 35, HEARTCOLOUR);
-	tft.fillCircle(203, 30, 5, HEARTCOLOUR);
-	tft.fillCircle(203, 20, 5, HEARTCOLOUR);
+void drawHeart(uint16_t x, uint16_t y, uint16_t b, uint16_t h) {
+	tft.fillTriangle((x + 0.5*b), (y + h), x, (y + 0.44*h), (x + b), (y + 0.44*h), HEARTCOLOUR); //driehoek van hartje
+	tft.fillCircle((x+0.25*b), (y + 0.28*h), (0.25*b), HEARTCOLOUR); //cirkel linksboven van hartje
+        tft.fillCircle((x+0.75*b), (y + 0.28*h), (0.25*b), HEARTCOLOUR); //cirkel rechtsboven van hartje
+	tft.fillRect(x+3,y+2,1,1,ILI9341_WHITE);// details
+	tft.fillRect(x+2,y+3,1,1,ILI9341_WHITE);
 }
 
-void drawHeartRight() {
-
+void drawPlayer1Field() {
+	drawHeart(15, 20, 20, 18); //teken hartje
+	if(livesleft >= 2) {
+		drawHeart(15, 40, 20, 18); //als 2 levens, teken 2e hartje
+	}if(livesleft == 3) {
+		drawHeart(15, 60, 20, 18); //als 3 levens, teken 3e hartje
+	}
 }
 
-void drawPlayer1(uint8_t x, uint8_t y) { // Toegevoegd
+void drawPlayer2Field() {
+	drawHeart(285, 200, 20, 18); //teken hartje
+	if(livesleft >= 2) {
+		drawHeart(285, 180, 20, 18); //als 2 levens, teken 2e hartje
+	} if(livesleft == 3) {
+		drawHeart(285, 160, 20, 18); //als 3 levens, teken 3e hartje
+	}
+}
+
+void drawPlayer1(uint8_t x, uint8_t y) { 
 	// fillRect( x, y, w, h, c)
 	// fillCircle( x, y, r, c)
-	tft.fillCircle(x*lw + XUP + (0.3*lw) + 7, y*lw + YUP + (0.3*lw) + 5, 5, SKIN); // head
-	/* Hat  */
-	tft.fillRect(x*lw + XUP + OBJOFFSET + 15, (y*lw) + YUP + OBJOFFSET + 5, lw - 2*OBJOFFSET -15 , lw - 2*OBJOFFSET - 9, PLAYER1); // main hat
-	tft.drawRect(x*lw + XUP + OBJOFFSET + 15, (y*lw) + YUP + OBJOFFSET + 5, lw - 2*OBJOFFSET -15 , lw - 2*OBJOFFSET - 9, ILI9341_BLACK);
-	tft.fillRect(x*lw + XUP + OBJOFFSET + 13, (y*lw) + YUP + OBJOFFSET + 8, lw - 2*OBJOFFSET -16 , lw - 2*OBJOFFSET - 9, PLAYER1); // brim
-	tft.drawRect(x*lw + XUP + OBJOFFSET + 13, (y*lw) + YUP + OBJOFFSET + 8, lw - 2*OBJOFFSET -16 , lw - 2*OBJOFFSET - 9, ILI9341_BLACK);
+	/* Pants */
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 6.5, (y*lw) + YUP + OBJOFFSET + 10, lw - 2*OBJOFFSET - 12 , lw - 2*OBJOFFSET - 15, ILI9341_BLACK); // pant
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 6.5, (y*lw) + YUP + OBJOFFSET + 15, lw - 2*OBJOFFSET - 17 , lw - 2*OBJOFFSET - 13, ILI9341_BLACK); // left leg
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 11, (y*lw) + YUP + OBJOFFSET + 15, lw - 2*OBJOFFSET - 17 , lw - 2*OBJOFFSET - 13, ILI9341_BLACK); // right leg
+	/* Shoes */
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 4, (y*lw) + YUP + OBJOFFSET + 20, lw - 2*OBJOFFSET - 15, lw - 2*OBJOFFSET - 18, PLAYER1); // left shoe
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 11, (y*lw) + YUP + OBJOFFSET + 20, lw - 2*OBJOFFSET - 15, lw - 2*OBJOFFSET - 18, PLAYER1); // right shoe	
 	/* Body  */
-
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 6.5, (y*lw) + YUP + OBJOFFSET + 2, lw - 2*OBJOFFSET - 12 , lw - 2*OBJOFFSET - 10, PLAYER1); // chest 
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 2, (y*lw) + YUP + OBJOFFSET + 3, lw - 2*OBJOFFSET - 17 , lw - 2*OBJOFFSET - 14, PLAYER1); // left arm
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 3, (y*lw) + YUP + OBJOFFSET + 3, lw - 2*OBJOFFSET - 17 , lw - 2*OBJOFFSET - 16, PLAYER1); // left shoulder
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 2, (y*lw) + YUP + OBJOFFSET + 9, lw - 2*OBJOFFSET - 16 , lw - 2*OBJOFFSET - 16, SKIN);// left hand
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 15, (y*lw) + YUP + OBJOFFSET + 3, lw - 2*OBJOFFSET - 17 , lw - 2*OBJOFFSET - 14, PLAYER1); // right arm
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 14, (y*lw) + YUP + OBJOFFSET + 3, lw - 2*OBJOFFSET - 17 , lw - 2*OBJOFFSET - 16, PLAYER1); // right shoulder
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 15, (y*lw) + YUP + OBJOFFSET + 9, lw - 2*OBJOFFSET - 16 , lw - 2*OBJOFFSET - 16, SKIN);// right hand	
+	/* Head */
+	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) - 6 , 5, SKIN); // head
+	/* Face */
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET - 1, lw - 2*OBJOFFSET - 18, lw - 2*OBJOFFSET - 18, ILI9341_BLACK); // left eye
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET - 1, lw - 2*OBJOFFSET - 19, lw - 2*OBJOFFSET - 19, ILI9341_WHITE); // left eye white
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 12, (y*lw) + YUP + OBJOFFSET - 1, lw - 2*OBJOFFSET - 18, lw - 2*OBJOFFSET - 18, ILI9341_BLACK); // right eye
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 12, (y*lw) + YUP + OBJOFFSET - 1, lw - 2*OBJOFFSET - 19, lw - 2*OBJOFFSET - 19, ILI9341_WHITE); // right eye white
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 3, ILI9341_BLACK);// mouth
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 11, (y*lw) + YUP + OBJOFFSET + 2, ILI9341_BLACK);
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 9, (y*lw) + YUP + OBJOFFSET + 3, ILI9341_BLACK);
+	/* Hat  */
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 6, (y*lw) + YUP + OBJOFFSET - 9, lw - 2*OBJOFFSET -9 , lw - 2*OBJOFFSET - 15, PLAYER1); // main hat
+	tft.drawRect(x*lw + XUP + OBJOFFSET + 6, (y*lw) + YUP + OBJOFFSET - 9, lw - 2*OBJOFFSET -9 , lw - 2*OBJOFFSET - 15, ILI9341_BLACK);
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET - 6, lw - 2*OBJOFFSET -11 , lw - 2*OBJOFFSET - 16, PLAYER1); // brim
+	tft.drawRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET - 6, lw - 2*OBJOFFSET -11 , lw - 2*OBJOFFSET - 16, ILI9341_BLACK);
 }
 
-void drawPlayer2(uint8_t x, uint8_t y) { // Toegevoegd
-	tft.fillRect(x*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET + 1, lw - 2*OBJOFFSET + 1, PLAYER2);
-	tft.fillCircle(x*lw + XUP + (0.3*lw), y*lw + YUP + (0.3*lw), 5, SKIN); // head
-	//tft.fillRect(x*lw + XUP + OBJOFFSET + 15, (y*lw) + YUP + OBJOFFSET + 5, lw - 2*OBJOFFSET -15 , lw - 2*OBJOFFSET - 9, PLAYER2); // hat
-	//tft.drawRect(x*lw + XUP + OBJOFFSET + 15, (y*lw) + YUP + OBJOFFSET + 5, lw - 2*OBJOFFSET -15 , lw - 2*OBJOFFSET - 9, ILI9341_BLACK); // hat
-	//tft.fillRect(x*lw + XUP + OBJOFFSET + 13, (y*lw) + YUP + OBJOFFSET + 8, lw - 2*OBJOFFSET -16 , lw - 2*OBJOFFSET - 9, PLAYER2); // hat
-	//tft.drawRect(x*lw + XUP + OBJOFFSET + 13, (y*lw) + YUP + OBJOFFSET + 8, lw - 2*OBJOFFSET -16 , lw - 2*OBJOFFSET - 9, ILI9341_BLACK); // hat
+void drawPlayer2(uint8_t x, uint8_t y) {
+	/* Pants */
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 6.5, (y*lw) + YUP + OBJOFFSET + 10, lw - 2*OBJOFFSET - 12 , lw - 2*OBJOFFSET - 15, ILI9341_BLACK); // pant
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 6.5, (y*lw) + YUP + OBJOFFSET + 15, lw - 2*OBJOFFSET - 17 , lw - 2*OBJOFFSET - 13, ILI9341_BLACK); // left leg
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 11, (y*lw) + YUP + OBJOFFSET + 15, lw - 2*OBJOFFSET - 17 , lw - 2*OBJOFFSET - 13, ILI9341_BLACK); // right leg
+	/* Shoes */
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 4, (y*lw) + YUP + OBJOFFSET + 20, lw - 2*OBJOFFSET - 15, lw - 2*OBJOFFSET - 18, PLAYER2); // left shoe
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 11, (y*lw) + YUP + OBJOFFSET + 20, lw - 2*OBJOFFSET - 15, lw - 2*OBJOFFSET - 18, PLAYER2); // right shoe	
+	/* Body  */
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 6.5, (y*lw) + YUP + OBJOFFSET + 2, lw - 2*OBJOFFSET - 12 , lw - 2*OBJOFFSET - 10, PLAYER2); // chest 
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 2, (y*lw) + YUP + OBJOFFSET + 3, lw - 2*OBJOFFSET - 17 , lw - 2*OBJOFFSET - 14, PLAYER2); // left arm
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 3, (y*lw) + YUP + OBJOFFSET + 3, lw - 2*OBJOFFSET - 17 , lw - 2*OBJOFFSET - 16, PLAYER2); // left shoulder
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 2, (y*lw) + YUP + OBJOFFSET + 9, lw - 2*OBJOFFSET - 16 , lw - 2*OBJOFFSET - 16, SKIN);// left hand
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 15, (y*lw) + YUP + OBJOFFSET + 3, lw - 2*OBJOFFSET - 17 , lw - 2*OBJOFFSET - 14, PLAYER2); // right arm
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 14, (y*lw) + YUP + OBJOFFSET + 3, lw - 2*OBJOFFSET - 17 , lw - 2*OBJOFFSET - 16, PLAYER2); // right shoulder
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 15, (y*lw) + YUP + OBJOFFSET + 9, lw - 2*OBJOFFSET - 16 , lw - 2*OBJOFFSET - 16, SKIN);// right hand	
+	/* Head */
+	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) - 6 , 5, SKIN); // head
+	/* Face */
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET - 1, lw - 2*OBJOFFSET - 18, lw - 2*OBJOFFSET - 18, ILI9341_BLACK); // left eye
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET - 1, lw - 2*OBJOFFSET - 19, lw - 2*OBJOFFSET - 19, ILI9341_WHITE); // left eye white
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 12, (y*lw) + YUP + OBJOFFSET - 1, lw - 2*OBJOFFSET - 18, lw - 2*OBJOFFSET - 18, ILI9341_BLACK); // right eye
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 12, (y*lw) + YUP + OBJOFFSET - 1, lw - 2*OBJOFFSET - 19, lw - 2*OBJOFFSET - 19, ILI9341_WHITE); // right eye white
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 3, ILI9341_BLACK);// mouth
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 11, (y*lw) + YUP + OBJOFFSET + 2, ILI9341_BLACK);
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 9, (y*lw) + YUP + OBJOFFSET + 3, ILI9341_BLACK);
+	/* Hat  */
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 6, (y*lw) + YUP + OBJOFFSET - 9, lw - 2*OBJOFFSET -9 , lw - 2*OBJOFFSET - 15, PLAYER2); // main hat
+	tft.drawRect(x*lw + XUP + OBJOFFSET + 6, (y*lw) + YUP + OBJOFFSET - 9, lw - 2*OBJOFFSET -9 , lw - 2*OBJOFFSET - 15, ILI9341_BLACK);
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET - 6, lw - 2*OBJOFFSET -11 , lw - 2*OBJOFFSET - 16, PLAYER2); // brim
+	tft.drawRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET - 6, lw - 2*OBJOFFSET -11 , lw - 2*OBJOFFSET - 16, ILI9341_BLACK);
 }
 
-void drawBomb(uint8_t x, uint8_t y) { // Toegevoegd
-	tft.fillCircle(x*lw + XUP + (0.3*lw) + 3, y*lw + YUP + (0.3*lw) + 5, 5, ILI9341_BLACK); // lichaam bom
-	tft.fillRect(x*lw + XUP + OBJOFFSET + 11 , (y*lw) + YUP + OBJOFFSET + 9.5 , lw - 2*OBJOFFSET -13  , lw - 2*OBJOFFSET - 18, ILI9341_BLACK); // lontje bom
+void drawBomb(uint8_t x, uint8_t y) {
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 9.5, (y*lw) + YUP + OBJOFFSET + 3 , lw - 2*OBJOFFSET - 18  , lw - 2*OBJOFFSET - 13, LONT2); // lontje bom	
+	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 7, 5, ILI9341_BLACK); // lichaam bom
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 8, (y*lw) + YUP + OBJOFFSET + 9 , ILI9341_WHITE); // details
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET + 10 , ILI9341_WHITE);
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 2 ,lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 17, FIRE); // fire
 }
 
-void drawTon(uint8_t x, uint8_t y) { // Toegevoegd
+void drawBombExplosie(uint8_t x, uint8_t y){  // toegevoegd
+	/* Bom tekeken */
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 9.5, (y*lw) + YUP + OBJOFFSET + 3 , lw - 2*OBJOFFSET - 18  , lw - 2*OBJOFFSET - 13, LONT2); // lontje bom	
+	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 7, 5, ILI9341_BLACK); // lichaam bom
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 8, (y*lw) + YUP + OBJOFFSET + 9 , ILI9341_WHITE); // details
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET + 10 , ILI9341_WHITE);
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 2 ,lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 17, FIRE); // fire
+	/* Bom tikt */	
+	_delay_ms(1000);	// explosie timer
+	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 7, 5, ILI9341_RED); // lichaam bom // explosie
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 8, (y*lw) + YUP + OBJOFFSET + 9 , ILI9341_WHITE); // details
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET + 10 , ILI9341_WHITE);
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 2 ,lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 17, FIRE); // fire
+	_delay_ms(1000);	// explosie timer
+	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 7, 5, ILI9341_BLACK); // lichaam bom
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 8, (y*lw) + YUP + OBJOFFSET + 9 , ILI9341_WHITE); // details
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET + 10 , ILI9341_WHITE);
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 2 ,lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 17, FIRE); // fire
+	_delay_ms(650);	// explosie timer
+	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 7, 5, ILI9341_RED); // lichaam bom // explosie
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 8, (y*lw) + YUP + OBJOFFSET + 9 , ILI9341_WHITE); // details
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET + 10 , ILI9341_WHITE);
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 2 ,lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 17, FIRE); // fire
+	_delay_ms(650);	// explosie timer
+	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 7, 5, ILI9341_BLACK); // lichaam bom // explosie
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 8, (y*lw) + YUP + OBJOFFSET + 9 , ILI9341_WHITE); // details
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET + 10 , ILI9341_WHITE);
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 2 ,lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 17, FIRE); // fire
+	_delay_ms(350);	// explosie timer
+	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 7, 5, ILI9341_RED); // lichaam bom // explosie
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 8, (y*lw) + YUP + OBJOFFSET + 9 , ILI9341_WHITE); // details
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET + 10 , ILI9341_WHITE);
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 2 ,lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 17, FIRE); // fire
+	_delay_ms(350);	// explosie timer
+	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 7, 5, ILI9341_BLACK); // lichaam bom // explosie
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 8, (y*lw) + YUP + OBJOFFSET + 9 , ILI9341_WHITE); // details
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET + 10 , ILI9341_WHITE);
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 2 ,lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 17, FIRE); // fire
+	_delay_ms(350);	// explosie timer
+	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 7, 5, ILI9341_RED); // lichaam bom // explosie
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 8, (y*lw) + YUP + OBJOFFSET + 9 , ILI9341_WHITE); // details
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET + 10 , ILI9341_WHITE);
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 2 ,lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 17, FIRE); // fire
+	/* bom ge-explodeerd */
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 9.5, (y*lw) + YUP + OBJOFFSET + 3 , lw - 2*OBJOFFSET - 18  , lw - 2*OBJOFFSET - 13, GRIDCOLOUR); // lontje bom	
+	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 7, 5, GRIDCOLOUR); // lichaam bom
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 8, (y*lw) + YUP + OBJOFFSET + 9 , GRIDCOLOUR); // details
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET + 10 , GRIDCOLOUR);
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 2 ,lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 17, GRIDCOLOUR); // fire
+	
+	fireSpread(x, y);
+}
+
+void fireSpread(uint8_t x, uint8_t y) {
+	if((x >= 0 || x <= 8) && (y >= 0 || y <= 8)){			
+		tft.fillRect(x*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, FIRESPREAD); // vuur op bom
+	}
+	if((x -1 >= 0 && x -1 <= 8) && (y >= 0 || y <= 8)){
+		tft.fillRect((x-1)*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, FIRESPREAD); // vuur links van bom
+	}	
+	if((x +1 >= 0 && x +1 <= 8) && (y >= 0 && y <= 8)){
+		tft.fillRect((x+1)*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, FIRESPREAD); // vuur rechts van bom
+	}	
+	if((x >= 0 && x <= 8) && (y -1 >= 0 && y -1 <= 8)){
+		tft.fillRect(x*lw + XUP + OBJOFFSET, ((y-1)*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, FIRESPREAD); // vuur boven van bom	
+	}	
+	if((x >= 0 && x <= 8) && (y +1 >= 0 && y +1 <= 8)){
+		tft.fillRect(x*lw + XUP + OBJOFFSET, ((y+1)*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, FIRESPREAD); // vuur onder van bom
+	}
+	
+	_delay_ms(700); // timer firespread
+	if((x >= 0 || x <= 8) && (y >= 0 || y <= 8)){			
+		tft.fillRect(x*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, GRIDCOLOUR); // vuur op bom
+	}
+	if((x -1 >= 0 && x -1 <= 8) && (y >= 0 || y <= 8)){
+		tft.fillRect((x-1)*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, GRIDCOLOUR); // vuur links van bom
+	}	
+	if((x +1 >= 0 && x +1 <= 8) && (y >= 0 && y <= 8)){
+		tft.fillRect((x+1)*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, GRIDCOLOUR); // vuur rechts van bom
+	}	
+	if((x >= 0 && x <= 8) && (y -1 >= 0 && y -1 <= 8)){
+		tft.fillRect(x*lw + XUP + OBJOFFSET, ((y-1)*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, GRIDCOLOUR); // vuur boven van bom	
+	}	
+	if((x >= 0 && x <= 8) && (y +1 >= 0 && y +1 <= 8)){
+		tft.fillRect(x*lw + XUP + OBJOFFSET, ((y+1)*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, GRIDCOLOUR); // vuur onder van bom
+	}
+}
+
+void drawTon(uint8_t x, uint8_t y) { 
 	//lw = 220 / 9 = 24,444  objoffset = 2 24,444 - 2*2 = 20,444
 	// x = 4, lw = 220/9, XUP = 10 x*lw+xup+0.3*lw = 4*220/9 +10+ 0.3*220/9 = 115,11111111111111
 	//tft.fillRect( x-as , y-as , width , hight , colour );
@@ -204,8 +427,55 @@ void drawTon(uint8_t x, uint8_t y) { // Toegevoegd
 	//tft.fillCircle(x*lw + XUP + (0.3*lw), y*lw + YUP + (0.3*lw),   5    , ILI9341_PINK);
 
 	tft.fillRect(x*lw + XUP + OBJOFFSET + 3 , (y*lw) + YUP + OBJOFFSET + 3 , lw - 2*OBJOFFSET - 5, lw - 2*OBJOFFSET - 5, TONBROWN); // lichaam ton
-	tft.fillCircle(x*lw + XUP + (0.3*lw) + 8, y*lw + YUP + (0.3*lw) + 5,   7   , TONBROWN); // lichaam ton
-	tft.fillCircle(x*lw + XUP + (0.3*lw) + 2, y*lw + YUP + (0.3*lw) + 5,   7   , TONBROWN);	// lichaam ton
-	tft.fillRect(x*lw + XUP + OBJOFFSET + 5 , (y*lw) + YUP + OBJOFFSET + 3 , lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 5, ILI9341_BLACK); // details
-	tft.fillRect(x*lw + XUP + OBJOFFSET + 12 , (y*lw) + YUP + OBJOFFSET + 3 , lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 5, ILI9341_BLACK); // details
+	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 8,   7   , TONBROWN); // lichaam ton
+	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 2,   7   , TONBROWN);	// lichaam ton
+	tft.fillRect(x*lw + XUP + OBJOFFSET +  3, (y*lw) + YUP + OBJOFFSET + 5 , lw - 2*OBJOFFSET - 5, lw - 2*OBJOFFSET - 17, ILI9341_BLACK); // details
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 3 , (y*lw) + YUP + OBJOFFSET + 13, lw - 2*OBJOFFSET - 5, lw - 2*OBJOFFSET - 17, ILI9341_BLACK); // details
+}
+
+void drawTitle() {
+	tft.setCursor(TITLETPOSX, TITLETPOSY); //startpositie tekst
+	tft.setTextSize(TITLETSIZE); //textsize
+	tft.setTextColor(BCOLOR);
+	tft.print("B"); //startpositie tekst
+	tft.setTextColor(OCOLOR);
+	tft.print("O");
+	tft.setTextColor(MCOLOR);
+	tft.print("M");
+	tft.setTextColor(BCOLOR);
+        tft.print("B");
+        tft.setTextColor(ECOLOR);
+        tft.print("E");
+	tft.setTextColor(RCOLOR);
+        tft.print("R");
+        tft.setTextColor(MCOLOR);
+        tft.print("M");
+	tft.setTextColor(ACOLOR);
+        tft.print("A");
+        tft.setTextColor(NCOLOR);
+        tft.print("N");
+
+
+
+}
+
+void drawStart() {
+//	if(selected) { //voor nunchuck
+		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, STARTBUTSELCOLOR);
+		tft.setCursor(STARTBUTSTPOSX, STARTBUTSTPOSY);
+		tft.setTextColor(SHADOWCOLOR);
+		tft.setTextSize(STARTBUTTSIZE);
+		tft.println("START");
+//	} else {
+//		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, STARTBUTCOLOR);
+//	}
+	tft.drawRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, ILI9341_BLACK);
+	tft.setCursor(STARTBUTTPOSX, STARTBUTTPOSY);
+	tft.setTextColor(TEXTCOLOR);
+	tft.setTextSize(STARTBUTTSIZE);
+	tft.println("START");
+}
+
+void drawHighScore() {
+	
 }
