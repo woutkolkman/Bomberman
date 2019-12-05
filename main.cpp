@@ -35,10 +35,36 @@
 #define STARTBUTTPOSX 125 //start button text position x
 #define STARTBUTTPOSY 65 //start button text position y
 #define STARTBUTTSIZE 2 //start button text size
-#define STARTBUTSELCOLOR ILI9341_YELLOW
+#define STARTBUTSELCOLOR LIGHTBROWN
 #define STARTBUTSTPOSX STARTBUTTPOSX + 2
 #define STARTBUTSTPOSY STARTBUTTPOSY - 2
-#define STARTBUTCOLOR ILI9341_RED
+#define STARTBUTCOLOR DARKBROWN
+
+//High score button defines
+#define HSBUTRX 50
+#define HSBUTRY 100
+#define HSBUTRW 220
+#define HSBUTRH 40
+#define HSBUTTPOSX 125
+#define HSBUTTPOSY 115
+#define HSBUTTSIZE 2
+#define HSBUTSELCOLOR LIGHTBROWN
+#define HSBUTSTPOSX HSBUTTPOSX + 2
+#define HSBUTSTPOSY HSBUTTPOSY - 2
+#define HSBUTCOLOR DARKBROWN
+
+//Quit button defines
+#define QUITBUTRX 50
+#define QUITBUTRY 150
+#define QUITBUTRW 220
+#define QUITBUTRH 40
+#define QUITBUTTPOSX 125
+#define QUITBUTTPOSY 155
+#define QUITBUTTSIZE 2
+#define QUITBUTSELCOLOR LIGHTBROWN
+#define QUITBUTSTPOSX QUITBUTTPOSX + 2
+#define QUITBUTSTPOSY QUITBUTTPOSY - 2
+#define QUITBUTCOLOR DARKBROWN
 
 /* Colour defines */
 #define LIGHTBROWN 0x7A00
@@ -73,7 +99,7 @@
 volatile uint8_t brightness = 0;
 uint8_t lw = 220 / AANTALLENGTEBREEDTE;
 uint8_t livesleft = 3; //REMOVE
-
+uint8_t mainmenuselect = 10;
 
 /* Use Hardware SPI (on Uno, #13, #12, #11) and #10 and # 9for  CS/DC   */
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
@@ -95,7 +121,7 @@ void drawMainMenu();
 void drawTitle();
 void drawStart();
 void drawHighScore();
-
+void drawQuit();
 /* ISR */
 ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 	brightness = (ADC>>2); // 10 bits, gooi 2 LSB weg, uitkomst 8 bits
@@ -182,7 +208,7 @@ TIMSK1 |= (1<<TOIE1); //overflow interupt enable
 
 void initGame() {
 	tft.setRotation(3); //set rotation;
-	tft.fillScreen(LIGHTBROWN); //lichtbruine achtergrond volledige scherm
+	//tft.fillScreen(LIGHTBROWN); //lichtbruine achtergrond volledige scherm
 }
 
 void drawMap(){
@@ -206,6 +232,8 @@ void drawMainMenu() {
 	tft.fillScreen(MAINMENUCOLOR);
 	drawTitle();
 	drawStart();
+	drawHighScore();
+	drawQuit();
 }
 
 void drawGrid() {
@@ -363,15 +391,15 @@ void drawTitle() {
 }
 
 void drawStart() {
-//	if(selected) { //voor nunchuck
+	if(mainmenuselect == 0) { //voor nunchuck
 		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, STARTBUTSELCOLOR);
 		tft.setCursor(STARTBUTSTPOSX, STARTBUTSTPOSY);
 		tft.setTextColor(SHADOWCOLOR);
 		tft.setTextSize(STARTBUTTSIZE);
 		tft.println("START");
-//	} else {
-//		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, STARTBUTCOLOR);
-//	}
+	} else {
+		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, STARTBUTCOLOR);
+	}
 	tft.drawRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, ILI9341_BLACK);
 	tft.setCursor(STARTBUTTPOSX, STARTBUTTPOSY);
 	tft.setTextColor(TEXTCOLOR);
@@ -380,5 +408,36 @@ void drawStart() {
 }
 
 void drawHighScore() {
-	
+	if(mainmenuselect == 1) {//voor nunchuck
+		tft.fillRect(HSBUTRX, HSBUTRY, HSBUTRW, HSBUTRH, HSBUTSELCOLOR);
+		tft.setCursor(HSBUTSTPOSX, STARTBUTSTPOSY);
+		tft.setTextColor(SHADOWCOLOR);
+		tft.setTextSize(HSBUTTSIZE);
+		tft.println("HIGH SCORES");
+	} else {
+		tft.fillRect(HSBUTRX, HSBUTRY, HSBUTRW, HSBUTRH, HSBUTCOLOR);
+	}
+	tft.drawRect(HSBUTRX, HSBUTRY, HSBUTRW, HSBUTRH, ILI9341_BLACK);
+	tft.setCursor(HSBUTTPOSX, HSBUTTPOSY);
+	tft.setTextColor(TEXTCOLOR);
+	tft.setTextSize(HSBUTTSIZE);
+	tft.println("HIGH SCORES");
 }
+
+void drawQuit() {
+	if(mainmenuselect == 2) {//voor nunchuck
+		tft.fillRect(QUITBUTRX, QUITBUTRY, QUITBUTRW, QUITBUTRH, QUITBUTSELCOLOR);
+		tft.setCursor(QUITBUTSTPOSX, QUITBUTSTPOSY);
+		tft.setTextColor(SHADOWCOLOR);
+		tft.setTextSize(QUITBUTTSIZE);
+		tft.println("QUIT");
+	} else {
+		tft.fillRect(QUITBUTRX, QUITBUTRY, QUITBUTRW, QUITBUTRH, QUITBUTCOLOR);
+	}
+	tft.drawRect(QUITBUTRX, QUITBUTRY, QUITBUTRW, QUITBUTRH, ILI9341_BLACK);
+	tft.setCursor(QUITBUTTPOSX, QUITBUTTPOSY);
+	tft.setTextColor(TEXTCOLOR);
+	tft.setTextSize(QUITBUTTSIZE);
+	tft.println("QUIT");
+}
+
