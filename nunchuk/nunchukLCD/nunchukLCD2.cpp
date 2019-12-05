@@ -10,6 +10,10 @@
 #define YUP 50
 #define OBJOFFSET 2
 #define MAXOBJ 8
+#define BORDERLEFTSIDE 0
+#define BORDERRIGHTSIDE 8
+#define BORDERUP 8
+#define BORDERDOWN 0
 
 // includes
 #include <avr/interrupt.h>
@@ -28,15 +32,18 @@ volatile uint8_t brightness = 0;
 volatile unsigned int counter = 0;
 volatile uint8_t lw = 220 / AANTALLENGTEBREEDTE;
 volatile uint8_t x_positions[8] = {1, 2, 3, 4, 5, 6, 7, 8};
-volatile uint8_t p1_x;
-volatile uint8_t clear_p1_x;
+volatile uint8_t p1;
+volatile uint8_t clear_p1;
 
 // use hardware SPI (on Uno, #13, #12, #11) and #10 and #9 for CS/DC
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 
 // function prototypes
 void nunchuk_init();
-void moveCharacterRight();
+void moveCharacterRight(uint8_t y_position);
+void moveCharacterLeft(uint8_t y_position);
+void moveCharacterUp(uint8_t x_position);
+void moveCharacterDown(uint8_t x_position);
 void drawGrid();
 void drawHeartLeft();
 void drawHeartRight();
@@ -78,7 +85,13 @@ int main(void) {
 
      Nunchuk.getState(ADDRESS); // retrieve states joystick and buttons Nunchuk
 
-     moveCharacterRight();
+     // code to move block over x axis and y axis (on sides)
+     moveCharacterRight(8);
+     moveCharacterLeft(0);
+     moveCharacterUp(8);
+     moveCharacterDown(8);
+
+    
      
    }
    return 0;
@@ -89,18 +102,58 @@ void nunchuk_init() {
     Nunchuk.begin(ADDRESS); // start communication with Arduino and Nunchuk
 }
 
-void moveCharacterRight() {
+void moveCharacterLeft(uint8_t y_position) {
 
-     if (Nunchuk.X_Axis() == 255) {
-      drawPlayer1(8, p1_x++);
-      _delay_ms(75);
-         if (p1_x > 8) {
-          p1_x = 8;    
-       } else {
-         clearDrawPlayer1(8, clear_p1_x++); 
+    if (Nunchuk.X_Axis() == 0) {
+	drawPlayer1(y_position, p1--);
+	_delay_ms(75);
+	 if (p1 < 0) {
+	   p1++;
+	 } else {
+ 	  clearDrawPlayer1(y_position, clear_p1--);
       }
    }
 }
+
+void moveCharacterRight(uint8_t y_position) {
+
+    if (Nunchuk.X_Axis() == 255) {
+        drawPlayer1(y_position, p1++);
+        _delay_ms(75);
+         if (p1 > 8) {
+          p1 = 8;
+         } else {
+	  clearDrawPlayer1(y_position, clear_p1++);
+     }
+   }
+}
+
+void moveCharacterUp(uint8_t x_position) {
+
+    if (Nunchuk.Y_Axis() == 255) {
+       drawPlayer1(p1++, x_position);
+       _delay_ms(75);
+	if (p1 > 8) {
+	  p1 = 8;
+      } else {
+	clearDrawPlayer1(clear_p1++, x_position);
+      }
+   }
+}
+ 
+
+void moveCharacterDown(uint8_t x_position) {
+
+    if (Nunchuk.Y_Axis() == 0) {
+      drawPlayer1(p1--, x_position);
+      _delay_ms(75);
+       if (p1 < 0) {
+	 p1 = 0;
+     } else {
+  	clearDrawPlayer1(clear_p1--, x_position);
+     }
+   }
+} 
 
 void drawGrid() {
         tft.fillRect(XUP, YUP, AANTALLENGTEBREEDTE * lw, AANTALLENGTEBREEDTE * lw, DARKBROWN);
