@@ -10,6 +10,10 @@
 #define YUP 50
 #define OBJOFFSET 2
 #define MAXOBJ 8
+#define BORDERLEFTSIDE 0
+#define BORDERRIGHTSIDE 8
+#define BORDERUP 8
+#define BORDERDOWN 0
 
 // includes
 #include <avr/interrupt.h>
