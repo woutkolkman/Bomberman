@@ -250,14 +250,6 @@ void drawMap(){
 
 void drawMap2(){ 
 	initMap();
-	/* draw walls */
-	for(int x = 1; x < 8; x = x+2){
-		for(int y = 1; y < 8; y = y+2){
-			drawWall(x,y);
-		}
-	}
-	//drawBombExplosie(2, 1);
-	//drawBombExplosie(4, 3);
 	/* draw tonnetjes */
 	for(int x = 2; x < 8; x++){	//x = 0, y = 0
 			int y = 0;		
