@@ -80,7 +80,7 @@
 #define DARKBROWN 0x5980
 #define SKIN 0xF5D0
 #define PLAYER1 0x135F
-#define PLAYER2 0xF2EB
+#define PLAYER2 0xD9E7 //		 toegevoegd
 #define GRIDCOLOUR DARKBROWN
 #define MAPCOLOUR LIGHTBROWN
 #define HEARTCOLOUR ILI9341_RED
@@ -155,8 +155,8 @@ int main(void) {
 	init();
 	tft.begin();
 	initGame();
-	drawMainMenu();
-	//drawMap2(); 
+	//drawMainMenu();
+	drawMap2(); 
 
 	//scherm is 240 * 320 pixels
 
@@ -294,7 +294,14 @@ void drawMap2(){
 			drawTon(x,y);}	
 	}
 	drawPlayer1(0, 0); // spelers
-	drawPlayer2(8, 8);				
+	drawPlayer2(8, 8);
+
+	drawBombExplosie(3, 0); // 		toegevoegd
+	drawBombExplosie(0, 4);
+	drawBombExplosie(4, 8);
+	drawBombExplosie(8, 5);
+	drawBombExplosie(2, 5);
+	drawBombExplosie(4, 7);				
 }
 
 void drawMainMenu() {
