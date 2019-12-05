@@ -9,7 +9,7 @@
 #define BAUD 9600
 #define TFT_DC 9 // initialisatie LCD
 #define TFT_CS 10 // initialisatie LCD
-#define AANTALLENGTEBREEDTE 9//aantal hokjes in lengte en breedte
+#define AANTALLENGTEBREEDTE 9 //aantal hokjes in lengte en breedte
 #define LIGHTBROWN 0x7A00
 #define DARKBROWN 0x5980
 #define XUP 10
@@ -35,7 +35,7 @@
 // global variables
 volatile uint8_t brightness = 0;
 volatile unsigned int counter = 0;
-volatile uint8_t lw = 220 / AANTALLENGTEBREEDTE;
+volatile uint8_t lw = 220 / AANTALLENGTEBREEDTE; // BREEDTE VAN EEN VAKJE!!
 volatile uint8_t x_positions[8] = {1, 2, 3, 4, 5, 6, 7, 8};
 volatile uint8_t p1;
 volatile uint8_t clear_p1;
@@ -104,6 +104,7 @@ int main(void) {
 	return 0;
 }
 
+// globale initialisatie functie (ter vervanging van "init")
 void game_init(void) {
 	init(); // onzichtbare functie
 	timer0_init();
@@ -168,27 +169,32 @@ void nunchuk_init() {
 
 void moveCharacter() {
 	if (Nunchuk.X_Axis() == 255) {
-		if (player1_x <= 8) {
+		if (player1_x < BORDERRIGHTSIDE) {
+//			clearDrawPlayer1();
 			player1_x++;
 		}
 	}
 	if (Nunchuk.X_Axis() == 0) {
-		if (player1_x >= 0) {
+		if (player1_x > BORDERLEFTSIDE) {
+//			clearDrawPlayer1();
 			player1_x--;
 		}
 	}
 	if (Nunchuk.Y_Axis() == 255) {
-                if (player1_y <= 8) {
+                if (player1_y < BORDERUP) {
+//			clearDrawPlayer1();
                         player1_y++;
                 }
         }
         if (Nunchuk.Y_Axis() == 0) {
-                if (player1_y >= 0) {
+                if (player1_y > BORDERDOWN) {
+//			clearDrawPlayer1();
                         player1_y--;
                 }
         }
 }
 
+// wordt niet gebruikt
 void moveCharacterRight(uint8_t y_position) {
     if (Nunchuk.X_Axis() == 255) {
       if (p1 >= 0 && p1 <= 8) {
@@ -206,6 +212,7 @@ void moveCharacterRight(uint8_t y_position) {
    } 
 }
 
+// wordt niet gebruikt
 void moveCharacterLeft(uint8_t y_position) {
 
     if (Nunchuk.X_Axis() == 0) {
@@ -244,9 +251,12 @@ void drawHeartRight() {
 
 }
 
-void clearDrawPlayer1(uint8_t x, uint8_t y) {
+void clearDrawPlayer1() {
+	uint8_t x = player1_x;
+	uint8_t y = player1_y;
 
-        tft.fillRect(x * lw + XUP + OBJOFFSET, (y * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, DARKBROWN);
+//        tft.fillRect((x * lw) + XUP + OBJOFFSET, (y * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, DARKBROWN);
+//	tft.fillRect(x,y,DARKBROWN);
 }
 
 void drawPlayer1(uint8_t x, uint8_t y) {
