@@ -108,7 +108,8 @@
 /* global variables */
 volatile uint8_t brightness = 0;
 uint8_t lw = 220 / AANTALLENGTEBREEDTE;
-uint8_t livesleft = 3; //REMOVE
+uint8_t livesleft1 = 3; //REMOVE
+uint8_t livesleft2 = 3;
 uint8_t mainmenuselect = 0;
 
 /* Use Hardware SPI (on Uno, #13, #12, #11) and #10 and # 9for  CS/DC   */
@@ -335,23 +336,23 @@ void drawHeart(uint16_t x, uint16_t y, uint16_t b, uint16_t h) {
 }
 
 void drawPlayer1Field() {
-	tft.fillRect(10, 40, 30, 210, MOOIEBRUIN);
-	tft.drawRect(10, 40, 30, 210, ILI9341_BLACK);
+	tft.fillRect(10, 15, 30, 70, MOOIEBRUIN);
+	tft.drawRect(10, 15, 30, 70, ILI9341_BLACK);
 	drawHeart(15, 20, 20, 18); //teken hartje
-	if(livesleft >= 2) {
+	if(livesleft1 >= 2) {
 		drawHeart(15, 40, 20, 18); //als 2 levens, teken 2e hartje
-	}if(livesleft == 3) {
+	}if(livesleft1 == 3) {
 		drawHeart(15, 60, 20, 18); //als 3 levens, teken 3e hartje
 	}
 }
 
 void drawPlayer2Field() {
-	tft.fillRect(280, 100, 30, 210, MOOIEBRUIN);
-	tft.drawRect(280, 100, 30, 210, ILI9341_BLACK);
+	tft.fillRect(280, 155, 30, 70, MOOIEBRUIN);
+	tft.drawRect(280, 155, 30, 70, ILI9341_BLACK);
 	drawHeart(285, 200, 20, 18); //teken hartje
-	if(livesleft >= 2) {
+	if(livesleft2 >= 2) {
 		drawHeart(285, 180, 20, 18); //als 2 levens, teken 2e hartje
-	} if(livesleft == 3) {
+	} if(livesleft2 == 3) {
 		drawHeart(285, 160, 20, 18); //als 3 levens, teken 3e hartje
 	}
 }
