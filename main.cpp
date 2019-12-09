@@ -36,9 +36,6 @@
 volatile uint8_t brightness = 0;
 volatile unsigned int counter = 0;
 volatile uint8_t lw = 220 / AANTALLENGTEBREEDTE; // BREEDTE VAN EEN VAKJE!!
-volatile uint8_t x_positions[8] = {1, 2, 3, 4, 5, 6, 7, 8};
-volatile uint8_t p1;
-volatile uint8_t clear_p1;
 volatile uint8_t player1_x = 0;
 volatile uint8_t player1_y = 0;
 volatile uint8_t player2_x = 0;
@@ -141,8 +138,8 @@ void screen_init(void) {
 //        drawHeartLeft();
 //        drawHeartRight();
 //        drawGrid();
-//      drawPlayer1(8, 0);
-//      drawPlayer2(0, 8);
+//        drawPlayer1(8, 0);
+//        drawPlayer2(0, 8);
 //        drawBomb(4, 2);
 //        moveCharacter();
 //        drawPlayer1(player1_y, player1_x);
@@ -193,44 +190,6 @@ void moveCharacter() {
                 }
         }
 }
-
-// wordt niet gebruikt
-void moveCharacterRight(uint8_t y_position) {
-    if (Nunchuk.X_Axis() == 255) {
-      if (p1 >= 0 && p1 <= 8) {
-       drawPlayer1(4, p1++);
-       _delay_ms(75);
-
-          if (p1 >= 0 && p1 <= 8) {
-	    clearDrawPlayer1(4, clear_p1++);
-	    currentPosition = p1;
-	    drawPlayer1(4, currentPosition);
-		
-            
-         }
-      }  
-   } 
-}
-
-// wordt niet gebruikt
-void moveCharacterLeft(uint8_t y_position) {
-
-    if (Nunchuk.X_Axis() == 0) {
-      if (p1 >= 0 && p1 <= 8) {
-	drawPlayer1(4, p1--);
-       _delay_ms(75);
-
-	 if (p1 >= 0 && p1 <= 8) {
-	   clearDrawPlayer1(4, clear_p1--);
-	   currentPosition = p1;
-	   drawPlayer1(4, currentPosition);
-           
-           
-         }
-      }
-   }
-} 
-
 
 void drawGrid() {
         tft.fillRect(XUP, YUP, AANTALLENGTEBREEDTE * lw, AANTALLENGTEBREEDTE * lw, DARKBROWN);
