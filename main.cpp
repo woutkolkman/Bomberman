@@ -1,6 +1,6 @@
 // defines
 #define ADDRESS 0x52
-#define GAMETICK_FREQUENCY 0.4 // gameticks in HZ, max 0,119HZ, min 7812,5HZ
+#define GAMETICK_FREQUENCY 0.5 // gameticks in HZ, max 0,119HZ, min 7812,5HZ
 #define FCLK 16000000 // arduino clock frequency
 #define PRESCALER_TIMER1 1024 // prescaler, zie ook functie timer1_init()
 #define OFFSET_VAKJE 24 // breedte & hoogte van een vakje
@@ -79,6 +79,7 @@ ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 
 
 ISR(TIMER1_COMPA_vect/*TIMER1_OVF_vect*/) { // gameticks
+//	Nunchuk.getState(ADDRESS);
 	moveCharacter();
 	draw_screen();
 }
@@ -90,7 +91,7 @@ int main(void) {
 
 	/* loop */
 	for(;;) {
-     		Nunchuk.getState(ADDRESS); // retrieve states joystick and buttons Nunchuk
+		Nunchuk.getState(ADDRESS); // retrieve states joystick and buttons Nunchuk
 
 //		// code to move block over x axis and y axis (on sides)
 //		_delay_ms(10);
@@ -108,7 +109,7 @@ void game_init(void) {
 	screen_init();
 	Wire.begin(); // enable TWI communication
 	nunchuk_init(); // start communication between Nunchuk and Arduino
-	USART_Init();
+//	USART_Init();
 
 	// pin in/outputs
 	/*
@@ -170,17 +171,20 @@ void moveCharacter() {
 //			clearDrawPlayer1();
 			player1_x++;
 		}
-	} else if (Nunchuk.X_Axis() == 0) {
+	}
+	if (Nunchuk.X_Axis() == 0) {
 		if (player1_x > BORDERLEFTSIDE) {
 //			clearDrawPlayer1();
 			player1_x--;
 		}
-	} else if (Nunchuk.Y_Axis() == 255) {
+	}
+	if (Nunchuk.Y_Axis() == 255) {
                 if (player1_y < BORDERUP) {
 //			clearDrawPlayer1();
                         player1_y++;
                 }
-        } else if (Nunchuk.Y_Axis() == 0) {
+        }
+	if (Nunchuk.Y_Axis() == 0) {
                 if (player1_y > BORDERDOWN) {
 //			clearDrawPlayer1();
                         player1_y--;
