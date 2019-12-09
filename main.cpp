@@ -183,8 +183,9 @@ int main(void) {
 	init();
 	tft.begin();
 	initGame();
-	drawMainMenu();
+	//drawMainMenu();
 	//drawMap2(); 
+	drawHighScores();
 
 	//scherm is 240 * 320 pixels
 
@@ -324,7 +325,7 @@ void drawMap2(){
 	drawPlayer1(0, 0); // spelers
 	drawPlayer2(8, 8);
 
-	drawBombExplosie(3, 0); // 		toegevoegd
+	drawBombExplosie(3, 0);
 	drawBombExplosie(0, 4);
 	drawBombExplosie(4, 8);
 	drawBombExplosie(8, 5);
@@ -333,9 +334,8 @@ void drawMap2(){
 }
 
 void drawMainMenu() {
-	//tft.fillScreen(MAINMENUCOLOR); // Toegevoegd
 	drawTitle();
-	drawTitleBomb();		// toegevoegd
+	drawTitleBomb();
 	drawStartButton();
 	drawHighScoreButton();
 	drawQuitButton();
@@ -507,7 +507,6 @@ void drawBombExplosie(uint8_t x, uint8_t y){
 }
 
 void drawBombExplosie(uint16_t x, uint8_t y){
-
 	_delay_ms(1000);
 	explosioncount++;
 	_delay_ms(1000);
@@ -630,7 +629,7 @@ void drawTitle() {
 	tft.println("B MBERMAN");
 }
 
-void drawTitleBomb() { 		// toegevoegd
+void drawTitleBomb() {
 	tft.fillRect(83, 9, 4, 10, LONT2); // lontje bom 
 	tft.fillRect(80, 14, 10, 5, ILI9341_BLACK); // topje bom
 	tft.drawRect(80, 14, 10, 5, ILI9341_WHITE);
