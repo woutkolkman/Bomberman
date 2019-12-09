@@ -142,8 +142,8 @@ void drawTitleBomb();
 void drawWall(uint8_t x, uint8_t y);
 void drawMap2();
 void Walls();
-void drawBomb2(uint16_t x, uint8_t y);		// Toegevoegd
-void drawTitleBackground(); 			// Toegevoegd
+void drawBomb2(uint16_t x, uint8_t y);
+void drawTitleBackground();
 
 /* ISR */
 ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
@@ -562,7 +562,7 @@ void drawTon(uint8_t x, uint8_t y) {
 	tft.fillRect(x*lw + XUP + OBJOFFSET + 3 , (y*lw) + YUP + OBJOFFSET + 13, lw - 2*OBJOFFSET - 5, lw - 2*OBJOFFSET - 17, ILI9341_BLACK); // details
 }
 
-void drawTitleBackground(){ 	// Toegevoegd	
+void drawTitleBackground(){	
 	for(int x = 20; x < 320; x = x + 40){
 		int y = 25;
 		drawBomb2(x, y);	
