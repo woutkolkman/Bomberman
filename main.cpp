@@ -72,14 +72,13 @@ void draw_screen(void);
 /* ISR */
 ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 	brightness = (ADC >> 2); // 10 bits, gooi 2 LSB weg, uitkomst 8 bits
-
 	// brightness toepassen op beeldscherm
 }
 
 
 ISR(TIMER1_COMPA_vect) { // gameticks
    moveCharacter();
-   draw_screen();
+// draw_screen();
 	USART_Transmit(0x31);
 }
 
@@ -94,7 +93,7 @@ int main(void) {
 
 		moveCharacter();
       draw_screen();
-	  _delay_ms(10);
+	// _delay_ms(10);
 	}
 
 	/* never reached */
@@ -214,7 +213,7 @@ void clearDrawPlayer1() {
 	uint8_t x = player1_x;
 	uint8_t y = player1_y;
 
-//        tft.fillRect((x * lw) + XUP + OBJOFFSET, (y * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, DARKBROWN);
+// tft.fillRect((x * lw) + XUP + OBJOFFSET, (y * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, DARKBROWN);
 //	tft.fillRect(x,y,DARKBROWN);
 }
 
