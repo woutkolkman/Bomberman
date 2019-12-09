@@ -71,15 +71,15 @@ void draw_screen(void);
 
 /* ISR */
 ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
-	brightness = (ADC>>2); // 10 bits, gooi 2 LSB weg, uitkomst 8 bits
+	brightness = (ADC >> 2); // 10 bits, gooi 2 LSB weg, uitkomst 8 bits
 
 	// brightness toepassen op beeldscherm
 }
 
 
-ISR(TIMER1_COMPA_vect/*TIMER1_OVF_vect*/) { // gameticks
-//	moveCharacter();
-//	draw_screen();
+ISR(TIMER1_COMPA_vect) { // gameticks
+   moveCharacter();
+   draw_screen();
 	USART_Transmit(0x31);
 }
 
@@ -90,13 +90,11 @@ int main(void) {
 
 	/* loop */
 	for(;;) {
-     		Nunchuk.getState(ADDRESS); // retrieve states joystick and buttons Nunchuk
+     	Nunchuk.getState(ADDRESS); // retrieve states joystick and buttons Nunchuk
 
-//		// code to move block over x axis and y axis (on sides)
-//		moveCharacterRight(4);
 		moveCharacter();
-        	draw_screen();
-		_delay_ms(10);
+      draw_screen();
+	  _delay_ms(10);
 	}
 
 	/* never reached */
@@ -135,7 +133,7 @@ void screen_init(void) {
 	tft.setRotation(2); // rotate screen
 
 	// screen is 240 x 320
-        tft.fillScreen(LIGHTBROWN);
+      tft.fillScreen(LIGHTBROWN);
 
 //        drawHeartLeft();
 //        drawHeartRight();
@@ -148,17 +146,17 @@ void screen_init(void) {
 }
 
 void draw_screen(void) {
-	// screen is 240 x 320
-//        tft.fillScreen(LIGHTBROWN);
+	   // screen is 240 x 320
+      // tft.fillScreen(LIGHTBROWN);
 
-        drawHeartLeft();
-        drawHeartRight();
-//	tft.fillRect(XUP, YUP, AANTALLENGTEBREEDTE * lw, AANTALLENGTEBREEDTE * lw, DARKBROWN);
-        drawGrid();
-//      drawPlayer1(8, 0);
-//      drawPlayer2(0, 8);
-        drawBomb(4, 2);
-	drawPlayer1(player1_y, player1_x);
+         drawHeartLeft();
+         drawHeartRight();
+      // tft.fillRect(XUP, YUP, AANTALLENGTEBREEDTE * lw, AANTALLENGTEBREEDTE * lw, DARKBROWN);
+         drawGrid();
+      // drawPlayer1(8, 0);
+      // drawPlayer2(0, 8);
+         drawBomb(4, 2);
+		   drawPlayer1(player1_y, player1_x);
 }
 
 void nunchuk_init() {
@@ -243,27 +241,27 @@ void timer0_init(void) {
 void timer1_init(void) { // gameticks timer 1
 	TCCR1A = 0;
 	TCCR1B = 0;
-	TCCR1B |= (1<<WGM12); // CTC, OCR1A top
+	TCCR1B |= (1 << WGM12); // CTC, OCR1A top
 	OCR1A = (FCLK / (GAMETICK_FREQUENCY * 2 * PRESCALER_TIMER1))-1; // frequentie aangeven
 
 	#if PRESCALER_TIMER1 == 1024
-	TCCR1B |= (1<<CS12) /*| (1<<CS11)*/ | (1<<CS10); // prescaler 1024
+	TCCR1B |= (1 << CS12) /* | (1<<CS11) */ | (1 << CS10); // prescaler 1024
 	#else
 	#pragma GCC error "geen bruikbare prescaler ingesteld"
 	#endif
 
-	TIMSK1 |= (1<<OCIE1A); // output compare match interrupt A enable
-//	TIMSK1 |= (1<<TOIE1); // overflow interrupt enable
+	TIMSK1 |= (1 << OCIE1A); // output compare match interrupt A enable
+   TIMSK1 |= (1 << TOIE1); // overflow interrupt enable
 }
 
 void adc_init(void) { // initialiseer ADC
-	ADMUX |= (1<<REFS0); // reference voltage on AVCC (5V)
-	ADCSRA |= (1<<ADIE); // ADC interrupt enable
-	ADCSRA |= (1<<ADPS2) | (1<<ADPS1) | (1<<ADPS0); // ADC clock prescaler ...(nog kiezen)
+	ADMUX |= (1 << REFS0); // reference voltage on AVCC (5V)
+	ADCSRA |= (1 << ADIE); // ADC interrupt enable
+	ADCSRA |= (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // ADC clock prescaler ...(nog kiezen)
 
 	ADCSRA |= (1<<ADATE); // ADC auto trigger enable \/
-	ADCSRB &= ~(1<<ADTS2) & ~(1<<ADTS1) & ~(1<<ADTS0); // free running mode
+	ADCSRB &= ~(1 << ADTS2) & ~(1 << ADTS1) & ~(1 << ADTS0); // free running mode
 
-	ADCSRA |= (1<<ADEN); // enable ADC
-        ADCSRA |= (1<<ADSC); // start eerste meting
+	ADCSRA |= (1 << ADEN); // enable ADC
+   ADCSRA |= (1 << ADSC); // start eerste meting
 }
