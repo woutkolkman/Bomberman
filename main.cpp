@@ -480,7 +480,7 @@ void drawBomb(uint8_t x, uint8_t y) {
 	}
 }
 
-void drawBomb2(uint8_t x, uint8_t y) { // Toegevoegd 
+void drawBomb2(uint16_t x, uint8_t y) {
 	tft.fillRect( x-1, y-15 , 3 , 5, LONT2); // lontje bom
 	tft.fillRect( x-1, y-15, 3, 2, FIRE); // fire
 	tft.fillRect( x-3, y-10, 7, 6, ILI9341_BLACK); // topje
