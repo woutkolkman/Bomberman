@@ -13,11 +13,15 @@
 
 //title
 #define TITLETPOSX 50
-#define TITLETPOSY 10
+#define TITLETPOSY 12 // Toegevoegd
 #define TITLETSIZE 4 //start button text size
+					// Toegevoegd
 //mainmenucolors
+#define MAINMENUCOLOR 0x016E		// Toegevoegd
+#define TITLECOLOUR 0xA841		// Toegevoegd
 #define ACOLOR ILI9341_PURPLE
-#define BCOLOR ILI9341_YELLOW
+#define BCOLOR 0xFE20	 		// Toegevoegd
+#define SHADOWBCOLOR 0xBA81		// Toegevoegd
 #define ECOLOR DARKBROWN
 #define MCOLOR ILI9341_RED
 #define NCOLOR ILI9341_NAVY
@@ -88,7 +92,7 @@
 #define LONT 0xFDAB
 #define LONT2 0xDC29
 #define FIRE 0xF9E1
-#define MAINMENUCOLOR ILI9341_BLACK
+//#define MAINMENUCOLOR ILI9341_BLACK 	// verwijdered
 #define FIRESPREAD ILI9341_RED
 #define WALL 0x6B8E
 
@@ -139,6 +143,7 @@ void drawTitleBomb();
 void drawWall(uint8_t x, uint8_t y);
 void drawMap2();
 void Walls();
+void drawBomb2(uint8_t x, uint8_t y); 	// Toegevoegd
 
 /* ISR */
 ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
@@ -157,8 +162,8 @@ int main(void) {
 	init();
 	tft.begin();
 	initGame();
-	//drawMainMenu();
-	drawMap2(); 
+	drawMainMenu();
+	//drawMap2(); 
 
 	//scherm is 240 * 320 pixels
 
@@ -307,9 +312,9 @@ void drawMap2(){
 }
 
 void drawMainMenu() {
-	tft.fillScreen(MAINMENUCOLOR);
+	//tft.fillScreen(MAINMENUCOLOR); // Toegevoegd
 	drawTitle();
-//	drawTitleBomb();
+	drawTitleBomb();		// toegevoegd
 	drawStart();
 	drawHighScore();
 	drawQuit();
@@ -434,6 +439,17 @@ void drawBomb(uint8_t x, uint8_t y) {
 	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 2 ,lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 17, FIRE); // fire
 }
 
+void drawBomb2(uint8_t x, uint8_t y) { // Toegevoegd 
+	tft.fillRect( x-1, y-15 , 3 , 5, LONT2); // lontje bom
+	tft.fillRect( x-1, y-15, 3, 2, FIRE); // fire
+	tft.fillRect( x-3, y-10, 7, 6, ILI9341_BLACK); // topje
+	tft.drawRect( x-3, y-10, 7, 6, ILI9341_WHITE);
+	tft.fillCircle( x, y, 7, ILI9341_BLACK); // lichaam bom
+	tft.drawCircle( x, y, 7, ILI9341_WHITE);
+	tft.fillRect(x-3, y-3, 2, 2, ILI9341_WHITE); // details
+	tft.fillRect(x-4, y-2, 2, 2, ILI9341_WHITE);	
+}
+
 void drawBombExplosie(uint8_t x, uint8_t y){
 	/* Bom tekeken */
 	tft.fillRect(x*lw + XUP + OBJOFFSET + 9.5, (y*lw) + YUP + OBJOFFSET + 3 , lw - 2*OBJOFFSET - 18  , lw - 2*OBJOFFSET - 13, LONT2); // lontje bom	
@@ -547,35 +563,32 @@ void drawTon(uint8_t x, uint8_t y) {
 	tft.fillRect(x*lw + XUP + OBJOFFSET + 3 , (y*lw) + YUP + OBJOFFSET + 13, lw - 2*OBJOFFSET - 5, lw - 2*OBJOFFSET - 17, ILI9341_BLACK); // details
 }
 
-void drawTitle() {
-	tft.setCursor(TITLETPOSX, TITLETPOSY); //startpositie tekst
+void drawTitle() { 		// Toegevoegd
+	tft.fillScreen(MAINMENUCOLOR);
+	tft.fillRect(42, 5, 232, 42, TITLECOLOUR); // Toegevoegd
+	tft.drawRect(41, 4, 233, 43, ILI9341_BLACK); // Toegevoegd
+	tft.setCursor(TITLETPOSX + 2, TITLETPOSY - 2); //startpositie tekst
 	tft.setTextSize(TITLETSIZE); //textsize
+	tft.setTextColor(SHADOWBCOLOR);
+	tft.println("B MBERMAN");
+	tft.setCursor(TITLETPOSX, TITLETPOSY);
 	tft.setTextColor(BCOLOR);
-	tft.print("B"); //startpositie tekst
-	tft.setTextColor(OCOLOR);
-	tft.print("O");
-	tft.setTextColor(MCOLOR);
-	tft.print("M");
-	tft.setTextColor(BCOLOR);
-        tft.print("B");
-        tft.setTextColor(ECOLOR);
-        tft.print("E");
-	tft.setTextColor(RCOLOR);
-        tft.print("R");
-        tft.setTextColor(MCOLOR);
-        tft.print("M");
-	tft.setTextColor(ACOLOR);
-        tft.print("A");
-        tft.setTextColor(NCOLOR);
-        tft.print("N");
+	tft.println("B MBERMAN");
+	drawBomb2(20, 25);
+	drawBomb2(60, 25);
+	drawBomb2(100, 25);
+	drawBomb2(140, 25);
 }
 
-void drawTitleBomb() {
-	tft.fillRect(50, 50, 20, 40, LONT2); // lontje bom 
-        tft.fillCircle(40, 60, 10, ILI9341_BLACK); // lichaam bom
-        tft.drawPixel(43, 55, ILI9341_WHITE); // details
-        tft.drawPixel(44, 56, ILI9341_WHITE);
-        tft.fillRect(40, 30, 20, 10, FIRE); // fire
+void drawTitleBomb() { 		// toegevoegd
+	tft.fillRect(83, 9, 4, 10, LONT2); // lontje bom 
+	tft.fillRect(80, 14, 10, 5, ILI9341_BLACK); // topje bom
+	tft.drawRect(80, 14, 10, 5, ILI9341_WHITE);
+        tft.fillCircle(84, 29, 10, ILI9341_BLACK); // lichaam bom
+	tft.drawCircle(84, 29, 11, ILI9341_WHITE);
+        tft.fillRect(81, 22, 3, 3, ILI9341_WHITE); // details
+        tft.fillRect(79, 24, 3, 3, ILI9341_WHITE);
+	tft.fillRect(83, 7, 4, 4, FIRE); // fire
 }
 
 void drawStart() {
