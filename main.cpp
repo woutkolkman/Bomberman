@@ -1,6 +1,6 @@
 // defines
 #define ADDRESS 0x52
-#define GAMETICK_FREQUENCY 0.5 // gameticks in HZ, max 0,119HZ, min 7812,5HZ
+#define GAMETICK_FREQUENCY 1 // gameticks in HZ, max 0,119HZ, min 7812,5HZ
 #define FCLK 16000000 // arduino clock frequency
 #define PRESCALER_TIMER1 1024 // prescaler, zie ook functie timer1_init()
 #define OFFSET_VAKJE 24 // breedte & hoogte van een vakje
@@ -40,10 +40,9 @@ volatile uint8_t brightness = 0;
 volatile unsigned int counter = 0;
 volatile uint8_t lw = 220 / AANTALLENGTEBREEDTE; // BREEDTE VAN EEN VAKJE!!
 volatile uint8_t player1_x = 0;
-volatile uint8_t player1_y = 0;
-volatile uint8_t player2_x = 0;
+volatile uint8_t player1_y = 8;
+volatile uint8_t player2_x = 8;
 volatile uint8_t player2_y = 0;
-volatile uint8_t currentPosition;
 
 // use hardware SPI (on Uno, #13, #12, #11) and #10 and #9 for CS/DC
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
@@ -56,7 +55,7 @@ void moveCharacter(void);
 void drawGrid();
 void drawHeartLeft();
 void drawHeartRight();
-void clearDrawPlayer1(uint8_t x, uint8_t y);
+void clearDraw(uint8_t x, uint8_t y);
 void drawPlayer1(uint8_t x, uint8_t y);
 void drawPlayer2(uint8_t x, uint8_t y);
 void drawBomb(uint8_t x, uint8_t y);
@@ -80,6 +79,8 @@ ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 
 ISR(TIMER1_COMPA_vect/*TIMER1_OVF_vect*/) { // gameticks
 //	Nunchuk.getState(ADDRESS);
+	clearDraw(player1_x, player1_y);
+	clearDraw(player2_x, player2_y);
 	moveCharacter();
 	draw_screen();
 }
@@ -138,12 +139,12 @@ void screen_init(void) {
 
 //	drawHeartLeft();
 //	drawHeartRight();
-//	drawGrid();
+	drawGrid();
 //	drawPlayer1(8, 0);
 //      drawPlayer2(0, 8);
 //	drawBomb(4, 2);
-//	moveCharacter();
-//	drawPlayer1(player1_y, player1_x);
+
+	// teken de muren hier
 }
 
 void draw_screen(void) {
@@ -153,11 +154,12 @@ void draw_screen(void) {
         drawHeartLeft();
         drawHeartRight();
 //	tft.fillRect(XUP, YUP, AANTALLENGTEBREEDTE * lw, AANTALLENGTEBREEDTE * lw, DARKBROWN);
-        drawGrid();
+//	drawGrid();
 //      drawPlayer1(8, 0);
 //      drawPlayer2(0, 8);
-        drawBomb(4, 2);
-	drawPlayer1(player1_y, player1_x);
+//	drawBomb(4, 2);
+	drawPlayer1(player1_x, player1_y);
+	drawPlayer2(player2_x, player2_y);
 }
 
 void nunchuk_init() {
@@ -166,25 +168,23 @@ void nunchuk_init() {
 }
 
 void moveCharacter() {
+	// kan maar 1 kant op bewegen per keer
 	if (Nunchuk.X_Axis() == 255) {
 		if (player1_x < BORDERRIGHTSIDE) {
 //			clearDrawPlayer1();
 			player1_x++;
 		}
-	}
-	if (Nunchuk.X_Axis() == 0) {
+	} else if (Nunchuk.X_Axis() == 0) {
 		if (player1_x > BORDERLEFTSIDE) {
 //			clearDrawPlayer1();
 			player1_x--;
 		}
-	}
-	if (Nunchuk.Y_Axis() == 255) {
+	} else if (Nunchuk.Y_Axis() == 255) {
                 if (player1_y < BORDERUP) {
 //			clearDrawPlayer1();
                         player1_y++;
                 }
-        }
-	if (Nunchuk.Y_Axis() == 0) {
+        } else if (Nunchuk.Y_Axis() == 0) {
                 if (player1_y > BORDERDOWN) {
 //			clearDrawPlayer1();
                         player1_y--;
@@ -212,20 +212,19 @@ void drawHeartRight() {
 	
 }
 
-void clearDrawPlayer1() {
-	uint8_t x = player1_x;
-	uint8_t y = player1_y;
-
+void clearDraw(uint8_t x, uint8_t y) {
 //	tft.fillRect((x * lw) + XUP + OBJOFFSET, (y * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, DARKBROWN);
-//	tft.fillRect(x,y,DARKBROWN);
+	tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, DARKBROWN);
 }
 
 void drawPlayer1(uint8_t x, uint8_t y) {
-	tft.fillRect(x * lw + XUP + OBJOFFSET, (y * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_CYAN);
+//	tft.fillRect(x * lw + XUP + OBJOFFSET, (y * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_CYAN);
+	tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_CYAN);
 }
 
 void drawPlayer2(uint8_t x, uint8_t y) {
-	tft.fillRect(x * lw + XUP + OBJOFFSET, (y * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_RED);
+//	tft.fillRect(x * lw + XUP + OBJOFFSET, (y * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_RED);
+	tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_RED);
 }
 
 void drawBomb(uint8_t x, uint8_t y) {
