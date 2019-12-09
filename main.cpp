@@ -31,6 +31,7 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <Nunchuk.h>
+#include <usart.h>
 
 // global variables
 volatile uint8_t brightness = 0;
@@ -76,9 +77,10 @@ ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 }
 
 
-ISR(TIMER1_COMPA_vect) { // gameticks
-	moveCharacter();
-	draw_screen();
+ISR(TIMER1_COMPA_vect/*TIMER1_OVF_vect*/) { // gameticks
+//	moveCharacter();
+//	draw_screen();
+	USART_Transmit(0x31);
 }
 
 
@@ -239,8 +241,10 @@ void timer0_init(void) {
 }
 
 void timer1_init(void) { // gameticks timer 1
+	TCCR1A = 0;
+	TCCR1B = 0;
 	TCCR1B |= (1<<WGM12); // CTC, OCR1A top
-	OCR1A = (FCLK / (GAMETICK_FREQUENCY * 2 * PRESCALER_TIMER1)); // frequentie aangeven
+	OCR1A = (FCLK / (GAMETICK_FREQUENCY * 2 * PRESCALER_TIMER1))-1; // frequentie aangeven
 
 	#if PRESCALER_TIMER1 == 1024
 	TCCR1B |= (1<<CS12) /*| (1<<CS11)*/ | (1<<CS10); // prescaler 1024
@@ -249,6 +253,7 @@ void timer1_init(void) { // gameticks timer 1
 	#endif
 
 	TIMSK1 |= (1<<OCIE1A); // output compare match interrupt A enable
+//	TIMSK1 |= (1<<TOIE1); // overflow interrupt enable
 }
 
 void adc_init(void) { // initialiseer ADC
