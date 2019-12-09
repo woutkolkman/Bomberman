@@ -13,15 +13,15 @@
 
 //title
 #define TITLETPOSX 50
-#define TITLETPOSY 12 // Toegevoegd
+#define TITLETPOSY 12
 #define TITLETSIZE 4 //start button text size
-					// Toegevoegd
+
 //mainmenucolors
-#define MAINMENUCOLOR 0x016E		// Toegevoegd
-#define TITLECOLOUR 0xA841		// Toegevoegd
+#define MAINMENUCOLOR 0x016E
+#define TITLECOLOUR 0xA841
 #define ACOLOR ILI9341_PURPLE
-#define BCOLOR 0xFE20	 		// Toegevoegd
-#define SHADOWBCOLOR 0xBA81		// Toegevoegd
+#define BCOLOR 0xFE20
+#define SHADOWBCOLOR 0xBA81
 #define ECOLOR DARKBROWN
 #define MCOLOR ILI9341_RED
 #define NCOLOR ILI9341_NAVY
@@ -84,7 +84,7 @@
 #define DARKBROWN 0x5980
 #define SKIN 0xF5D0
 #define PLAYER1 0x135F
-#define PLAYER2 0xD9E7 //		 toegevoegd
+#define PLAYER2 0xD9E7
 #define GRIDCOLOUR DARKBROWN
 #define MAPCOLOUR LIGHTBROWN
 #define HEARTCOLOUR ILI9341_RED
@@ -92,7 +92,6 @@
 #define LONT 0xFDAB
 #define LONT2 0xDC29
 #define FIRE 0xF9E1
-//#define MAINMENUCOLOR ILI9341_BLACK 	// verwijdered
 #define FIRESPREAD ILI9341_RED
 #define WALL 0x6B8E
 
@@ -143,7 +142,8 @@ void drawTitleBomb();
 void drawWall(uint8_t x, uint8_t y);
 void drawMap2();
 void Walls();
-void drawBomb2(uint8_t x, uint8_t y); 	// Toegevoegd
+void drawBomb2(uint16_t x, uint8_t y);		// Toegevoegd
+void drawTitleBackground(); 			// Toegevoegd
 
 /* ISR */
 ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
@@ -303,7 +303,7 @@ void drawMap2(){
 	drawPlayer1(0, 0); // spelers
 	drawPlayer2(8, 8);
 
-	drawBombExplosie(3, 0); // 		toegevoegd
+	drawBombExplosie(3, 0);
 	drawBombExplosie(0, 4);
 	drawBombExplosie(4, 8);
 	drawBombExplosie(8, 5);
@@ -312,9 +312,8 @@ void drawMap2(){
 }
 
 void drawMainMenu() {
-	//tft.fillScreen(MAINMENUCOLOR); // Toegevoegd
 	drawTitle();
-	drawTitleBomb();		// toegevoegd
+	drawTitleBomb();
 	drawStart();
 	drawHighScore();
 	drawQuit();
@@ -439,7 +438,7 @@ void drawBomb(uint8_t x, uint8_t y) {
 	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 2 ,lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 17, FIRE); // fire
 }
 
-void drawBomb2(uint8_t x, uint8_t y) { // Toegevoegd 
+void drawBomb2(uint16_t x, uint8_t y) {
 	tft.fillRect( x-1, y-15 , 3 , 5, LONT2); // lontje bom
 	tft.fillRect( x-1, y-15, 3, 2, FIRE); // fire
 	tft.fillRect( x-3, y-10, 7, 6, ILI9341_BLACK); // topje
@@ -563,10 +562,42 @@ void drawTon(uint8_t x, uint8_t y) {
 	tft.fillRect(x*lw + XUP + OBJOFFSET + 3 , (y*lw) + YUP + OBJOFFSET + 13, lw - 2*OBJOFFSET - 5, lw - 2*OBJOFFSET - 17, ILI9341_BLACK); // details
 }
 
-void drawTitle() { 		// Toegevoegd
+void drawTitleBackground(){ 	// Toegevoegd	
+	for(int x = 20; x < 320; x = x + 40){
+		int y = 25;
+		drawBomb2(x, y);	
+	}
+	for(int x = 0; x < 360; x = x + 40){
+		int y = 60;
+		drawBomb2(x, y);	
+	}
+	for(int x = 20; x < 320; x = x + 40){
+		int y = 95;
+		drawBomb2(x, y);	
+	}
+	for(int x = 0; x < 360; x = x + 40){
+		int y = 130;
+		drawBomb2(x, y);	
+	}
+	for(int x = 20; x < 320; x = x + 40){
+		int y = 165;
+		drawBomb2(x, y);	
+	}
+	for(int x = 0; x < 360; x = x + 40){
+		int y = 200;
+		drawBomb2(x, y);	
+	}
+	for(int x = 20; x < 320; x = x + 40){
+		int y = 235;
+		drawBomb2(x, y);	
+	}
+}
+
+void drawTitle() {		// Toegevoegd
 	tft.fillScreen(MAINMENUCOLOR);
-	tft.fillRect(42, 5, 232, 42, TITLECOLOUR); // Toegevoegd
-	tft.drawRect(41, 4, 233, 43, ILI9341_BLACK); // Toegevoegd
+	drawTitleBackground();
+	tft.fillRect(42, 5, 232, 42, TITLECOLOUR);
+	tft.drawRect(41, 4, 233, 43, ILI9341_BLACK);
 	tft.setCursor(TITLETPOSX + 2, TITLETPOSY - 2); //startpositie tekst
 	tft.setTextSize(TITLETSIZE); //textsize
 	tft.setTextColor(SHADOWBCOLOR);
@@ -574,13 +605,10 @@ void drawTitle() { 		// Toegevoegd
 	tft.setCursor(TITLETPOSX, TITLETPOSY);
 	tft.setTextColor(BCOLOR);
 	tft.println("B MBERMAN");
-	drawBomb2(20, 25);
-	drawBomb2(60, 25);
-	drawBomb2(100, 25);
-	drawBomb2(140, 25);
+
 }
 
-void drawTitleBomb() { 		// toegevoegd
+void drawTitleBomb() {
 	tft.fillRect(83, 9, 4, 10, LONT2); // lontje bom 
 	tft.fillRect(80, 14, 10, 5, ILI9341_BLACK); // topje bom
 	tft.drawRect(80, 14, 10, 5, ILI9341_WHITE);
