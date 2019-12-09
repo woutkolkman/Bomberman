@@ -139,6 +139,7 @@ void drawTitleBomb();
 void drawWall(uint8_t x, uint8_t y);
 void drawMap2();
 void Walls();
+
 /* ISR */
 ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 	brightness = (ADC>>2); // 10 bits, gooi 2 LSB weg, uitkomst 8 bits
