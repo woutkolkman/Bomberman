@@ -114,7 +114,7 @@
 #include <Arduino.h> // LCD library
 #include <avr/io.h> // LCD library
 #include <SPI.h>
-#include <cspi.h>
+// #include <cspi.h>
 #include <usart.h>
 
 /* global variables */
@@ -335,9 +335,9 @@ void drawMainMenu() {
 	//tft.fillScreen(MAINMENUCOLOR); // Toegevoegd
 	drawTitle();
 	drawTitleBomb();		// toegevoegd
-	drawStart();
-	drawHighScore();
-	drawQuit();
+	drawStartButton();
+	drawHighScoreButton();
+	drawQuitButton();
 }
 
 void drawPauseMenu() {
@@ -351,7 +351,7 @@ void drawHighScores() {
 	tft.fillScreen(HSBUTCOLOR);
 	tft.setTextColor(TEXTCOLOR);
 	tft.setTextSize(TITLETSIZE);
-	tft.setCursor(HSTPOSX, TITLETPOSY);
+	//tft.setCursor(HSTPOSX, TITLETPOSY);
 	tft.println("HIGH-SCORES");
 	drawHighScoreboard();
 //	drawBackButton();
@@ -476,6 +476,7 @@ void drawBomb(uint8_t x, uint8_t y) {
 	tft.drawPixel(x*lw + XUP + OBJOFFSET + 8, (y*lw) + YUP + OBJOFFSET + 9 , ILI9341_WHITE); // details
 	tft.drawPixel(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET + 10 , ILI9341_WHITE);
 	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 2 ,lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 17, FIRE); // fire
+	}
 }
 
 void drawBomb2(uint8_t x, uint8_t y) { // Toegevoegd 
@@ -502,10 +503,9 @@ void drawBombExplosie(uint8_t x, uint8_t y){
 	tft.drawPixel(x*lw + XUP + OBJOFFSET + 8, (y*lw) + YUP + OBJOFFSET + 9 , ILI9341_WHITE); // details
 	tft.drawPixel(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET + 10 , ILI9341_WHITE);
 	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 2 ,lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 17, FIRE); // fire
-	}
 }
 
-void drawBombExplosie(uint8_t x, uint8_t y){
+void drawBombExplosie(uint16_t x, uint8_t y){
 
 	_delay_ms(1000);
 	explosioncount++;
