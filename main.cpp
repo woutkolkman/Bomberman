@@ -22,6 +22,7 @@
 #define BORDERDOWN 0
 
 // includes
+#include <util/setbaud.h>
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <util/delay.h>
@@ -32,6 +33,7 @@
 #include <Wire.h>
 #include <Nunchuk.h>
 #include <usart.h>
+#include <stdint.h>
 
 // global variables
 volatile uint8_t brightness = 0;
@@ -76,10 +78,9 @@ ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 }
 
 
-ISR(TIMER1_COMPA_vect) { // gameticks
-   moveCharacter();
-// draw_screen();
-	USART_Transmit(0x31);
+ISR(TIMER1_COMPA_vect/*TIMER1_OVF_vect*/) { // gameticks
+	moveCharacter();
+	draw_screen();
 }
 
 
@@ -89,11 +90,10 @@ int main(void) {
 
 	/* loop */
 	for(;;) {
-     	Nunchuk.getState(ADDRESS); // retrieve states joystick and buttons Nunchuk
+     		Nunchuk.getState(ADDRESS); // retrieve states joystick and buttons Nunchuk
 
-		moveCharacter();
-      draw_screen();
-	// _delay_ms(10);
+//		// code to move block over x axis and y axis (on sides)
+//		_delay_ms(10);
 	}
 
 	/* never reached */
@@ -108,6 +108,7 @@ void game_init(void) {
 	screen_init();
 	Wire.begin(); // enable TWI communication
 	nunchuk_init(); // start communication between Nunchuk and Arduino
+	USART_Init();
 
 	// pin in/outputs
 	/*
@@ -132,30 +133,30 @@ void screen_init(void) {
 	tft.setRotation(2); // rotate screen
 
 	// screen is 240 x 320
-      tft.fillScreen(LIGHTBROWN);
+	tft.fillScreen(LIGHTBROWN);
 
-//        drawHeartLeft();
-//        drawHeartRight();
-//        drawGrid();
-//        drawPlayer1(8, 0);
-//        drawPlayer2(0, 8);
-//        drawBomb(4, 2);
-//        moveCharacter();
-//        drawPlayer1(player1_y, player1_x);
+//	drawHeartLeft();
+//	drawHeartRight();
+//	drawGrid();
+//	drawPlayer1(8, 0);
+//      drawPlayer2(0, 8);
+//	drawBomb(4, 2);
+//	moveCharacter();
+//	drawPlayer1(player1_y, player1_x);
 }
 
 void draw_screen(void) {
-	   // screen is 240 x 320
-      // tft.fillScreen(LIGHTBROWN);
+	// screen is 240 x 320
+//	tft.fillScreen(LIGHTBROWN);
 
-         drawHeartLeft();
-         drawHeartRight();
-      // tft.fillRect(XUP, YUP, AANTALLENGTEBREEDTE * lw, AANTALLENGTEBREEDTE * lw, DARKBROWN);
-         drawGrid();
-      // drawPlayer1(8, 0);
-      // drawPlayer2(0, 8);
-         drawBomb(4, 2);
-		   drawPlayer1(player1_y, player1_x);
+        drawHeartLeft();
+        drawHeartRight();
+//	tft.fillRect(XUP, YUP, AANTALLENGTEBREEDTE * lw, AANTALLENGTEBREEDTE * lw, DARKBROWN);
+        drawGrid();
+//      drawPlayer1(8, 0);
+//      drawPlayer2(0, 8);
+        drawBomb(4, 2);
+	drawPlayer1(player1_y, player1_x);
 }
 
 void nunchuk_init() {
@@ -190,6 +191,7 @@ void moveCharacter() {
         }
 }
 
+
 void drawGrid() {
         tft.fillRect(XUP, YUP, AANTALLENGTEBREEDTE * lw, AANTALLENGTEBREEDTE * lw, DARKBROWN);
         for (int x = 0; x < 9; x++) {
@@ -206,14 +208,14 @@ void drawHeartLeft() {
 }
 
 void drawHeartRight() {
-
+	
 }
 
 void clearDrawPlayer1() {
 	uint8_t x = player1_x;
 	uint8_t y = player1_y;
 
-// tft.fillRect((x * lw) + XUP + OBJOFFSET, (y * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, DARKBROWN);
+//	tft.fillRect((x * lw) + XUP + OBJOFFSET, (y * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, DARKBROWN);
 //	tft.fillRect(x,y,DARKBROWN);
 }
 
@@ -241,7 +243,7 @@ void timer1_init(void) { // gameticks timer 1
 	TCCR1A = 0;
 	TCCR1B = 0;
 	TCCR1B |= (1 << WGM12); // CTC, OCR1A top
-	OCR1A = (FCLK / (GAMETICK_FREQUENCY * 2 * PRESCALER_TIMER1))-1; // frequentie aangeven
+	OCR1A = (FCLK / (GAMETICK_FREQUENCY * 2 * PRESCALER_TIMER1)); // frequentie aangeven
 
 	#if PRESCALER_TIMER1 == 1024
 	TCCR1B |= (1 << CS12) /* | (1<<CS11) */ | (1 << CS10); // prescaler 1024
@@ -250,7 +252,7 @@ void timer1_init(void) { // gameticks timer 1
 	#endif
 
 	TIMSK1 |= (1 << OCIE1A); // output compare match interrupt A enable
-   TIMSK1 |= (1 << TOIE1); // overflow interrupt enable
+//	TIMSK1 |= (1 << TOIE1); // overflow interrupt enable
 }
 
 void adc_init(void) { // initialiseer ADC
@@ -262,5 +264,5 @@ void adc_init(void) { // initialiseer ADC
 	ADCSRB &= ~(1 << ADTS2) & ~(1 << ADTS1) & ~(1 << ADTS0); // free running mode
 
 	ADCSRA |= (1 << ADEN); // enable ADC
-   ADCSRA |= (1 << ADSC); // start eerste meting
+	ADCSRA |= (1 << ADSC); // start eerste meting
 }
