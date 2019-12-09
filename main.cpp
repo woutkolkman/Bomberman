@@ -1,6 +1,6 @@
 // defines
 #define ADDRESS 0x52
-#define GAMETICK_FREQUENCY 0.3 // gameticks in HZ, max 0,119HZ, min 7812,5HZ
+#define GAMETICK_FREQUENCY 0.4 // gameticks in HZ, max 0,119HZ, min 7812,5HZ
 #define FCLK 16000000 // arduino clock frequency
 #define PRESCALER_TIMER1 1024 // prescaler, zie ook functie timer1_init()
 #define OFFSET_VAKJE 24 // breedte & hoogte van een vakje
@@ -170,20 +170,17 @@ void moveCharacter() {
 //			clearDrawPlayer1();
 			player1_x++;
 		}
-	}
-	if (Nunchuk.X_Axis() == 0) {
+	} else if (Nunchuk.X_Axis() == 0) {
 		if (player1_x > BORDERLEFTSIDE) {
 //			clearDrawPlayer1();
 			player1_x--;
 		}
-	}
-	if (Nunchuk.Y_Axis() == 255) {
+	} else if (Nunchuk.Y_Axis() == 255) {
                 if (player1_y < BORDERUP) {
 //			clearDrawPlayer1();
                         player1_y++;
                 }
-        }
-        if (Nunchuk.Y_Axis() == 0) {
+        } else if (Nunchuk.Y_Axis() == 0) {
                 if (player1_y > BORDERDOWN) {
 //			clearDrawPlayer1();
                         player1_y--;
