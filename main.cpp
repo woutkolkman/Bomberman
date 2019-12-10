@@ -16,6 +16,9 @@
 #define TITLETPOSY 12 // Toegevoegd
 #define TITLETSIZE 4 //start button text size
 
+
+
+
 //mainmenucolors
 #define MAINMENUCOLOR 0x016E
 #define TITLECOLOUR 0xA841
@@ -102,7 +105,7 @@
 #define WALL 0x6B8E
 #define GOLD 0xFE00
 #define SILVER 0x94B2
-#define BRONZE 0x
+#define BRONZE 0xB406
 #define HIGHSCORESBACK 0x1B02 // achtergrond kleur van de tekst in highscores menu
 #define HIGHSCORESTEXT 0xFAA0 // tekst kleur titel highscores menu
 #define SHADOWHCOLOR 0xB222   // shaduw kleur voor de titel van highscores menu
@@ -189,8 +192,7 @@ int main(void) {
 	//drawMainMenu();
 	//drawMap2(); 
 	drawHighScores();
-	//drawPauseMenu();
-
+//	drawPauseMenu();
 	//scherm is 240 * 320 pixels
 
 	/* loop */
@@ -347,6 +349,7 @@ void drawMainMenu() {
 
 void drawPauseMenu() {
 	tft.fillScreen(PAUSEMENUCOLOR);
+	drawTitleBackground();
 	drawPause();
 	drawContinueButton();
 	drawQuitButton();
@@ -639,8 +642,14 @@ void drawTitle() {
 	tft.setTextColor(BCOLOR);
 	tft.println("B MBERMAN");
 }
+void drawPause() {
+	tft.setCursor(TITLETPOSX + 50, TITLETPOSY);
+	tft.setTextColor(ILI9341_PURPLE);
+	tft.setTextSize(TITLETSIZE);
+	tft.println("PAUSE");
+}
 
-void drawTitleBomb() {
+void drawTitleBomb() { 		// toegevoegd
 	tft.fillRect(83, 9, 4, 10, LONT2); // lontje bom 
 	tft.fillRect(80, 14, 10, 5, ILI9341_BLACK); // topje bom
 	tft.drawRect(80, 14, 10, 5, ILI9341_WHITE);
@@ -714,6 +723,19 @@ void drawHighScoreButton() {
 void drawHighScoreboard() {
 	tft.drawRect(HSFIELDX, HSFIELDY, HSFIELDW, HSFIELDH, ILI9341_BLACK);
 	tft.fillRect(HSFIELDX, HSFIELDY, HSFIELDW, (0.2*HSFIELDH), GOLD);
+	tft.setCursor(HSFIELDX + 10, HSFIELDY + 10);
+	tft.setTextSize(2);
+	tft.setTextColor(GOLD);
+//	tft.println("1: %d", highscore1);
+//	tft.setCursor();
+	tft.setTextSize(2);
+	tft.setTextColor(SILVER);
+//	tft.println("2: %d", highscore2);
+//	tft.setCursor();
+//	tft.setTextSize(2);
+//	tft.setTextColor(BRONZE);
+//	tft.println("3: %d", highscore3);
+
 
 }
 //	drawBackButton();
