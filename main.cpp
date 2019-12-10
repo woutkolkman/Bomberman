@@ -413,23 +413,23 @@ void drawQuitButton() { // tekent de quit knop, voor meerdere menu's gebruikt
 }
 
 void drawPauseMenu() { // Tekent pauze menu
-	tft.fillScreen(PAUSEMENUCOLOR); 
-	drawTitleBackground();
-	tft.fillRect(47, 5, 225, 42, PAUZEBACK); 
+	tft.fillScreen(PAUSEMENUCOLOR); // tekent de achtergrond kleur van pauze menu
+	drawTitleBackground(); // tekent de bom achtergrond
+	tft.fillRect(47, 5, 225, 42, PAUZEBACK); // tekent het valk voor de titel
 	tft.drawRect(46, 4, 226, 43, ILI9341_BLACK);
-	tft.setTextSize(TITLETSIZE);	
-	tft.setCursor(TITLETPOSX + 52, TITLETPOSY - 2);
-	tft.setTextColor(SHADOWPCOLOR);
-	tft.println("PAUSE");
+	tft.setTextSize(TITLETSIZE);
+	tft.setCursor(TITLETPOSX + 52, TITLETPOSY - 2); // selecteerd de positie voor schaduw tekst
+	tft.setTextColor(SHADOWPCOLOR); // selecteerd de schaduw tekst kleur
+	tft.println("PAUSE"); // tekent het woord
 	tft.setCursor(TITLETPOSX + 50, TITLETPOSY); //startpositie tekst
-	tft.setTextColor(PAUZETEXT);
+	tft.setTextColor(PAUZETEXT); // tekst kleur
 	tft.println("PAUSE");
-	drawContinueButton();
-	drawQuitButton();
+	drawContinueButton(); // tekent de continue knop
+	drawQuitButton(); // tekent de quit knop
 }
 
-void drawContinueButton() {
-	if(pausemenuselect == 0) { //voor nunchuck
+void drawContinueButton() { // tekent de continue knop
+	if(pausemenuselect == 0) { //voor nunchuck als de 1e knop in het pauze menu is geselecteerd 
 		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, CONTINEBUTCOLOR); //make rectangle with select color
 		tft.setCursor(CONTBUTSTPOSX, STARTBUTSTPOSY); //set cursur at shadow position (x + 2, y - 2)
 		tft.setTextColor(SHADOWCOLOR); //shadow color (lightgrey)
@@ -438,82 +438,82 @@ void drawContinueButton() {
 		tft.setCursor(CONTBUTTPOSX, STARTBUTTPOSY); //set cursor at 'start button text position x', and y
 		tft.setTextColor(TEXTCOLOR); //set text color (when button is selected)
 		tft.println("CONTINUE"); //selected text start
-	} else {
+	} else { // als de 1e knop in het pauze menu niet is geselecteerd
 		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, CONTINEBUTSELBUTCOLOR); //make rectangle with not selected color
 		tft.setCursor(CONTBUTTPOSX, STARTBUTTPOSY); //set cursor at position
 		tft.setTextColor(TEXTCOLOR); //text color
 		tft.setTextSize(STARTBUTTSIZE);
 		tft.println("CONTINUE");
 	}
-	tft.drawRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, ILI9341_BLACK);
+	tft.drawRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, ILI9341_BLACK); // omleining knop
 }
 
-void drawBackButton() {
-	tft.fillRect(BACKBUTRX, BACKBUTRY, BACKBUTRW, BACKBUTRH, BACKBUTROOD);
-	tft.setCursor(BACKSTPOSX, BACKSTPOSY);
-        tft.setTextColor(SHADOWCOLOR);
-        tft.setTextSize(BACKBUTTSIZE);
-        tft.println("BACK");
-        tft.setCursor(BACKTPOSX, BACKTPOSY);
-        tft.setTextColor(TEXTCOLOR);
-        tft.println("BACK");
+void drawBackButton() { // tekent de terug knop
+	tft.fillRect(BACKBUTRX, BACKBUTRY, BACKBUTRW, BACKBUTRH, BACKBUTROOD);  // tekent het figuur voor de knop
+	tft.setCursor(BACKSTPOSX, BACKSTPOSY); // selecteerd de positie van de schaduw tekst
+        tft.setTextColor(SHADOWCOLOR); // selecteerd de schaduw kleur voor de schaduw tekst
+        tft.setTextSize(BACKBUTTSIZE); // selecteerd de tekst grootte
+        tft.println("BACK"); // print de teskt
+        tft.setCursor(BACKTPOSX, BACKTPOSY); // selecteerd de positie van de tekst
+        tft.setTextColor(TEXTCOLOR); // selecteerd de tekst kleur
+        tft.println("BACK"); // print de teskt
 }
 
-void drawTitleBackground(){
-	for(int x = 20; x < 320; x = x + 40){
+void drawTitleBackground(){ // tekent de bom achtergrond
+	for(int x = 20; x < 320; x = x + 40){ // tekent een gelijk aantal bommetjes op de hoogte y = 25
 		int y = 25;
 		drawBomb2(x, y);	
 	}
-	for(int x = 0; x < 360; x = x + 40){
+	for(int x = 0; x < 360; x = x + 40){ // hoogte op 60
 		int y = 60;
 		drawBomb2(x, y);	
 	}
-	for(int x = 20; x < 320; x = x + 40){
+	for(int x = 20; x < 320; x = x + 40){ // hoogte op 95
 		int y = 95;
 		drawBomb2(x, y);	
 	}
-	for(int x = 0; x < 360; x = x + 40){
+	for(int x = 0; x < 360; x = x + 40){ // hoogte op 130
 		int y = 130;
 		drawBomb2(x, y);	
 	}
-	for(int x = 20; x < 320; x = x + 40){
+	for(int x = 20; x < 320; x = x + 40){ // hoogte op 165
 		int y = 165;
 		drawBomb2(x, y);	
 	}
-	for(int x = 0; x < 360; x = x + 40){
+	for(int x = 0; x < 360; x = x + 40){ // hoogte op 200
 		int y = 200;
 		drawBomb2(x, y);	
 	}
-	for(int x = 20; x < 320; x = x + 40){
+	for(int x = 20; x < 320; x = x + 40){ // hoogte op 235
 		int y = 235;
 		drawBomb2(x, y);	
 	}
 }
 
-void initMap() {
-	tft.fillScreen(MOOIEBRUIN);
-	drawGrid();
-	Walls();
-	drawPlayer1Field();
-	drawPlayer2Field();
+void initMap() { // tekent de map
+	tft.fillScreen(MOOIEBRUIN); // tekent achtergrond kleur 
+	drawGrid(); // tekent de grid
+	Walls(); // tekent de muren
+	drawPlayer1Field(); // tekent de hartjes van player 1
+	drawPlayer2Field(); // tekent de hartjes van player 2
 }
 
-void drawMap(){
+void drawMap(){ // tekent een man voor een game
 	//scherm is 240 * 320 pixels
-	initMap();
-	drawPlayer1(0, 0);
-	drawPlayer2(8, 8);
-	drawBombExplosie(0, 3);
-	drawPlayer2Field();
-	drawBombExplosie(4, 0);
-	drawPlayer1Field();
+	initMap(); // geberuikt initmap voor de standaard benodigden
+	drawPlayer1(0, 0); // tekent speler 1
+	drawPlayer2(8, 8); // tekent speler 2
+	drawBombExplosie(0, 3); // tekent een bom die explodeerd
+	drawPlayer2Field(); // player 2 verliest een hart
+	drawBombExplosie(4, 0); 
+	drawPlayer1Field(); // player 1 verliest een hart
 	drawBombExplosie(8, 3);
 	drawPlayer1Field();
 	drawBombExplosie(3, 8);
 }
 
-void drawMap2(){
-	initMap();
+void drawMap2(){ // tekent een nieuwe map
+	initMap(); // geberuikt initmap voor de standaard benodigden
 	/* draw tonnetjes */
 	for(int x = 2; x < 8; x++){	//x = 0, y = 0
 			int y = 0;
@@ -561,7 +561,7 @@ void drawMap2(){
 	drawPlayer1(0, 0); // spelers
 	drawPlayer2(8, 8);
 
-	drawBombExplosie(3, 0);
+	drawBombExplosie(3, 0); // exploderende bommentjes
 	drawBombExplosie(0, 4);
 	drawBombExplosie(4, 8);
 	drawBombExplosie(8, 5);
@@ -569,7 +569,7 @@ void drawMap2(){
 	drawBombExplosie(4, 7);
 }
 
-void drawGrid() {
+void drawGrid() { // tekent de grid voor het speelveld
         tft.fillRect(XUP /*niet op grens van scherm X */, YUP/*niet op grens van scherm Y*/, AANTALLENGTEBREEDTE*lw /*volledige game-grid*/, AANTALLENGTEBREEDTE*lw /*volledige game-grid*/, GRIDCOLOUR /*donkerbruine achtergrond*/);
         for(int x = 0; x < AANTALLENGTEBREEDTE; x++) {
                 for(int y = 0; y < AANTALLENGTEBREEDTE; y++) {
@@ -578,8 +578,12 @@ void drawGrid() {
         }
 }
 
-void Walls() {
-	for(int x = 1; x < 8; x = x+2){
+void drawWall(uint8_t x, uint8_t y){ // tekent 1 muur voor het speelveld
+	tft.fillRect(x*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET, WALL);
+}
+
+void Walls() { // tekent muren voor in het speelveld
+	for(int x = 1; x < 8; x = x+2){ // tekent muren op coordianten waarbij x en y even zijn
                 for(int y = 1; y < 8; y = y+2){
                         drawWall(x,y);
                 }
@@ -587,11 +591,7 @@ void Walls() {
 
 }
 
-void drawWall(uint8_t x, uint8_t y){
-	tft.fillRect(x*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET, WALL);
-}
-
-void drawHeart(uint16_t x, uint16_t y, uint16_t b, uint16_t h) {
+void drawHeart(uint16_t x, uint16_t y, uint16_t b, uint16_t h) { // tekent hartjes voor de spelers
 	tft.fillTriangle((x + 0.5*b), (y + h), x, (y + 0.44*h), (x + b), (y + 0.44*h), HEARTCOLOUR); //driehoek van hartje
 	tft.fillCircle((x+0.25*b), (y + 0.28*h), (0.25*b), HEARTCOLOUR); //cirkel linksboven van hartje
         tft.fillCircle((x+0.75*b), (y + 0.28*h), (0.25*b), HEARTCOLOUR); //cirkel rechtsboven van hartje
@@ -599,9 +599,8 @@ void drawHeart(uint16_t x, uint16_t y, uint16_t b, uint16_t h) {
 	tft.fillRect(x+2,y+3,1,1,ILI9341_WHITE);
 }
 
-void drawPlayer1Field() {
-	tft.fillRect(10, 15, 30, 70, MOOIEBRUIN);
-	tft.drawRect(10, 15, 30, 70, ILI9341_BLACK);
+void drawPlayer1Field() { // tekent de hartjes op de jusite plek en haalt ze weg
+	tft.fillRect(10, 15, 30, 70, ILI9341_BLACK);
 	drawHeart(15, 20, 20, 18); //teken hartje
 	if(livesleft1 >= 2) {
 		drawHeart(15, 40, 20, 18); //als 2 levens, teken 2e hartje
@@ -611,8 +610,7 @@ void drawPlayer1Field() {
 }
 
 void drawPlayer2Field() {
-	tft.fillRect(280, 155, 30, 70, MOOIEBRUIN);
-	tft.drawRect(280, 155, 30, 70, ILI9341_BLACK);
+	tft.fillRect(280, 155, 30, 70, ILI9341_BLACK);
 	drawHeart(285, 200, 20, 18); //teken hartje
 	if(livesleft2 >= 2) {
 		drawHeart(285, 180, 20, 18); //als 2 levens, teken 2e hartje
@@ -621,7 +619,7 @@ void drawPlayer2Field() {
 	}
 }
 
-void drawPlayer1(uint8_t x, uint8_t y) { 
+void drawPlayer1(uint8_t x, uint8_t y) { // tekent het poppetje voor player 1
 	// fillRect( x, y, w, h, c)
 	// fillCircle( x, y, r, c)
 	/* Pants */
@@ -656,7 +654,7 @@ void drawPlayer1(uint8_t x, uint8_t y) {
 	tft.drawRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET - 6, lw - 2*OBJOFFSET -11 , lw - 2*OBJOFFSET - 16, ILI9341_BLACK);
 }
 
-void drawPlayer2(uint8_t x, uint8_t y) {
+void drawPlayer2(uint8_t x, uint8_t y) { // tekent het poppetje voor player 2
 	/* Pants */
 	tft.fillRect(x*lw + XUP + OBJOFFSET + 6.5, (y*lw) + YUP + OBJOFFSET + 10, lw - 2*OBJOFFSET - 12 , lw - 2*OBJOFFSET - 15, ILI9341_BLACK); // pant
 	tft.fillRect(x*lw + XUP + OBJOFFSET + 6.5, (y*lw) + YUP + OBJOFFSET + 15, lw - 2*OBJOFFSET - 17 , lw - 2*OBJOFFSET - 13, ILI9341_BLACK); // left leg
@@ -689,7 +687,7 @@ void drawPlayer2(uint8_t x, uint8_t y) {
 	tft.drawRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET - 6, lw - 2*OBJOFFSET -11 , lw - 2*OBJOFFSET - 16, ILI9341_BLACK);
 }
 
-void drawBomb(uint8_t x, uint8_t y) { 
+void drawBomb(uint8_t x, uint8_t y) { // tekent een bom die niks uitvoerd
 	/* Bom tekeken */
 	if(explosioncount % 2) {
 	tft.fillRect(x*lw + XUP + OBJOFFSET + 9.5, (y*lw) + YUP + OBJOFFSET + 3 , lw - 2*OBJOFFSET - 18  , lw - 2*OBJOFFSET - 13, LONT2); // lontje bom	
@@ -700,7 +698,7 @@ void drawBomb(uint8_t x, uint8_t y) {
 	}
 }
 
-void drawBomb2(uint16_t x, uint8_t y) {
+void drawBomb2(uint16_t x, uint8_t y) { // tekent de bomentjes gebruikt voor de achtergrond
 	tft.fillRect( x-1, y-15 , 3 , 5, LONT2); // lontje bom
 	tft.fillRect( x-1, y-15, 3, 2, FIRE); // fire
 	tft.fillRect( x-3, y-10, 7, 6, ILI9341_BLACK); // topje
@@ -711,7 +709,7 @@ void drawBomb2(uint16_t x, uint8_t y) {
 	tft.fillRect(x-4, y-2, 2, 2, ILI9341_WHITE);	
 }
 
-void drawBombExplosie(uint8_t x, uint8_t y){
+void drawBombExplosie(uint8_t x, uint8_t y){ // tekent langzaam exploderende bom
 	/* Bom tekeken */
 	tft.fillRect(x*lw + XUP + OBJOFFSET + 9.5, (y*lw) + YUP + OBJOFFSET + 3 , lw - 2*OBJOFFSET - 18  , lw - 2*OBJOFFSET - 13, LONT2); // lontje bom	
 	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 7, 5, ILI9341_BLACK); // lichaam bom
@@ -764,7 +762,7 @@ void drawBombExplosie(uint8_t x, uint8_t y){
 	fireSpread(x, y);
 }
 
-void fireSpread(uint8_t x, uint8_t y) {
+void fireSpread(uint8_t x, uint8_t y) { // vuur dat verspreid na het exploderen van een bom 
 	if((x >= 0 && x <= 8) && (y >= 0 && y <= 8) && (!(x % 2) || !(y % 2))){	
 		tft.fillRect(x*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, FIRESPREAD); // vuur op bom
 	}
@@ -799,7 +797,7 @@ void fireSpread(uint8_t x, uint8_t y) {
 	}
 }
 
-void drawTon(uint8_t x, uint8_t y) { 
+void drawTon(uint8_t x, uint8_t y) { // tekenen van een ton
 	//lw = 220 / 9 = 24,444  objoffset = 2 24,444 - 2*2 = 20,444
 	// x = 4, lw = 220/9, XUP = 10 x*lw+xup+0.3*lw = 4*220/9 +10+ 0.3*220/9 = 115,11111111111111
 	//tft.fillRect( x-as , y-as , width , hight , colour );
