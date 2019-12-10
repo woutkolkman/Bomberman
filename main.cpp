@@ -21,7 +21,7 @@
 #define TITLECOLOUR 0xA841
 #define ACOLOR ILI9341_PURPLE
 #define BCOLOR 0xFE20
-#define SHADOWBCOLOR 0xBA81
+#define SHADOWBCOLOR 0xBA81	// shaduw kleur voor de titel van start menu
 #define ECOLOR DARKBROWN
 #define MCOLOR ILI9341_RED
 #define NCOLOR ILI9341_NAVY
@@ -29,7 +29,7 @@
 #define RCOLOR ILI9341_WHITE
 #define TEXTCOLOR ILI9341_BLACK
 #define SELECTEDTEXTCOLOR ILI9341_GREEN
-#define SHADOWCOLOR ILI9341_LIGHTGREY
+#define SHADOWCOLOR ILI9341_LIGHTGREY		// shaduw kleur letters
 
 //buttoncolor defines
 #define TEXTCOLOR ILI9341_BLACK
@@ -97,12 +97,15 @@
 #define LONT 0xFDAB
 #define LONT2 0xDC29
 #define FIRE 0xF9E1
-#define PAUSEMENUCOLOR 0xFD60
+#define PAUSEMENUCOLOR 0xFD60 
 #define FIRESPREAD ILI9341_RED
 #define WALL 0x6B8E
 #define GOLD 0xFE00
 #define SILVER 0x94B2
 #define BRONZE 0x
+#define HIGHSCORESBACK 0x1B02 // achtergrond kleur van de tekst in highscores menu
+#define HIGHSCORESTEXT 0xFAA0 // tekst kleur titel highscores menu
+#define SHADOWHCOLOR 0xB222   // shaduw kleur voor de titel van highscores menu
 
 /* includes */
 #include <avr/interrupt.h>
@@ -352,11 +355,16 @@ void drawPauseMenu() {
 void drawHighScores() {
 	tft.fillScreen(HSBUTCOLOR);
 	drawTitleBackground();
-	tft.setTextColor(TEXTCOLOR);
-	tft.setTextSize(TITLETSIZE);
-	tft.setCursor(TITLETPOSX - 10 , TITLETPOSY - 2); //startpositie tekst
-	//tft.setCursor(HSTPOSX, TITLETPOSY);
+	tft.fillRect(47, 5, 225, 42, HIGHSCORESBACK); 
+	tft.drawRect(46, 4, 226, 43, ILI9341_BLACK);
+	tft.setCursor(TITLETPOSX + 17, TITLETPOSY ); //startpositie tekst
+	tft.setTextSize(TITLETSIZE - 1);
+	tft.setTextColor(SHADOWHCOLOR);		
 	tft.println("HIGH-SCORES");
+	tft.setCursor(TITLETPOSX + 15, TITLETPOSY + 2); //startpositie tekst
+	tft.setTextColor(HIGHSCORESTEXT);
+	tft.println("HIGH-SCORES");
+
 	drawHighScoreboard();
 //	drawBackButton();
 
