@@ -186,6 +186,7 @@ int main(void) {
 	//drawMainMenu();
 	//drawMap2(); 
 	drawHighScores();
+	//drawPauseMenu();
 
 	//scherm is 240 * 320 pixels
 
@@ -350,8 +351,10 @@ void drawPauseMenu() {
 
 void drawHighScores() {
 	tft.fillScreen(HSBUTCOLOR);
+	drawTitleBackground();
 	tft.setTextColor(TEXTCOLOR);
 	tft.setTextSize(TITLETSIZE);
+	tft.setCursor(TITLETPOSX - 10 , TITLETPOSY - 2); //startpositie tekst
 	//tft.setCursor(HSTPOSX, TITLETPOSY);
 	tft.println("HIGH-SCORES");
 	drawHighScoreboard();
