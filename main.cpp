@@ -16,9 +16,6 @@
 #define TITLETPOSY 12 // Toegevoegd
 #define TITLETSIZE 4 //start button text size
 
-
-
-
 //mainmenucolors
 #define MAINMENUCOLOR 0x016E
 #define TITLECOLOUR 0xA841
@@ -38,6 +35,8 @@
 #define TEXTCOLOR ILI9341_BLACK
 #define STARTBUTCOLOR 0x0575
 #define STARTBUTSELCOLOR 0xAFFF
+#define CONTINEBUTCOLOR 0x1380
+#define CONTINEBUTSELBUTCOLOR 0x2600
 #define HSBUTCOLOR 0x0500
 #define HSBUTSELCOLOR 0x87F0
 #define QUITBUTCOLOR 0xC800
@@ -109,6 +108,9 @@
 #define HIGHSCORESBACK 0x1B02 // achtergrond kleur van de tekst in highscores menu
 #define HIGHSCORESTEXT 0xFAA0 // tekst kleur titel highscores menu
 #define SHADOWHCOLOR 0xB222   // shaduw kleur voor de titel van highscores menu
+#define PAUZEBACK 0xD300//  achtergrond kleur van de tekst in pauze menu
+#define SHADOWPCOLOR 0x500F   // shaduw kleur voor de titel van pauze menu
+#define PAUZETEXT 0xBABE// tekst kleur titel highscores menu
 
 /* includes */
 #include <avr/interrupt.h>
@@ -155,7 +157,6 @@ void drawMap();
 void drawMainMenu();
 void drawHighScores();
 void drawPauseMenu();
-void drawPause();
 void drawTitle();
 void drawStartButton();
 void drawContinueButton();
@@ -190,9 +191,11 @@ int main(void) {
 	tft.begin();
 	initGame();
 	//drawMainMenu();
+	//_delay_ms(1000);
 	//drawMap2(); 
 	drawHighScores();
-//	drawPauseMenu();
+	//_delay_ms(1000);
+	//drawPauseMenu();
 	//scherm is 240 * 320 pixels
 
 	/* loop */
@@ -350,7 +353,15 @@ void drawMainMenu() {
 void drawPauseMenu() {
 	tft.fillScreen(PAUSEMENUCOLOR);
 	drawTitleBackground();
-	drawPause();
+	tft.fillRect(47, 5, 225, 42, PAUZEBACK); 
+	tft.drawRect(46, 4, 226, 43, ILI9341_BLACK);
+	tft.setTextSize(TITLETSIZE);	
+	tft.setCursor(TITLETPOSX + 52, TITLETPOSY - 2);
+	tft.setTextColor(SHADOWPCOLOR);
+	tft.println("PAUSE");
+	tft.setCursor(TITLETPOSX + 50, TITLETPOSY); //startpositie tekst
+	tft.setTextColor(PAUZETEXT);
+	tft.println("PAUSE");
 	drawContinueButton();
 	drawQuitButton();
 }
@@ -642,12 +653,6 @@ void drawTitle() {
 	tft.setTextColor(BCOLOR);
 	tft.println("B MBERMAN");
 }
-void drawPause() {
-	tft.setCursor(TITLETPOSX + 50, TITLETPOSY);
-	tft.setTextColor(ILI9341_PURPLE);
-	tft.setTextSize(TITLETSIZE);
-	tft.println("PAUSE");
-}
 
 void drawTitleBomb() { 		// toegevoegd
 	tft.fillRect(83, 9, 4, 10, LONT2); // lontje bom 
@@ -682,7 +687,7 @@ void drawStartButton() {
 
 void drawContinueButton() {
 	if(pausemenuselect == 0) { //voor nunchuck
-		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, STARTBUTSELCOLOR); //make rectangle with select color
+		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, CONTINEBUTCOLOR); //make rectangle with select color
 		tft.setCursor(CONTBUTSTPOSX, STARTBUTSTPOSY); //set cursur at shadow position (x + 2, y - 2)
 		tft.setTextColor(SHADOWCOLOR); //shadow color (lightgrey)
 		tft.setTextSize(STARTBUTTSIZE); //start button text size
@@ -691,7 +696,7 @@ void drawContinueButton() {
 		tft.setTextColor(TEXTCOLOR); //set text color (when button is selected)
 		tft.println("CONTINUE"); //selected text start
 	} else {
-		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, STARTBUTCOLOR); //make rectangle with not selected color
+		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, CONTINEBUTSELBUTCOLOR); //make rectangle with not selected color
 		tft.setCursor(CONTBUTTPOSX, STARTBUTTPOSY); //set cursor at position
 		tft.setTextColor(TEXTCOLOR); //text color
 		tft.setTextSize(STARTBUTTSIZE);
