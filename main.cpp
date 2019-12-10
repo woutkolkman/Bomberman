@@ -150,6 +150,7 @@ uint32_t highscore2 = 3140;
 uint32_t highscore3 = 220;
 uint32_t highscore4 = 10;
 uint32_t highscore5 = 0;
+
 /* Use Hardware SPI (on Uno, #13, #12, #11) and #10 and # 9for  CS/DC   */
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 
@@ -512,7 +513,8 @@ void drawPlayer2(uint8_t x, uint8_t y) {
 }
 
 void drawBomb(uint8_t x, uint8_t y) { 
-	/* Bom tekeken */if(explosioncount % 2) {
+	/* Bom tekeken */
+	if(explosioncount % 2) {
 	tft.fillRect(x*lw + XUP + OBJOFFSET + 9.5, (y*lw) + YUP + OBJOFFSET + 3 , lw - 2*OBJOFFSET - 18  , lw - 2*OBJOFFSET - 13, LONT2); // lontje bom	
 	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 7, 5, ILI9341_BLACK); // lichaam bom
 	tft.drawPixel(x*lw + XUP + OBJOFFSET + 8, (y*lw) + YUP + OBJOFFSET + 9 , ILI9341_WHITE); // details
@@ -790,10 +792,8 @@ void drawHighScoreboard() {
         tft.setTextColor(ILI9341_WHITE);
         tft.print("5: ");
         tft.print(highscore5);
-
-
-
 }
+
 void drawBackButton() {
 	tft.fillRect(BACKBUTRX, BACKBUTRY, BACKBUTRW, BACKBUTRH, BACKBUTROOD);
 	tft.setCursor(BACKSTPOSX, BACKSTPOSY);
@@ -803,7 +803,6 @@ void drawBackButton() {
         tft.setCursor(BACKTPOSX, BACKTPOSY);
         tft.setTextColor(TEXTCOLOR);
         tft.println("BACK");
-
 }
 
 void drawQuitButton() {
