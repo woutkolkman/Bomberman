@@ -6,32 +6,27 @@
 #define OBJOFFSET 2 //no overlap with line
 #define MAXOBJ 8 //object max x/y axis
 
-//LCD init defines
+/* LCD init defines */
 #define TFT_DC 9 // initialisatie LCD
 #define TFT_CS 10 // initialisatie LCD
 #define ROTATION 3 //rotation of screen
 
-//title
+/* title */
 #define TITLETPOSX 50
 #define TITLETPOSY 12 // Toegevoegd
 #define TITLETSIZE 4 //start button text size
 
-//mainmenucolors
+/* mainmenucolors */
 #define MAINMENUCOLOR 0x016E
 #define TITLECOLOUR 0xA841
 #define ACOLOR ILI9341_PURPLE
 #define BCOLOR 0xFE20
-#define SHADOWBCOLOR 0xBA81	// shaduw kleur voor de titel van start menu
-#define ECOLOR DARKBROWN
-#define MCOLOR ILI9341_RED
-#define NCOLOR ILI9341_NAVY
-#define OCOLOR ILI9341_CYAN
-#define RCOLOR ILI9341_WHITE
+#define SHADOWBCOLOR 0xBA81 // shaduw kleur voor de titel van start menu
 #define TEXTCOLOR ILI9341_BLACK
 #define SELECTEDTEXTCOLOR ILI9341_GREEN
-#define SHADOWCOLOR ILI9341_LIGHTGREY		// shaduw kleur letters
+#define SHADOWCOLOR ILI9341_LIGHTGREY // shaduw kleur letters
 
-//buttoncolor defines
+/* buttoncolor defines */
 #define TEXTCOLOR ILI9341_BLACK
 #define STARTBUTCOLOR 0x0575
 #define STARTBUTSELCOLOR 0xAFFF
@@ -42,7 +37,7 @@
 #define QUITBUTCOLOR 0xC800
 #define QUITBUTSELCOLOR 0xFAAA
 
-//startbutton defines
+/* startbutton defines */
 #define STARTBUTRX 50 //start button rectangle position x
 #define STARTBUTRY 50 //start button rectangle position y
 #define STARTBUTRW 220 //start button rectangle width
@@ -53,11 +48,11 @@
 #define STARTBUTSTPOSX STARTBUTTPOSX + 2
 #define STARTBUTSTPOSY STARTBUTTPOSY - 2
 
-//continue define
+/* continue define */
 #define CONTBUTTPOSX STARTBUTTPOSX - 10
 #define CONTBUTSTPOSX STARTBUTSTPOSX - 10
 
-//High score button defines
+/* High score button defines */
 #define HSBUTRX 50
 #define HSBUTRY 100
 #define HSBUTRW 220
@@ -68,13 +63,13 @@
 #define HSBUTSTPOSX HSBUTTPOSX + 2
 #define HSBUTSTPOSY HSBUTTPOSY - 2
 
-//High score lis defines
+/* High score lis defines */
 #define HSFIELDX 30
 #define HSFIELDY 45
 #define HSFIELDW 260
 #define HSFIELDH 150
 
-//Quit button defines
+/* Quit button defines */
 #define QUITBUTRX 50
 #define QUITBUTRY 150
 #define QUITBUTRW 220
@@ -85,7 +80,7 @@
 #define QUITBUTSTPOSX QUITBUTTPOSX + 2
 #define QUITBUTSTPOSY QUITBUTTPOSY - 2
 
-//Back button defines
+/* Back button defines */
 #define BACKBUTRX 120
 #define BACKBUTRY 200
 #define BACKBUTRW 80
@@ -134,7 +129,6 @@
 #include <Arduino.h> // LCD library
 #include <avr/io.h> // LCD library
 #include <SPI.h>
-// #include <cspi.h>
 #include <usart.h>
 
 /* global variables */
