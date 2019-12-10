@@ -85,6 +85,17 @@
 #define QUITBUTSTPOSX QUITBUTTPOSX + 2
 #define QUITBUTSTPOSY QUITBUTTPOSY - 2
 
+//Back button defines
+#define BACKBUTRX 120
+#define BACKBUTRY 200
+#define BACKBUTRW 80
+#define BACKBUTRH 30
+#define BACKSTPOSX BACKTPOSX + 2
+#define BACKSTPOSY BACKTPOSY - 2
+#define BACKBUTTSIZE 2
+#define BACKTPOSX 135
+#define BACKTPOSY 210
+
 /* Colour defines */
 #define LIGHTBROWN 0x7A00
 #define TONBROWN 0x28A0
@@ -111,6 +122,7 @@
 #define PAUZEBACK 0xD300//  achtergrond kleur van de tekst in pauze menu
 #define SHADOWPCOLOR 0x500F   // shaduw kleur voor de titel van pauze menu
 #define PAUZETEXT 0xBABE// tekst kleur titel highscores menu
+#define BACKBUTROOD 0xF165 //kleur back color
 
 /* includes */
 #include <avr/interrupt.h>
@@ -384,7 +396,7 @@ void drawHighScores() {
 	tft.println("HIGH-SCORES");
 
 	drawHighScoreboard();
-//	drawBackButton();
+	drawBackButton();
 
 
 }
@@ -783,6 +795,14 @@ void drawHighScoreboard() {
 
 }
 void drawBackButton() {
+	tft.fillRect(BACKBUTRX, BACKBUTRY, BACKBUTRW, BACKBUTRH, BACKBUTROOD);
+	tft.setCursor(BACKSTPOSX, BACKSTPOSY);
+        tft.setTextColor(SHADOWCOLOR);
+        tft.setTextSize(BACKBUTTSIZE);
+        tft.println("BACK");
+        tft.setCursor(BACKTPOSX, BACKTPOSY);
+        tft.setTextColor(TEXTCOLOR);
+        tft.println("BACK");
 
 }
 
