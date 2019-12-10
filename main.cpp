@@ -189,7 +189,6 @@ void drawTitleBackground();
 /* ISR */
 ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 	brightness = (ADC>>2); // 10 bits, gooi 2 LSB weg, uitkomst 8 bits
-
 	// brightness toepassen op beeldscherm
 }
 
@@ -280,6 +279,223 @@ void initGame() {
 	tft.setRotation(3); //set rotation;
 }
 
+void drawMainMenu() {
+	drawTitle();
+	drawTitleBomb();
+	drawStartButton();
+	drawHighScoreButton();
+	drawQuitButton();
+}
+
+void drawPauseMenu() {
+	tft.fillScreen(PAUSEMENUCOLOR);
+	drawTitleBackground();
+	tft.fillRect(47, 5, 225, 42, PAUZEBACK); 
+	tft.drawRect(46, 4, 226, 43, ILI9341_BLACK);
+	tft.setTextSize(TITLETSIZE);	
+	tft.setCursor(TITLETPOSX + 52, TITLETPOSY - 2);
+	tft.setTextColor(SHADOWPCOLOR);
+	tft.println("PAUSE");
+	tft.setCursor(TITLETPOSX + 50, TITLETPOSY); //startpositie tekst
+	tft.setTextColor(PAUZETEXT);
+	tft.println("PAUSE");
+	drawContinueButton();
+	drawQuitButton();
+}
+
+void drawHighScores() {
+	tft.fillScreen(HSBUTCOLOR);
+	drawTitleBackground();
+	tft.fillRect(47, 5, 225, 42, HIGHSCORESBACK); 
+	tft.drawRect(46, 4, 226, 43, ILI9341_BLACK);
+	tft.setCursor(TITLETPOSX + 17, TITLETPOSY ); //startpositie tekst
+	tft.setTextSize(TITLETSIZE - 1);
+	tft.setTextColor(SHADOWHCOLOR);		
+	tft.println("HIGH-SCORES");
+	tft.setCursor(TITLETPOSX + 15, TITLETPOSY + 2); //startpositie tekst
+	tft.setTextColor(HIGHSCORESTEXT);
+	tft.println("HIGH-SCORES");
+	drawHighScoreboard();
+	drawBackButton();
+}
+
+void drawTitleBackground(){
+	for(int x = 20; x < 320; x = x + 40){
+		int y = 25;
+		drawBomb2(x, y);	
+	}
+	for(int x = 0; x < 360; x = x + 40){
+		int y = 60;
+		drawBomb2(x, y);	
+	}
+	for(int x = 20; x < 320; x = x + 40){
+		int y = 95;
+		drawBomb2(x, y);	
+	}
+	for(int x = 0; x < 360; x = x + 40){
+		int y = 130;
+		drawBomb2(x, y);	
+	}
+	for(int x = 20; x < 320; x = x + 40){
+		int y = 165;
+		drawBomb2(x, y);	
+	}
+	for(int x = 0; x < 360; x = x + 40){
+		int y = 200;
+		drawBomb2(x, y);	
+	}
+	for(int x = 20; x < 320; x = x + 40){
+		int y = 235;
+		drawBomb2(x, y);	
+	}
+}
+
+void drawTitle() { 
+	tft.fillScreen(MAINMENUCOLOR);
+	drawTitleBackground();
+	tft.fillRect(42, 5, 232, 42, TITLECOLOUR); 
+	tft.drawRect(41, 4, 233, 43, ILI9341_BLACK);
+	tft.setCursor(TITLETPOSX + 2, TITLETPOSY - 2); //startpositie tekst
+	tft.setTextSize(TITLETSIZE); //textsize
+	tft.setTextColor(SHADOWBCOLOR);
+	tft.println("B MBERMAN");
+	tft.setCursor(TITLETPOSX, TITLETPOSY);
+	tft.setTextColor(BCOLOR);
+	tft.println("B MBERMAN");
+}
+
+void drawTitleBomb() { 		// toegevoegd
+	tft.fillRect(83, 9, 4, 10, LONT2); // lontje bom 
+	tft.fillRect(80, 14, 10, 5, ILI9341_BLACK); // topje bom
+	tft.drawRect(80, 14, 10, 5, ILI9341_WHITE);
+        tft.fillCircle(84, 29, 10, ILI9341_BLACK); // lichaam bom
+	tft.drawCircle(84, 29, 11, ILI9341_WHITE);
+        tft.fillRect(81, 22, 3, 3, ILI9341_WHITE); // details
+        tft.fillRect(79, 24, 3, 3, ILI9341_WHITE);
+	tft.fillRect(83, 7, 4, 4, FIRE); // fire
+}
+
+void drawStartButton() {
+	if(mainmenuselect == 0) { //voor nunchuck
+		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, STARTBUTSELCOLOR); //make rectangle with select color
+		tft.setCursor(STARTBUTSTPOSX, STARTBUTSTPOSY); //set cursur at shadow position (x + 2, y - 2)
+		tft.setTextColor(SHADOWCOLOR); //shadow color (lightgrey)
+		tft.setTextSize(STARTBUTTSIZE); //start button text size
+		tft.println("START"); //shadowtext start
+		tft.setCursor(STARTBUTTPOSX, STARTBUTTPOSY); //set cursor at 'start button text position x', and y
+		tft.setTextColor(TEXTCOLOR); //set text color (when button is selected)
+		tft.println("START"); //selected text start
+	} else {
+		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, STARTBUTCOLOR); //make rectangle with not selected color
+		tft.setCursor(STARTBUTTPOSX, STARTBUTTPOSY); //set cursor at position
+		tft.setTextColor(TEXTCOLOR); //text color
+		tft.setTextSize(STARTBUTTSIZE);
+		tft.println("START");
+	}
+	tft.drawRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, ILI9341_BLACK);
+}
+
+void drawContinueButton() {
+	if(pausemenuselect == 0) { //voor nunchuck
+		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, CONTINEBUTCOLOR); //make rectangle with select color
+		tft.setCursor(CONTBUTSTPOSX, STARTBUTSTPOSY); //set cursur at shadow position (x + 2, y - 2)
+		tft.setTextColor(SHADOWCOLOR); //shadow color (lightgrey)
+		tft.setTextSize(STARTBUTTSIZE); //start button text size
+		tft.println("CONTINUE"); //shadowtext start
+		tft.setCursor(CONTBUTTPOSX, STARTBUTTPOSY); //set cursor at 'start button text position x', and y
+		tft.setTextColor(TEXTCOLOR); //set text color (when button is selected)
+		tft.println("CONTINUE"); //selected text start
+	} else {
+		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, CONTINEBUTSELBUTCOLOR); //make rectangle with not selected color
+		tft.setCursor(CONTBUTTPOSX, STARTBUTTPOSY); //set cursor at position
+		tft.setTextColor(TEXTCOLOR); //text color
+		tft.setTextSize(STARTBUTTSIZE);
+		tft.println("CONTINUE");
+	}
+	tft.drawRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, ILI9341_BLACK);
+}
+
+void drawHighScoreButton() {
+	if(mainmenuselect == 1) {//voor nunchuck
+		tft.fillRect(HSBUTRX, HSBUTRY, HSBUTRW, HSBUTRH, HSBUTSELCOLOR);
+		tft.setCursor(HSBUTSTPOSX, HSBUTSTPOSY);
+		tft.setTextColor(SHADOWCOLOR);
+		tft.setTextSize(HSBUTTSIZE);
+		tft.println("HIGH-SCORES");
+		tft.setCursor(HSBUTTPOSX, HSBUTTPOSY);
+		tft.setTextColor(TEXTCOLOR);
+		tft.println("HIGH-SCORES");
+	} else {
+		tft.fillRect(HSBUTRX, HSBUTRY, HSBUTRW, HSBUTRH, HSBUTCOLOR);
+		tft.setCursor(HSBUTTPOSX, HSBUTTPOSY);
+		tft.setTextColor(TEXTCOLOR);
+		tft.setTextSize(HSBUTTSIZE);
+		tft.println("HIGH-SCORES");
+	}
+	tft.drawRect(HSBUTRX, HSBUTRY, HSBUTRW, HSBUTRH, ILI9341_BLACK);
+}
+
+void drawHighScoreboard() {
+	tft.fillRect(HSFIELDX, HSFIELDY, HSFIELDW, (HSFIELDH), ILI9341_BLACK);
+	tft.drawRect(HSFIELDX, HSFIELDY, HSFIELDW, 0.2*HSFIELDH, GOLD);
+	tft.drawRect(HSFIELDX, HSFIELDY+ 0.2*HSFIELDH, HSFIELDW, 0.2*HSFIELDH, SILVER);
+	tft.drawRect(HSFIELDX, HSFIELDY+ 0.4*HSFIELDH, HSFIELDW, 0.2*HSFIELDH, BRONZE);
+	tft.drawRect(HSFIELDX, HSFIELDY+ 0.6*HSFIELDH, HSFIELDW, 0.2*HSFIELDH, ILI9341_WHITE);
+	tft.drawRect(HSFIELDX, HSFIELDY+ 0.8*HSFIELDH, HSFIELDW, 0.2*HSFIELDH, ILI9341_WHITE);
+	tft.setCursor(HSFIELDX + 10, HSFIELDY + 10);
+	tft.setTextSize(2);
+	tft.setTextColor(GOLD);
+	tft.print("1: ");
+	tft.print(highscore1);
+	tft.setCursor(HSFIELDX + 10, HSFIELDY + 40);
+	tft.setTextColor(SILVER);
+	tft.print("2: ");
+	tft.print(highscore2);
+	tft.setCursor(HSFIELDX + 10, HSFIELDY + 70);
+	tft.setTextColor(BRONZE);
+	tft.print("3: ");
+	tft.print(highscore3);
+	tft.setCursor(HSFIELDX + 10, HSFIELDY + 100);
+        tft.setTextColor(ILI9341_WHITE);
+        tft.print("4: ");
+        tft.print(highscore4);
+        tft.setCursor(HSFIELDX + 10, HSFIELDY + 130);
+        tft.setTextColor(ILI9341_WHITE);
+        tft.print("5: ");
+        tft.print(highscore5);
+}
+
+void drawBackButton() {
+	tft.fillRect(BACKBUTRX, BACKBUTRY, BACKBUTRW, BACKBUTRH, BACKBUTROOD);
+	tft.setCursor(BACKSTPOSX, BACKSTPOSY);
+        tft.setTextColor(SHADOWCOLOR);
+        tft.setTextSize(BACKBUTTSIZE);
+        tft.println("BACK");
+        tft.setCursor(BACKTPOSX, BACKTPOSY);
+        tft.setTextColor(TEXTCOLOR);
+        tft.println("BACK");
+}
+
+void drawQuitButton() {
+	if(mainmenuselect == 2 || pausemenuselect == 1) {//voor nunchuck
+		tft.fillRect(QUITBUTRX, QUITBUTRY, QUITBUTRW, QUITBUTRH, QUITBUTSELCOLOR);
+		tft.setCursor(QUITBUTSTPOSX, QUITBUTSTPOSY);
+		tft.setTextColor(SHADOWCOLOR);
+		tft.setTextSize(QUITBUTTSIZE);
+		tft.println("QUIT");
+		tft.setCursor(QUITBUTTPOSX, QUITBUTTPOSY);
+		tft.setTextColor(TEXTCOLOR);
+		tft.println("QUIT");
+	} else {
+		tft.fillRect(QUITBUTRX, QUITBUTRY, QUITBUTRW, QUITBUTRH, QUITBUTCOLOR);
+		tft.setCursor(QUITBUTTPOSX, QUITBUTTPOSY);
+		tft.setTextColor(TEXTCOLOR);
+		tft.setTextSize(QUITBUTTSIZE);
+		tft.println("QUIT");
+	}
+	tft.drawRect(QUITBUTRX, QUITBUTRY, QUITBUTRW, QUITBUTRH, ILI9341_BLACK);
+}
+
 void initMap() {
 	tft.fillScreen(MOOIEBRUIN);
 	drawGrid();
@@ -359,48 +575,6 @@ void drawMap2(){
 	drawBombExplosie(4, 7);
 }
 
-void drawMainMenu() {
-	drawTitle();
-	drawTitleBomb();
-	drawStartButton();
-	drawHighScoreButton();
-	drawQuitButton();
-}
-
-void drawPauseMenu() {
-	tft.fillScreen(PAUSEMENUCOLOR);
-	drawTitleBackground();
-	tft.fillRect(47, 5, 225, 42, PAUZEBACK); 
-	tft.drawRect(46, 4, 226, 43, ILI9341_BLACK);
-	tft.setTextSize(TITLETSIZE);	
-	tft.setCursor(TITLETPOSX + 52, TITLETPOSY - 2);
-	tft.setTextColor(SHADOWPCOLOR);
-	tft.println("PAUSE");
-	tft.setCursor(TITLETPOSX + 50, TITLETPOSY); //startpositie tekst
-	tft.setTextColor(PAUZETEXT);
-	tft.println("PAUSE");
-	drawContinueButton();
-	drawQuitButton();
-}
-
-void drawHighScores() {
-	tft.fillScreen(HSBUTCOLOR);
-	drawTitleBackground();
-	tft.fillRect(47, 5, 225, 42, HIGHSCORESBACK); 
-	tft.drawRect(46, 4, 226, 43, ILI9341_BLACK);
-	tft.setCursor(TITLETPOSX + 17, TITLETPOSY ); //startpositie tekst
-	tft.setTextSize(TITLETSIZE - 1);
-	tft.setTextColor(SHADOWHCOLOR);		
-	tft.println("HIGH-SCORES");
-	tft.setCursor(TITLETPOSX + 15, TITLETPOSY + 2); //startpositie tekst
-	tft.setTextColor(HIGHSCORESTEXT);
-	tft.println("HIGH-SCORES");
-
-	drawHighScoreboard();
-	drawBackButton();
-
-
-}
 void drawGrid() {
         tft.fillRect(XUP /*niet op grens van scherm X */, YUP/*niet op grens van scherm Y*/, AANTALLENGTEBREEDTE*lw /*volledige game-grid*/, AANTALLENGTEBREEDTE*lw /*volledige game-grid*/, GRIDCOLOUR /*donkerbruine achtergrond*/);
         for(int x = 0; x < AANTALLENGTEBREEDTE; x++) {
@@ -408,6 +582,15 @@ void drawGrid() {
                         tft.drawRect((x*lw) + XUP, (y*lw) + YUP, lw+1, lw+1, ILI9341_BLACK); //lijnen tussen grid
                 }
         }
+}
+
+void Walls() {
+	for(int x = 1; x < 8; x = x+2){
+                for(int y = 1; y < 8; y = y+2){
+                        drawWall(x,y);
+                }
+        }
+
 }
 
 void drawWall(uint8_t x, uint8_t y){
@@ -587,15 +770,6 @@ void drawBombExplosie(uint8_t x, uint8_t y){
 	fireSpread(x, y);
 }
 
-void Walls() {
-	for(int x = 1; x < 8; x = x+2){
-                for(int y = 1; y < 8; y = y+2){
-                        drawWall(x,y);
-                }
-        }
-
-}
-
 void fireSpread(uint8_t x, uint8_t y) {
 	if((x >= 0 && x <= 8) && (y >= 0 && y <= 8) && (!(x % 2) || !(y % 2))){	
 		tft.fillRect(x*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET +1, FIRESPREAD); // vuur op bom
@@ -646,181 +820,4 @@ void drawTon(uint8_t x, uint8_t y) {
 	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 2,   7   , TONBROWN);	// lichaam ton
 	tft.fillRect(x*lw + XUP + OBJOFFSET +  3, (y*lw) + YUP + OBJOFFSET + 5 , lw - 2*OBJOFFSET - 5, lw - 2*OBJOFFSET - 17, ILI9341_BLACK); // details
 	tft.fillRect(x*lw + XUP + OBJOFFSET + 3 , (y*lw) + YUP + OBJOFFSET + 13, lw - 2*OBJOFFSET - 5, lw - 2*OBJOFFSET - 17, ILI9341_BLACK); // details
-}
-
-void drawTitleBackground(){
-	for(int x = 20; x < 320; x = x + 40){
-		int y = 25;
-		drawBomb2(x, y);	
-	}
-	for(int x = 0; x < 360; x = x + 40){
-		int y = 60;
-		drawBomb2(x, y);	
-	}
-	for(int x = 20; x < 320; x = x + 40){
-		int y = 95;
-		drawBomb2(x, y);	
-	}
-	for(int x = 0; x < 360; x = x + 40){
-		int y = 130;
-		drawBomb2(x, y);	
-	}
-	for(int x = 20; x < 320; x = x + 40){
-		int y = 165;
-		drawBomb2(x, y);	
-	}
-	for(int x = 0; x < 360; x = x + 40){
-		int y = 200;
-		drawBomb2(x, y);	
-	}
-	for(int x = 20; x < 320; x = x + 40){
-		int y = 235;
-		drawBomb2(x, y);	
-	}
-}
-
-void drawTitle() { 
-	tft.fillScreen(MAINMENUCOLOR);
-	drawTitleBackground();
-	tft.fillRect(42, 5, 232, 42, TITLECOLOUR); 
-	tft.drawRect(41, 4, 233, 43, ILI9341_BLACK);
-	tft.setCursor(TITLETPOSX + 2, TITLETPOSY - 2); //startpositie tekst
-	tft.setTextSize(TITLETSIZE); //textsize
-	tft.setTextColor(SHADOWBCOLOR);
-	tft.println("B MBERMAN");
-	tft.setCursor(TITLETPOSX, TITLETPOSY);
-	tft.setTextColor(BCOLOR);
-	tft.println("B MBERMAN");
-}
-
-void drawTitleBomb() { 		// toegevoegd
-	tft.fillRect(83, 9, 4, 10, LONT2); // lontje bom 
-	tft.fillRect(80, 14, 10, 5, ILI9341_BLACK); // topje bom
-	tft.drawRect(80, 14, 10, 5, ILI9341_WHITE);
-        tft.fillCircle(84, 29, 10, ILI9341_BLACK); // lichaam bom
-	tft.drawCircle(84, 29, 11, ILI9341_WHITE);
-        tft.fillRect(81, 22, 3, 3, ILI9341_WHITE); // details
-        tft.fillRect(79, 24, 3, 3, ILI9341_WHITE);
-	tft.fillRect(83, 7, 4, 4, FIRE); // fire
-}
-
-void drawStartButton() {
-	if(mainmenuselect == 0) { //voor nunchuck
-		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, STARTBUTSELCOLOR); //make rectangle with select color
-		tft.setCursor(STARTBUTSTPOSX, STARTBUTSTPOSY); //set cursur at shadow position (x + 2, y - 2)
-		tft.setTextColor(SHADOWCOLOR); //shadow color (lightgrey)
-		tft.setTextSize(STARTBUTTSIZE); //start button text size
-		tft.println("START"); //shadowtext start
-		tft.setCursor(STARTBUTTPOSX, STARTBUTTPOSY); //set cursor at 'start button text position x', and y
-		tft.setTextColor(TEXTCOLOR); //set text color (when button is selected)
-		tft.println("START"); //selected text start
-	} else {
-		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, STARTBUTCOLOR); //make rectangle with not selected color
-		tft.setCursor(STARTBUTTPOSX, STARTBUTTPOSY); //set cursor at position
-		tft.setTextColor(TEXTCOLOR); //text color
-		tft.setTextSize(STARTBUTTSIZE);
-		tft.println("START");
-	}
-	tft.drawRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, ILI9341_BLACK);
-}
-
-void drawContinueButton() {
-	if(pausemenuselect == 0) { //voor nunchuck
-		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, CONTINEBUTCOLOR); //make rectangle with select color
-		tft.setCursor(CONTBUTSTPOSX, STARTBUTSTPOSY); //set cursur at shadow position (x + 2, y - 2)
-		tft.setTextColor(SHADOWCOLOR); //shadow color (lightgrey)
-		tft.setTextSize(STARTBUTTSIZE); //start button text size
-		tft.println("CONTINUE"); //shadowtext start
-		tft.setCursor(CONTBUTTPOSX, STARTBUTTPOSY); //set cursor at 'start button text position x', and y
-		tft.setTextColor(TEXTCOLOR); //set text color (when button is selected)
-		tft.println("CONTINUE"); //selected text start
-	} else {
-		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, CONTINEBUTSELBUTCOLOR); //make rectangle with not selected color
-		tft.setCursor(CONTBUTTPOSX, STARTBUTTPOSY); //set cursor at position
-		tft.setTextColor(TEXTCOLOR); //text color
-		tft.setTextSize(STARTBUTTSIZE);
-		tft.println("CONTINUE");
-	}
-	tft.drawRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, ILI9341_BLACK);
-}
-
-void drawHighScoreButton() {
-	if(mainmenuselect == 1) {//voor nunchuck
-		tft.fillRect(HSBUTRX, HSBUTRY, HSBUTRW, HSBUTRH, HSBUTSELCOLOR);
-		tft.setCursor(HSBUTSTPOSX, HSBUTSTPOSY);
-		tft.setTextColor(SHADOWCOLOR);
-		tft.setTextSize(HSBUTTSIZE);
-		tft.println("HIGH-SCORES");
-		tft.setCursor(HSBUTTPOSX, HSBUTTPOSY);
-		tft.setTextColor(TEXTCOLOR);
-		tft.println("HIGH-SCORES");
-	} else {
-		tft.fillRect(HSBUTRX, HSBUTRY, HSBUTRW, HSBUTRH, HSBUTCOLOR);
-		tft.setCursor(HSBUTTPOSX, HSBUTTPOSY);
-		tft.setTextColor(TEXTCOLOR);
-		tft.setTextSize(HSBUTTSIZE);
-		tft.println("HIGH-SCORES");
-	}
-	tft.drawRect(HSBUTRX, HSBUTRY, HSBUTRW, HSBUTRH, ILI9341_BLACK);
-}
-
-void drawHighScoreboard() {
-	tft.fillRect(HSFIELDX, HSFIELDY, HSFIELDW, (HSFIELDH), ILI9341_BLACK);
-	tft.drawRect(HSFIELDX, HSFIELDY, HSFIELDW, 0.2*HSFIELDH, GOLD);
-	tft.drawRect(HSFIELDX, HSFIELDY+ 0.2*HSFIELDH, HSFIELDW, 0.2*HSFIELDH, SILVER);
-	tft.drawRect(HSFIELDX, HSFIELDY+ 0.4*HSFIELDH, HSFIELDW, 0.2*HSFIELDH, BRONZE);
-	tft.drawRect(HSFIELDX, HSFIELDY+ 0.6*HSFIELDH, HSFIELDW, 0.2*HSFIELDH, ILI9341_WHITE);
-	tft.drawRect(HSFIELDX, HSFIELDY+ 0.8*HSFIELDH, HSFIELDW, 0.2*HSFIELDH, ILI9341_WHITE);
-	tft.setCursor(HSFIELDX + 10, HSFIELDY + 10);
-	tft.setTextSize(2);
-	tft.setTextColor(GOLD);
-	tft.print("1: ");
-	tft.print(highscore1);
-	tft.setCursor(HSFIELDX + 10, HSFIELDY + 40);
-	tft.setTextColor(SILVER);
-	tft.print("2: ");
-	tft.print(highscore2);
-	tft.setCursor(HSFIELDX + 10, HSFIELDY + 70);
-	tft.setTextColor(BRONZE);
-	tft.print("3: ");
-	tft.print(highscore3);
-	tft.setCursor(HSFIELDX + 10, HSFIELDY + 100);
-        tft.setTextColor(ILI9341_WHITE);
-        tft.print("4: ");
-        tft.print(highscore4);
-        tft.setCursor(HSFIELDX + 10, HSFIELDY + 130);
-        tft.setTextColor(ILI9341_WHITE);
-        tft.print("5: ");
-        tft.print(highscore5);
-}
-
-void drawBackButton() {
-	tft.fillRect(BACKBUTRX, BACKBUTRY, BACKBUTRW, BACKBUTRH, BACKBUTROOD);
-	tft.setCursor(BACKSTPOSX, BACKSTPOSY);
-        tft.setTextColor(SHADOWCOLOR);
-        tft.setTextSize(BACKBUTTSIZE);
-        tft.println("BACK");
-        tft.setCursor(BACKTPOSX, BACKTPOSY);
-        tft.setTextColor(TEXTCOLOR);
-        tft.println("BACK");
-}
-
-void drawQuitButton() {
-	if(mainmenuselect == 2 || pausemenuselect == 1) {//voor nunchuck
-		tft.fillRect(QUITBUTRX, QUITBUTRY, QUITBUTRW, QUITBUTRH, QUITBUTSELCOLOR);
-		tft.setCursor(QUITBUTSTPOSX, QUITBUTSTPOSY);
-		tft.setTextColor(SHADOWCOLOR);
-		tft.setTextSize(QUITBUTTSIZE);
-		tft.println("QUIT");
-		tft.setCursor(QUITBUTTPOSX, QUITBUTTPOSY);
-		tft.setTextColor(TEXTCOLOR);
-		tft.println("QUIT");
-	} else {
-		tft.fillRect(QUITBUTRX, QUITBUTRY, QUITBUTRW, QUITBUTRH, QUITBUTCOLOR);
-		tft.setCursor(QUITBUTTPOSX, QUITBUTTPOSY);
-		tft.setTextColor(TEXTCOLOR);
-		tft.setTextSize(QUITBUTTSIZE);
-		tft.println("QUIT");
-	}
-	tft.drawRect(QUITBUTRX, QUITBUTRY, QUITBUTRW, QUITBUTRH, ILI9341_BLACK);
 }
