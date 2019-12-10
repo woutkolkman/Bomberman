@@ -197,13 +197,13 @@ int main(void) {
 	tft.begin();
 	initGame();
 	drawMainMenu();
-	_delay_ms(5000);
+	//_delay_ms(5000);
 	 
 	drawHighScores();
-	_delay_ms(5000);
+	//_delay_ms(5000);
 
 	drawPauseMenu();
-	_delay_ms(5000);
+	//_delay_ms(5000);
 	drawMap2();
 	//scherm is 240 * 320 pixels
 
@@ -269,20 +269,151 @@ TIMSK1 |= (1<<TOIE1); //overflow interupt enable
 //TIMSK1 |= (1<<OCIEA); //compare output interrupt enable
 }
 
-void initGame() {
+void initGame() { // start game
 	tft.setRotation(3); //set rotation;
 }
 
-void drawMainMenu() {
-	drawTitle();
-	drawTitleBomb();
-	drawStartButton();
-	drawHighScoreButton();
-	drawQuitButton();
+void drawMainMenu() { // teken main menu
+	drawTitle(); // tekent titel
+	drawTitleBomb(); // tekent de bom op de 'o'
+	drawStartButton(); // tekent de Start knop op het main menu 
+	drawHighScoreButton(); // tekent de Highscore knop op het main menu
+	drawQuitButton(); // tekent de Quit knop op het main menu
 }
 
-void drawPauseMenu() {
-	tft.fillScreen(PAUSEMENUCOLOR);
+void drawTitle() { // titel van main menu
+	tft.fillScreen(MAINMENUCOLOR); // main menu achtergrond kleur
+	drawTitleBackground(); // tekent bom achtergrond
+	tft.fillRect(42, 5, 232, 42, TITLECOLOUR); // blokje om tekst
+	tft.drawRect(41, 4, 233, 43, ILI9341_BLACK);
+	tft.setCursor(TITLETPOSX + 2, TITLETPOSY - 2); // positie van schaduw tekst
+	tft.setTextSize(TITLETSIZE); //textsize
+	tft.setTextColor(SHADOWBCOLOR); // shaduw kleur van titel 
+	tft.println("B MBERMAN"); // schrijven van schaduw titel
+	tft.setCursor(TITLETPOSX, TITLETPOSY);	// positie van titel
+	tft.setTextColor(BCOLOR); // titel kleur
+	tft.println("B MBERMAN"); // schrijven van titel
+}
+
+void drawTitleBomb() { // bom vorimge 'o' in main menu
+	tft.fillRect(83, 9, 4, 10, LONT2); // lontje bom 
+	tft.fillRect(80, 14, 10, 5, ILI9341_BLACK); // topje bom
+	tft.drawRect(80, 14, 10, 5, ILI9341_WHITE);
+        tft.fillCircle(84, 29, 10, ILI9341_BLACK); // lichaam bom
+	tft.drawCircle(84, 29, 11, ILI9341_WHITE);
+        tft.fillRect(81, 22, 3, 3, ILI9341_WHITE); // details
+        tft.fillRect(79, 24, 3, 3, ILI9341_WHITE);
+	tft.fillRect(83, 7, 4, 4, FIRE); // fire
+}
+
+void drawStartButton() { // tekent de start knop kan voor meerdere menu's gebruikt worden
+	if(mainmenuselect == 0) { //voor nunchuck 0 = Start button geselecteerd
+		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, STARTBUTSELCOLOR); //make rectangle with select color
+		tft.setCursor(STARTBUTSTPOSX, STARTBUTSTPOSY); //set cursur at shadow position (x + 2, y - 2)
+		tft.setTextColor(SHADOWCOLOR); //shadow color (lightgrey)
+		tft.setTextSize(STARTBUTTSIZE); //start button text size
+		tft.println("START"); //shadowtext start
+		tft.setCursor(STARTBUTTPOSX, STARTBUTTPOSY); //set cursor at 'start button text position x', and y
+		tft.setTextColor(TEXTCOLOR); //set text color (when button is selected)
+		tft.println("START"); //selected text start
+	} else { // niet 0 = Start button niet geselecteerd
+		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, STARTBUTCOLOR); //make rectangle with not selected color
+		tft.setCursor(STARTBUTTPOSX, STARTBUTTPOSY); //set cursor at position
+		tft.setTextColor(TEXTCOLOR); //text color
+		tft.setTextSize(STARTBUTTSIZE);
+		tft.println("START");
+	}
+	tft.drawRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, ILI9341_BLACK); // omleining van knop
+}
+
+void drawHighScoreButton() { // tekent de knop voor de highscores, kan voor meerdere menu's
+	if(mainmenuselect == 1) {//voor nunchuck 1 = Highscores knop geselecteerd
+		tft.fillRect(HSBUTRX, HSBUTRY, HSBUTRW, HSBUTRH, HSBUTSELCOLOR); // maakt het figuur voor de knop geselecteerd
+		tft.setCursor(HSBUTSTPOSX, HSBUTSTPOSY); // selecteerd de positie voor de schaduw tekst
+		tft.setTextColor(SHADOWCOLOR); // selecteerd de shaduwkleur voor de tekst
+		tft.setTextSize(HSBUTTSIZE); // selecteerd de tekst grootte
+		tft.println("HIGH-SCORES"); // print de tekst
+		tft.setCursor(HSBUTTPOSX, HSBUTTPOSY); // selecteerd een nieuwe positie voor de tekst
+		tft.setTextColor(TEXTCOLOR); // selecteerd de teskt kleur
+		tft.println("HIGH-SCORES"); // print de tekst
+	} else { // niet 1 = Highscore knop niet geselecteerd
+		tft.fillRect(HSBUTRX, HSBUTRY, HSBUTRW, HSBUTRH, HSBUTCOLOR); // maakt het figuur voor de knop niet geselecteerd
+		tft.setCursor(HSBUTTPOSX, HSBUTTPOSY);
+		tft.setTextColor(TEXTCOLOR);
+		tft.setTextSize(HSBUTTSIZE);
+		tft.println("HIGH-SCORES");
+	}
+	tft.drawRect(HSBUTRX, HSBUTRY, HSBUTRW, HSBUTRH, ILI9341_BLACK); // omleining van knop
+}
+
+void drawHighScores() {  // Tekent Highscores menu
+	tft.fillScreen(HSBUTCOLOR); // tekent de highscore achtergrond kleur
+	drawTitleBackground(); // tekent de bom achtergrond
+	tft.fillRect(47, 5, 225, 42, HIGHSCORESBACK); // blokje om tekst
+	tft.drawRect(46, 4, 226, 43, ILI9341_BLACK);
+	tft.setCursor(TITLETPOSX + 17, TITLETPOSY ); // startpositie schaduw tekst
+	tft.setTextSize(TITLETSIZE - 1); // tekst grootte
+	tft.setTextColor(SHADOWHCOLOR); // schaduw kleur schaduw tekst		
+	tft.println("HIGH-SCORES"); // tekent het woord
+	tft.setCursor(TITLETPOSX + 15, TITLETPOSY + 2); //startpositie tekst
+	tft.setTextColor(HIGHSCORESTEXT); // kleur voor normale tekst
+	tft.println("HIGH-SCORES"); // tekent het woord
+	drawHighScoreboard(); // tekent het score board
+	drawBackButton(); // tekent de terug knop
+}
+
+void drawHighScoreboard() { // Het score board waar de scores in staan
+	tft.fillRect(HSFIELDX, HSFIELDY, HSFIELDW, (HSFIELDH), ILI9341_BLACK); // Achtergrond kleur
+	tft.drawRect(HSFIELDX, HSFIELDY, HSFIELDW, 0.2*HSFIELDH, GOLD); // 1e high score kleur
+	tft.drawRect(HSFIELDX, HSFIELDY+ 0.2*HSFIELDH, HSFIELDW, 0.2*HSFIELDH, SILVER); // 2e high score kleur
+	tft.drawRect(HSFIELDX, HSFIELDY+ 0.4*HSFIELDH, HSFIELDW, 0.2*HSFIELDH, BRONZE); // 3e high score kleur
+	tft.drawRect(HSFIELDX, HSFIELDY+ 0.6*HSFIELDH, HSFIELDW, 0.2*HSFIELDH, ILI9341_WHITE); // 4e en 
+	tft.drawRect(HSFIELDX, HSFIELDY+ 0.8*HSFIELDH, HSFIELDW, 0.2*HSFIELDH, ILI9341_WHITE); // 5e high score kleuren
+	tft.setCursor(HSFIELDX + 10, HSFIELDY + 10); // locatie tekst 1e high score
+	tft.setTextSize(2); // tekst grootte
+	tft.setTextColor(GOLD); // tekst kleur 1e high score
+	tft.print("1: "); // nummer 1
+	tft.print(highscore1); // print variabele van 1e high score
+	tft.setCursor(HSFIELDX + 10, HSFIELDY + 40); // locatie tekst 2e high score
+	tft.setTextColor(SILVER); // tekst kleur 2e high score
+	tft.print("2: ");
+	tft.print(highscore2);
+	tft.setCursor(HSFIELDX + 10, HSFIELDY + 70); // locatie tekst 3e high score
+	tft.setTextColor(BRONZE); // tekst kleur 3e high score
+	tft.print("3: ");
+	tft.print(highscore3);
+	tft.setCursor(HSFIELDX + 10, HSFIELDY + 100); // locatie tekst 4e high score
+        tft.setTextColor(ILI9341_WHITE);
+        tft.print("4: ");
+        tft.print(highscore4);
+        tft.setCursor(HSFIELDX + 10, HSFIELDY + 130); // locatie tekst 5e high score
+        tft.setTextColor(ILI9341_WHITE);
+        tft.print("5: ");
+        tft.print(highscore5);
+}
+
+void drawQuitButton() { // tekent de quit knop, voor meerdere menu's gebruikt 
+	if(mainmenuselect == 2 || pausemenuselect == 1) {//voor nunchuck als de 3e knop in main menu is geselecteerd of de 2e knop in het pauze menu
+		tft.fillRect(QUITBUTRX, QUITBUTRY, QUITBUTRW, QUITBUTRH, QUITBUTSELCOLOR); // tekent het figuur waarbij de knop geselecteerd is
+		tft.setCursor(QUITBUTSTPOSX, QUITBUTSTPOSY); // selecteerd de positie van de schaduw tekst
+		tft.setTextColor(SHADOWCOLOR); // schaduw kleur voor shaduw tekst
+		tft.setTextSize(QUITBUTTSIZE); // tekst groote
+		tft.println("QUIT"); // tekent het woord
+		tft.setCursor(QUITBUTTPOSX, QUITBUTTPOSY); // selecteerd nieuwe positie voor tekst
+		tft.setTextColor(TEXTCOLOR); // tekst kleur
+		tft.println("QUIT"); // tekent woord
+	} else {
+		tft.fillRect(QUITBUTRX, QUITBUTRY, QUITBUTRW, QUITBUTRH, QUITBUTCOLOR); // tekent het figuur waarbij de knop niet geselecteerd is
+		tft.setCursor(QUITBUTTPOSX, QUITBUTTPOSY);
+		tft.setTextColor(TEXTCOLOR);
+		tft.setTextSize(QUITBUTTSIZE);
+		tft.println("QUIT");
+	}
+	tft.drawRect(QUITBUTRX, QUITBUTRY, QUITBUTRW, QUITBUTRH, ILI9341_BLACK); // omleining knop
+}
+
+void drawPauseMenu() { // Tekent pauze menu
+	tft.fillScreen(PAUSEMENUCOLOR); 
 	drawTitleBackground();
 	tft.fillRect(47, 5, 225, 42, PAUZEBACK); 
 	tft.drawRect(46, 4, 226, 43, ILI9341_BLACK);
@@ -297,20 +428,35 @@ void drawPauseMenu() {
 	drawQuitButton();
 }
 
-void drawHighScores() {
-	tft.fillScreen(HSBUTCOLOR);
-	drawTitleBackground();
-	tft.fillRect(47, 5, 225, 42, HIGHSCORESBACK); 
-	tft.drawRect(46, 4, 226, 43, ILI9341_BLACK);
-	tft.setCursor(TITLETPOSX + 17, TITLETPOSY ); //startpositie tekst
-	tft.setTextSize(TITLETSIZE - 1);
-	tft.setTextColor(SHADOWHCOLOR);		
-	tft.println("HIGH-SCORES");
-	tft.setCursor(TITLETPOSX + 15, TITLETPOSY + 2); //startpositie tekst
-	tft.setTextColor(HIGHSCORESTEXT);
-	tft.println("HIGH-SCORES");
-	drawHighScoreboard();
-	drawBackButton();
+void drawContinueButton() {
+	if(pausemenuselect == 0) { //voor nunchuck
+		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, CONTINEBUTCOLOR); //make rectangle with select color
+		tft.setCursor(CONTBUTSTPOSX, STARTBUTSTPOSY); //set cursur at shadow position (x + 2, y - 2)
+		tft.setTextColor(SHADOWCOLOR); //shadow color (lightgrey)
+		tft.setTextSize(STARTBUTTSIZE); //start button text size
+		tft.println("CONTINUE"); //shadowtext start
+		tft.setCursor(CONTBUTTPOSX, STARTBUTTPOSY); //set cursor at 'start button text position x', and y
+		tft.setTextColor(TEXTCOLOR); //set text color (when button is selected)
+		tft.println("CONTINUE"); //selected text start
+	} else {
+		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, CONTINEBUTSELBUTCOLOR); //make rectangle with not selected color
+		tft.setCursor(CONTBUTTPOSX, STARTBUTTPOSY); //set cursor at position
+		tft.setTextColor(TEXTCOLOR); //text color
+		tft.setTextSize(STARTBUTTSIZE);
+		tft.println("CONTINUE");
+	}
+	tft.drawRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, ILI9341_BLACK);
+}
+
+void drawBackButton() {
+	tft.fillRect(BACKBUTRX, BACKBUTRY, BACKBUTRW, BACKBUTRH, BACKBUTROOD);
+	tft.setCursor(BACKSTPOSX, BACKSTPOSY);
+        tft.setTextColor(SHADOWCOLOR);
+        tft.setTextSize(BACKBUTTSIZE);
+        tft.println("BACK");
+        tft.setCursor(BACKTPOSX, BACKTPOSY);
+        tft.setTextColor(TEXTCOLOR);
+        tft.println("BACK");
 }
 
 void drawTitleBackground(){
@@ -342,152 +488,6 @@ void drawTitleBackground(){
 		int y = 235;
 		drawBomb2(x, y);	
 	}
-}
-
-void drawTitle() { 
-	tft.fillScreen(MAINMENUCOLOR);
-	drawTitleBackground();
-	tft.fillRect(42, 5, 232, 42, TITLECOLOUR); 
-	tft.drawRect(41, 4, 233, 43, ILI9341_BLACK);
-	tft.setCursor(TITLETPOSX + 2, TITLETPOSY - 2); //startpositie tekst
-	tft.setTextSize(TITLETSIZE); //textsize
-	tft.setTextColor(SHADOWBCOLOR);
-	tft.println("B MBERMAN");
-	tft.setCursor(TITLETPOSX, TITLETPOSY);
-	tft.setTextColor(BCOLOR);
-	tft.println("B MBERMAN");
-}
-
-void drawTitleBomb() { 		// toegevoegd
-	tft.fillRect(83, 9, 4, 10, LONT2); // lontje bom 
-	tft.fillRect(80, 14, 10, 5, ILI9341_BLACK); // topje bom
-	tft.drawRect(80, 14, 10, 5, ILI9341_WHITE);
-        tft.fillCircle(84, 29, 10, ILI9341_BLACK); // lichaam bom
-	tft.drawCircle(84, 29, 11, ILI9341_WHITE);
-        tft.fillRect(81, 22, 3, 3, ILI9341_WHITE); // details
-        tft.fillRect(79, 24, 3, 3, ILI9341_WHITE);
-	tft.fillRect(83, 7, 4, 4, FIRE); // fire
-}
-
-void drawStartButton() {
-	if(mainmenuselect == 0) { //voor nunchuck
-		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, STARTBUTSELCOLOR); //make rectangle with select color
-		tft.setCursor(STARTBUTSTPOSX, STARTBUTSTPOSY); //set cursur at shadow position (x + 2, y - 2)
-		tft.setTextColor(SHADOWCOLOR); //shadow color (lightgrey)
-		tft.setTextSize(STARTBUTTSIZE); //start button text size
-		tft.println("START"); //shadowtext start
-		tft.setCursor(STARTBUTTPOSX, STARTBUTTPOSY); //set cursor at 'start button text position x', and y
-		tft.setTextColor(TEXTCOLOR); //set text color (when button is selected)
-		tft.println("START"); //selected text start
-	} else {
-		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, STARTBUTCOLOR); //make rectangle with not selected color
-		tft.setCursor(STARTBUTTPOSX, STARTBUTTPOSY); //set cursor at position
-		tft.setTextColor(TEXTCOLOR); //text color
-		tft.setTextSize(STARTBUTTSIZE);
-		tft.println("START");
-	}
-	tft.drawRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, ILI9341_BLACK);
-}
-
-void drawContinueButton() {
-	if(pausemenuselect == 0) { //voor nunchuck
-		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, CONTINEBUTCOLOR); //make rectangle with select color
-		tft.setCursor(CONTBUTSTPOSX, STARTBUTSTPOSY); //set cursur at shadow position (x + 2, y - 2)
-		tft.setTextColor(SHADOWCOLOR); //shadow color (lightgrey)
-		tft.setTextSize(STARTBUTTSIZE); //start button text size
-		tft.println("CONTINUE"); //shadowtext start
-		tft.setCursor(CONTBUTTPOSX, STARTBUTTPOSY); //set cursor at 'start button text position x', and y
-		tft.setTextColor(TEXTCOLOR); //set text color (when button is selected)
-		tft.println("CONTINUE"); //selected text start
-	} else {
-		tft.fillRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, CONTINEBUTSELBUTCOLOR); //make rectangle with not selected color
-		tft.setCursor(CONTBUTTPOSX, STARTBUTTPOSY); //set cursor at position
-		tft.setTextColor(TEXTCOLOR); //text color
-		tft.setTextSize(STARTBUTTSIZE);
-		tft.println("CONTINUE");
-	}
-	tft.drawRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, ILI9341_BLACK);
-}
-
-void drawHighScoreButton() {
-	if(mainmenuselect == 1) {//voor nunchuck
-		tft.fillRect(HSBUTRX, HSBUTRY, HSBUTRW, HSBUTRH, HSBUTSELCOLOR);
-		tft.setCursor(HSBUTSTPOSX, HSBUTSTPOSY);
-		tft.setTextColor(SHADOWCOLOR);
-		tft.setTextSize(HSBUTTSIZE);
-		tft.println("HIGH-SCORES");
-		tft.setCursor(HSBUTTPOSX, HSBUTTPOSY);
-		tft.setTextColor(TEXTCOLOR);
-		tft.println("HIGH-SCORES");
-	} else {
-		tft.fillRect(HSBUTRX, HSBUTRY, HSBUTRW, HSBUTRH, HSBUTCOLOR);
-		tft.setCursor(HSBUTTPOSX, HSBUTTPOSY);
-		tft.setTextColor(TEXTCOLOR);
-		tft.setTextSize(HSBUTTSIZE);
-		tft.println("HIGH-SCORES");
-	}
-	tft.drawRect(HSBUTRX, HSBUTRY, HSBUTRW, HSBUTRH, ILI9341_BLACK);
-}
-
-void drawHighScoreboard() {
-	tft.fillRect(HSFIELDX, HSFIELDY, HSFIELDW, (HSFIELDH), ILI9341_BLACK);
-	tft.drawRect(HSFIELDX, HSFIELDY, HSFIELDW, 0.2*HSFIELDH, GOLD);
-	tft.drawRect(HSFIELDX, HSFIELDY+ 0.2*HSFIELDH, HSFIELDW, 0.2*HSFIELDH, SILVER);
-	tft.drawRect(HSFIELDX, HSFIELDY+ 0.4*HSFIELDH, HSFIELDW, 0.2*HSFIELDH, BRONZE);
-	tft.drawRect(HSFIELDX, HSFIELDY+ 0.6*HSFIELDH, HSFIELDW, 0.2*HSFIELDH, ILI9341_WHITE);
-	tft.drawRect(HSFIELDX, HSFIELDY+ 0.8*HSFIELDH, HSFIELDW, 0.2*HSFIELDH, ILI9341_WHITE);
-	tft.setCursor(HSFIELDX + 10, HSFIELDY + 10);
-	tft.setTextSize(2);
-	tft.setTextColor(GOLD);
-	tft.print("1: ");
-	tft.print(highscore1);
-	tft.setCursor(HSFIELDX + 10, HSFIELDY + 40);
-	tft.setTextColor(SILVER);
-	tft.print("2: ");
-	tft.print(highscore2);
-	tft.setCursor(HSFIELDX + 10, HSFIELDY + 70);
-	tft.setTextColor(BRONZE);
-	tft.print("3: ");
-	tft.print(highscore3);
-	tft.setCursor(HSFIELDX + 10, HSFIELDY + 100);
-        tft.setTextColor(ILI9341_WHITE);
-        tft.print("4: ");
-        tft.print(highscore4);
-        tft.setCursor(HSFIELDX + 10, HSFIELDY + 130);
-        tft.setTextColor(ILI9341_WHITE);
-        tft.print("5: ");
-        tft.print(highscore5);
-}
-
-void drawBackButton() {
-	tft.fillRect(BACKBUTRX, BACKBUTRY, BACKBUTRW, BACKBUTRH, BACKBUTROOD);
-	tft.setCursor(BACKSTPOSX, BACKSTPOSY);
-        tft.setTextColor(SHADOWCOLOR);
-        tft.setTextSize(BACKBUTTSIZE);
-        tft.println("BACK");
-        tft.setCursor(BACKTPOSX, BACKTPOSY);
-        tft.setTextColor(TEXTCOLOR);
-        tft.println("BACK");
-}
-
-void drawQuitButton() {
-	if(mainmenuselect == 2 || pausemenuselect == 1) {//voor nunchuck
-		tft.fillRect(QUITBUTRX, QUITBUTRY, QUITBUTRW, QUITBUTRH, QUITBUTSELCOLOR);
-		tft.setCursor(QUITBUTSTPOSX, QUITBUTSTPOSY);
-		tft.setTextColor(SHADOWCOLOR);
-		tft.setTextSize(QUITBUTTSIZE);
-		tft.println("QUIT");
-		tft.setCursor(QUITBUTTPOSX, QUITBUTTPOSY);
-		tft.setTextColor(TEXTCOLOR);
-		tft.println("QUIT");
-	} else {
-		tft.fillRect(QUITBUTRX, QUITBUTRY, QUITBUTRW, QUITBUTRH, QUITBUTCOLOR);
-		tft.setCursor(QUITBUTTPOSX, QUITBUTTPOSY);
-		tft.setTextColor(TEXTCOLOR);
-		tft.setTextSize(QUITBUTTSIZE);
-		tft.println("QUIT");
-	}
-	tft.drawRect(QUITBUTRX, QUITBUTRY, QUITBUTRW, QUITBUTRH, ILI9341_BLACK);
 }
 
 void initMap() {
