@@ -133,11 +133,11 @@ uint8_t livesleft2 = 3;
 uint8_t explosioncount;
 uint8_t mainmenuselect = 0;
 char pausemenuselect = 0;
-uint16_t highscore1 = 0;
-uint16_t highscore2 = 0;
-uint16_t highscore3 = 0;
-uint16_t highscore4 = 0;
-uint16_t highscore5 = 0;
+uint32_t highscore1 = 68420;
+uint32_t highscore2 = 3140;
+uint32_t highscore3 = 220;
+uint32_t highscore4 = 10;
+uint32_t highscore5 = 0;
 /* Use Hardware SPI (on Uno, #13, #12, #11) and #10 and # 9for  CS/DC   */
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 
@@ -726,24 +726,40 @@ void drawHighScoreButton() {
 }
 
 void drawHighScoreboard() {
-	tft.drawRect(HSFIELDX, HSFIELDY, HSFIELDW, HSFIELDH, ILI9341_BLACK);
-	tft.fillRect(HSFIELDX, HSFIELDY, HSFIELDW, (0.2*HSFIELDH), GOLD);
+	tft.fillRect(HSFIELDX, HSFIELDY, HSFIELDW, (HSFIELDH), ILI9341_BLACK);
+	tft.drawRect(HSFIELDX, HSFIELDY, HSFIELDW, 0.2*HSFIELDH, GOLD);
+	tft.drawRect(HSFIELDX, HSFIELDY+ 0.2*HSFIELDH, HSFIELDW, 0.2*HSFIELDH, SILVER);
+	tft.drawRect(HSFIELDX, HSFIELDY+ 0.4*HSFIELDH, HSFIELDW, 0.2*HSFIELDH, BRONZE);
+	tft.drawRect(HSFIELDX, HSFIELDY+ 0.6*HSFIELDH, HSFIELDW, 0.2*HSFIELDH, ILI9341_WHITE);
+	tft.drawRect(HSFIELDX, HSFIELDY+ 0.8*HSFIELDH, HSFIELDW, 0.2*HSFIELDH, ILI9341_WHITE);
 	tft.setCursor(HSFIELDX + 10, HSFIELDY + 10);
 	tft.setTextSize(2);
 	tft.setTextColor(GOLD);
-//	tft.println("1: %d", highscore1);
-//	tft.setCursor();
-	tft.setTextSize(2);
+	tft.print("1: ");
+	tft.print(highscore1);
+	tft.setCursor(HSFIELDX + 10, HSFIELDY + 40);
 	tft.setTextColor(SILVER);
-//	tft.println("2: %d", highscore2);
-//	tft.setCursor();
-//	tft.setTextSize(2);
-//	tft.setTextColor(BRONZE);
-//	tft.println("3: %d", highscore3);
+	tft.print("2: ");
+	tft.print(highscore2);
+	tft.setCursor(HSFIELDX + 10, HSFIELDY + 70);
+	tft.setTextColor(BRONZE);
+	tft.print("3: ");
+	tft.print(highscore3);
+	tft.setCursor(HSFIELDX + 10, HSFIELDY + 100);
+        tft.setTextColor(ILI9341_WHITE);
+        tft.print("4: ");
+        tft.print(highscore4);
+        tft.setCursor(HSFIELDX + 10, HSFIELDY + 130);
+        tft.setTextColor(ILI9341_WHITE);
+        tft.print("5: ");
+        tft.print(highscore5);
+
 
 
 }
-//	drawBackButton();
+void drawBackButton() {
+
+}
 
 void drawQuitButton() {
 	if(mainmenuselect == 2 || pausemenuselect == 1) {//voor nunchuck
