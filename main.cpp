@@ -121,7 +121,17 @@
 #define PAUZETEXT 0xBABE// tekst kleur titel highscores menu
 #define BACKBUTROOD 0xF165 //kleur back color
 
+// Nunchuk defines
+#define ADDRESS 0x52
+
+// timer1 defines
+#define FCLK 16000000
+#define GAMETICK_FREQUENCY 1.6
+#define PRESCALER_TIMER1 1024
+
 /* includes */
+#include <Nunchuk.h>
+#include <Wire.h>
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <util/delay.h>
@@ -152,6 +162,9 @@ uint32_t highscore5 = 0;
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 
 /* function prototypes */
+void nunchuk_init();
+void moveCursorNunchuk();
+void screen_init();
 void adc_init();
 void init_2();
 void timer1_init();
@@ -185,37 +198,36 @@ void drawTitleBackground();
 
 /* ISR */
 ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
-	brightness = (ADC>>2); // 10 bits, gooi 2 LSB weg, uitkomst 8 bits
+	brightness = (ADC >> 2); // 10 bits, gooi 2 LSB weg, uitkomst 8 bits
 	// brightness toepassen op beeldscherm
 }
 
 ISR(TIMER1_OVF_vect /*TIMER1_COMPA_vect*/) {
 
+	 moveCursorNunchuk();
+	 
+	 tft.setRotation(3);
+	 drawStartButton();
+	 drawHighScoreButton();
+	 drawQuitButton();
 }
 
 int main(void) {
 	/* setup */
-	//USART_Transmit(0x76);
 	init();
-	tft.begin();
+	init_2();
 	initGame();
-	drawMainMenu();
-//	_delay_ms(5000);
-//	drawHighScores();
-//	_delay_ms(5000);
-
-//	drawPauseMenu();
-//	_delay_ms(5000);
-//	drawMap2();
-	//scherm is 240 * 320 pixels
+	screen_init();
+	Wire.begin();
+	nunchuk_init();
 
 	/* loop */
 	for(;;){
-		//USART_Transmit(0x76);
-		//_delay_ms(1000);
+	
+	    Nunchuk.getState(ADDRESS);
+	    _delay_10(10);
+		
 	}
-
-
 	/* never reached */
 	return 0;
 }
@@ -226,7 +238,7 @@ void init_2() {
 	// init IR
 	// init CSPI
 	//timer0_init();
-	//timer1_init();
+	timer1_init();
 	//timer2_init();
 	//adc_init();
 
@@ -243,15 +255,17 @@ void init_2() {
 	 */
 	DDRD |= (1<<DDD3); // IR-zender
 	DDRD |= (1<<DDD2); // IR-ontvanger
-	DDRB |= (1<<DDB1) | (1<<DDB2) | (1<<DDB3) | (1<<DDB4) | (1<<DDB5); // TFT scherm
-	//DDRB |= (1<<PB0); //touchscreen
-	//DDRD |= (1<<PD4); //SD lezer
 	DDRD |= (1<<DDD0) | (1<<DDD1); //UART
-	DDRC |= (1<<DDC4) /*?*/ | (1<<DDC5); //nunchuck I2C
-
 	sei(); // set global interrupt flag
 }
 
+void screen_init() {
+
+    DDRB |= (1<<DDB1) | (1<<DDB2) | (1<<DDB3) | (1<<DDB4) | (1<<DDB5); // TFT scherm
+    
+    tft.begin();
+}
+    
 void adc_init() { // initialiseer ADC
 	ADMUX |= (1<<REFS0); // reference voltage on AVCC (5V)
 	ADCSRA |= (1<<ADIE); // ADC interrupt enable
@@ -261,7 +275,7 @@ void adc_init() { // initialiseer ADC
 	ADCSRB &= ~(1<<ADTS2) & ~(1<<ADTS1) & ~(1<<ADTS0); // free running mode
 
 	ADCSRA |= (1<<ADEN); // enable ADC
-        ADCSRA |= (1<<ADSC); // start eerste meting
+   ADCSRA |= (1<<ADSC); // start eerste meting
 }
 
 void timer1_init() {
@@ -509,6 +523,21 @@ void initMap() { // tekent de map
 	Walls(); // tekent de muren
 	drawPlayer1Field(); // tekent de hartjes van player 1
 	drawPlayer2Field(); // tekent de hartjes van player 2
+}
+
+void nunchuk_init() {
+    
+    DDRC &= ~(1 << DDC4) & ~(1 << DDC5); // nunchuk ports
+    Nunchuk.begin(ADDRESS); // start communication with Arduino and Nunchuk
+}
+
+void moveCursorNunchuk() {
+
+	if (Nunchuk.Y_Axis() == 0 && mainmenuselect < 2) {
+		mainmenuselect++;
+	} else if (Nunchuk.Y_Axis() == 255 && mainmenuselect > 0) {
+	   mainmenuselect--;
+	}
 }
 
 void drawMap(){ // tekent een man voor een game
