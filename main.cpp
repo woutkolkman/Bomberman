@@ -672,7 +672,7 @@ void drawPlayer2Field() {
 // vervang getekende vakje met een leeg hokje
 void clearDraw(uint8_t x, uint8_t y) {
 //	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
-	tft.fillRect((x * lw) + XUP + OBJOFFSET, (y * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 2, lw - 2 * OBJOFFSET + 2, DARKBROWN);
+	tft.fillRect((x * lw) + XUP + OBJOFFSET, (y * lw) + YUP + OBJOFFSET -1 , lw - 2 * OBJOFFSET + 2, lw - 2 * OBJOFFSET + 3, DARKBROWN);
 //	tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 2, lw - 2 * OBJOFFSET + 1, DARKBROWN);
 }
 
