@@ -5,8 +5,10 @@
 #define YUP 10 //ofset from screen border
 #define OBJOFFSET 2 //no overlap with line
 #define MAXOBJ 8 //object max x/y axis
-
-/* LCD init defines */
+#define GAMETICK_FREQUENCY 1    // gameticks in HZ, max 0,119HZ, min 7812,5HZ
+#define FCLK 16000000           // arduino clock frequency
+#define PRESCALER_TIMER1 1024   // prescaler, zie ook functie timer1_init()
+//LCD init defines
 #define TFT_DC 9 // initialisatie LCD
 #define TFT_CS 10 // initialisatie LCD
 #define ROTATION 3 //rotation of screen
@@ -133,6 +135,7 @@
 
 /* global variables */
 volatile uint8_t brightness = 0;
+volatile uint8_t where = 0;
 uint8_t lw = 220 / AANTALLENGTEBREEDTE;
 uint8_t livesleft1 = 3; //REMOVE
 uint8_t livesleft2 = 3;
@@ -187,7 +190,7 @@ ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 }
 
 ISR(TIMER1_OVF_vect /*TIMER1_COMPA_vect*/) {
-//	gametick
+
 }
 
 int main(void) {
@@ -197,14 +200,13 @@ int main(void) {
 	tft.begin();
 	initGame();
 	drawMainMenu();
-	//_delay_ms(5000);
-	 
-	drawHighScores();
-	//_delay_ms(5000);
+//	_delay_ms(5000);
+//	drawHighScores();
+//	_delay_ms(5000);
 
-	drawPauseMenu();
-	//_delay_ms(5000);
-	drawMap2();
+//	drawPauseMenu();
+//	_delay_ms(5000);
+//	drawMap2();
 	//scherm is 240 * 320 pixels
 
 	/* loop */
@@ -263,8 +265,19 @@ void adc_init() { // initialiseer ADC
 }
 
 void timer1_init() {
-TCCR1B |= (1<<WGM12); //CTC mode
-TCCR1B |= (1<<CS11); //prescaling 8
+	TCCR1A = 0;
+        TCCR1B = 0;
+        TCCR1B |= (1 << WGM12); // CTC, OCR1A top
+        OCR1A = (FCLK / (GAMETICK_FREQUENCY * 2 * PRESCALER_TIMER1)); // frequentie aangeven
+
+        #if PRESCALER_TIMER1 == 1024
+        TCCR1B |= (1 << CS12) /* | (1<<CS11) */ | (1 << CS10); // prescaler 1024
+        #else
+        #pragma GCC error "geen bruikbare prescaler ingesteld"
+        #endif
+
+        TIMSK1 |= (1 << OCIE1A); // output compare match interrupt A enable
+//      TIMSK1 |= (1 << TOIE1); // overflow interrupt enable
 TIMSK1 |= (1<<TOIE1); //overflow interupt enable
 //TIMSK1 |= (1<<OCIEA); //compare output interrupt enable
 }
