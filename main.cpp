@@ -30,6 +30,14 @@
 
 // defines - colors
 #define WALL 0X6B8E 		// kleur voor de muren
+#define PLAYER1 0x135F		// kleuren van de spelers
+#define PLAYER2 0xD9E7
+#define SKIN 0xF5D0
+#define HEARTCOLOUR ILI9341_RED	// kleur voor hartjesl 
+#define GRIDCOLOUR DARKBROWN    // kleur van de gridachtergrond
+#define LONT2 0xDC29 		// kleur van de lont van de bom
+#define FIRE 0xF9E1 		// kleur van het vuur van de bom
+#define TONBROWN 0x28A0		// kleur van de tonnen
 
 // defines - tile states
 #define BOMB_TILE_1S 10 			// player1 bom startwaarde, onderscheid voor bepalen score
@@ -73,7 +81,6 @@
 #include <usart.h>
 #include <stdint.h>
 
-
 // global variables
 volatile uint8_t state = 0; // states om interrupts in de main te laten uitrekenen, 0 = doe niks
 volatile uint8_t player1_health = DEFAULT_PLAYER_HEALTH;
@@ -86,18 +93,17 @@ volatile uint8_t player1_locatie;
 volatile uint8_t player2_locatie;
 volatile uint8_t tile_array[(WIDTH_MAP * HEIGHT_MAP)]; // bevat players, boxes, muren, bommen, vuur
 volatile uint8_t bomb_placed = 0;
-
+volatile uint8_t livesleft1 = 3; //REMOVE Toegevoegd
+volatile uint8_t livesleft2 = 3;
+volatile uint8_t explosioncount; // Toegevoegd
 
 // use hardware SPI (on Uno, #13, #12, #11) and #10 and #9 for CS/DC
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
-
 
 // function prototypes
 void nunchuk_init();
 void move(void);
 void drawGrid();
-void drawHeartLeft();
-void drawHeartRight();
 void clearDraw(uint8_t x, uint8_t y);
 void drawPlayer1(uint8_t x, uint8_t y);
 void drawPlayer2(uint8_t x, uint8_t y);
@@ -114,6 +120,8 @@ void game_init(void);
 void screen_init(void);
 void draw_screen(void);
 void init_map(void);
+void drawPlayer1Field();
+void drawPlayer2Field();
 uint8_t coords_to_tile(uint8_t x, uint8_t y);
 uint8_t tile_to_coords_x(uint8_t tile);
 uint8_t tile_to_coords_y(uint8_t tile);
@@ -126,7 +134,6 @@ void bomb_explode(uint8_t tile);
 void clear_tile(uint8_t tile);
 uint8_t fire_placing(uint8_t tile, uint8_t fire_type);
 
-
 /* ISR */
 ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 	brightness = (ADC >> 2); // 10 bits, gooi 2 LSB weg, uitkomst 8 bits
@@ -135,16 +142,17 @@ ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
 
 ISR(TIMER1_COMPA_vect/*TIMER1_OVF_vect*/) { // gameticks
 	state = 1; // uitvoeren in superloop
+	//tft.setRotation(3);
 }
 
 ISR(TIMER1_COMPB_vect) { // halve gametick
 //	state = 2; // uitvoeren in superloop
 }
 
-
 int main(void) {
 	/* setup */
 	game_init();
+	tft.setRotation(0);
 
 	/* loop */
 	for(;;) {
@@ -167,7 +175,6 @@ int main(void) {
 	/* never reached */
 	return 0;
 }
-
 
 // globale initialisatie functie (ter vervanging van "init")
 void game_init(void) {
@@ -196,12 +203,11 @@ void game_init(void) {
 	sei();
 }
 
-
 void screen_init(void) {
 	DDRB |= (1 << DDB1) | (1 << DDB2) | (1 << DDB3) | (1 << DDB4) | (1 << DDB5); // TFT scherm
 
 	tft.begin(); // enable SPI communication
-	tft.setRotation(2); // rotate screen
+	//tft.setRotation(2); // rotate screen
 
 	// screen is 240 x 320
 	tft.fillScreen(LIGHTBROWN);
@@ -235,13 +241,10 @@ void screen_init(void) {
 //	drawBomb(4, 2);
 }
 
-
 void draw_screen(void) {
 	// screen is 240 x 320
 //	tft.fillScreen(LIGHTBROWN);
 
-        drawHeartLeft();
-        drawHeartRight();
 //	tft.fillRect(XUP, YUP, AANTALLENGTEBREEDTE * lw, AANTALLENGTEBREEDTE * lw, DARKBROWN);
 //	drawGrid();
 //      drawPlayer1(8, 0);
@@ -612,39 +615,54 @@ uint8_t fire_placing(uint8_t tile, uint8_t fire_type) {
 }
 
 
-void drawGrid() {
-        tft.fillRect(XUP, YUP, AANTALLENGTEBREEDTE * lw, AANTALLENGTEBREEDTE * lw, DARKBROWN);
-        for (int x = 0; x < 9; x++) {
-                for (int y = 0; y < 9; y++) {
-                        tft.drawRect((x * lw) + XUP, (y * lw) + YUP, lw + 1, lw + 1, ILI9341_BLACK);
+void drawGrid() { // tekent de grid voor het speelveld
+        tft.fillRect(XUP /*niet op grens van scherm X */, YUP/*niet op grens van scherm Y*/, AANTALLENGTEBREEDTE*lw /*volledige game-grid*/, AANTALLENGTEBREEDTE*lw /*volledige game-grid*/, GRIDCOLOUR /*donkerbruine achtergrond*/);
+        for(int x = 0; x < AANTALLENGTEBREEDTE; x++) {
+                for(int y = 0; y < AANTALLENGTEBREEDTE; y++) {
+                        tft.drawRect((x*lw) + XUP, (y*lw) + YUP, lw+1, lw+1, ILI9341_BLACK); //lijnen tussen grid
                 }
         }
 }
 
-
-void drawHeartLeft() {
-	tft.fillTriangle(190, 25, 200, 15, 200, 35, ILI9341_RED);
-	tft.fillCircle(203, 30, 5, ILI9341_RED);
-	tft.fillCircle(203, 20, 5, ILI9341_RED);
+void drawHeart(uint16_t x, uint16_t y, uint16_t b, uint16_t h) { // tekent hartjes voor de spelers
+	tft.fillTriangle((x + 0.5*b), (y + h), x, (y + 0.44*h), (x + b), (y + 0.44*h), HEARTCOLOUR); //driehoek van hartje
+	tft.fillCircle((x+0.25*b), (y + 0.28*h), (0.25*b), HEARTCOLOUR); //cirkel linksboven van hartje
+        tft.fillCircle((x+0.75*b), (y + 0.28*h), (0.25*b), HEARTCOLOUR); //cirkel rechtsboven van hartje
+	tft.fillRect(x+3,y+2,1,1,ILI9341_WHITE);// details
+	tft.fillRect(x+2,y+3,1,1,ILI9341_WHITE);
 }
 
-
-void drawHeartRight() {
-	
+void drawPlayer1Field() { // tekent de hartjes op de jusite plek en haalt ze weg
+	tft.fillRect(10, 15, 30, 70, ILI9341_BLACK);
+	drawHeart(15, 20, 20, 18); //teken hartje
+	if(livesleft1 >= 2) {
+		drawHeart(15, 40, 20, 18); //als 2 levens, teken 2e hartje
+	}if(livesleft1 == 3) {
+		drawHeart(15, 60, 20, 18); //als 3 levens, teken 3e hartje
+	}
 }
 
+void drawPlayer2Field() {
+	tft.fillRect(280, 155, 30, 70, ILI9341_BLACK);
+	drawHeart(285, 200, 20, 18); //teken hartje
+	if(livesleft2 >= 2) {
+		drawHeart(285, 180, 20, 18); //als 2 levens, teken 2e hartje
+	} if(livesleft2 == 3) {
+		drawHeart(285, 160, 20, 18); //als 3 levens, teken 3e hartje
+	}
+}
 
 // vervang getekende vakje met een leeg hokje
 void clearDraw(uint8_t x, uint8_t y) {
-	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
-//	tft.fillRect((x * lw) + XUP + OBJOFFSET, (y * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, DARKBROWN);
-	tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, DARKBROWN);
+//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+	tft.fillRect((x * lw) + XUP + OBJOFFSET, (y * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 2, lw - 2 * OBJOFFSET + 2, DARKBROWN);
+//	tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 2, lw - 2 * OBJOFFSET + 1, DARKBROWN);
 }
 
 
 // voor tekenen player 1
 void drawPlayer1(uint8_t x, uint8_t y) {
-	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
 //	tft.fillRect((x * lw) + XUP + OBJOFFSET, (y * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_CYAN);
 //	tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_CYAN);
 	/* Pants */
@@ -679,10 +697,9 @@ void drawPlayer1(uint8_t x, uint8_t y) {
 	tft.drawRect(x*lw + XUP + OBJOFFSET + 9, (y*lw) + YUP + OBJOFFSET , lw - 2*OBJOFFSET -12 , lw - 2*OBJOFFSET - 17, ILI9341_BLACK);
 }
 
-
 // voor tekenen player 2
 void drawPlayer2(uint8_t x, uint8_t y) {
-	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
 //	tft.fillRect((x * lw) + XUP + OBJOFFSET, (y * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_RED);
 //	tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_RED);
 	/* Pants */
@@ -720,30 +737,42 @@ void drawPlayer2(uint8_t x, uint8_t y) {
 
 // voor tekenen muren (in het midden)
 void drawWall(uint8_t x, uint8_t y) {
-	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
-	tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, WALL);
+//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+	tft.fillRect(x*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET, WALL);
 }
 
 
 // voor tekenen vuur
 void drawFire(uint8_t x, uint8_t y) {
-	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
 	tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_ORANGE);
 }
 
 
 // voor tekenen bom
 void drawBomb(uint8_t x, uint8_t y) {
-	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
 //	tft.fillCircle(x * lw + XUP + (0.3 * lw), y * lw + YUP + (0.3 * lw), 5, ILI9341_BLACK);
 	tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_PURPLE);
+	/* Bom tekeken */
+	if(explosioncount % 2) {
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 9.5, (y*lw) + YUP + OBJOFFSET + 3 , lw - 2*OBJOFFSET - 18  , lw - 2*OBJOFFSET - 13, LONT2); // lontje bom	
+	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 7, 5, ILI9341_BLACK); // lichaam bom
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 8, (y*lw) + YUP + OBJOFFSET + 9 , ILI9341_WHITE); // details
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET + 10 , ILI9341_WHITE);
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 2 ,lw - 2*OBJOFFSET - 17, lw - 2*OBJOFFSET - 17, FIRE); // fire
+	}
 }
-
 
 // voor tekenen ton
 void drawTon(uint8_t x, uint8_t y) {
-	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
-	tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_PURPLE);
+//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+//	tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_PURPLE);
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 3 , (y*lw) + YUP + OBJOFFSET + 3 , lw - 2*OBJOFFSET - 5, lw - 2*OBJOFFSET - 5, TONBROWN); // lichaam ton
+	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 8,   7   , TONBROWN); // lichaam ton
+	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) + 2,   7   , TONBROWN);	// lichaam ton
+	tft.fillRect(x*lw + XUP + OBJOFFSET +  3, (y*lw) + YUP + OBJOFFSET + 5 , lw - 2*OBJOFFSET - 5, lw - 2*OBJOFFSET - 17, ILI9341_BLACK); // details
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 3 , (y*lw) + YUP + OBJOFFSET + 13, lw - 2*OBJOFFSET - 5, lw - 2*OBJOFFSET - 17, ILI9341_BLACK); // details
 }
 
 
