@@ -34,25 +34,23 @@
 #define WALL 0X6B8E 		// kleur voor de muren
 
 // defines - tile states
-#define BOMB_TILE_1S 10 			// player1 bom startwaarde, onderscheid voor bepalen score
-#define BOMB_TILE_1E (BOMB_TILE_1S + 8) 	// player1 bom eindwaarde, bepaalt na welke tijd bom afgaat
-#define BOMB_TILE_2S 20 			// player2 bom startwaarde, onderscheid voor bepalen score
-#define BOMB_TILE_2E (BOMB_TILE_2S + 8) 	// player2 bom eindwaarde, bepaalt na welke tijd bom afgaat
-#define FIRE_TILE_1S 30 			// player1 vuur startwaarde, onderscheid voor bepalen score
-#define FIRE_TILE_1E (FIRE_TILE_1S + 4) 	// player1 vuur eindwaarde, bepaalt hoe lang fire blijft staan
-#define FIRE_TILE_2S 40 			// player2 vuur startwaarde, onderscheid voor bepalen score
-#define FIRE_TILE_2E (FIRE_TILE_2S + 4)  	// player2 vuur eindwaarde, bepaalt hoe lang fire blijft staan
+#define BOMB_TILE_1S 10 			// player1 bom startwaarde, onderscheid voor bepalen score, >0
+#define BOMB_TILE_1E (BOMB_TILE_1S + 8) 	// player1 bom eindwaarde, bepaalt na welke tijd bom afgaat, >=BOMB_TILE_1S
+#define BOMB_TILE_2S 20 			// player2 bom startwaarde, onderscheid voor bepalen score, >0
+#define BOMB_TILE_2E (BOMB_TILE_2S + 8) 	// player2 bom eindwaarde, bepaalt na welke tijd bom afgaat, >=BOMB_TILE_2S
+#define FIRE_TILE_1S 30 			// player1 vuur startwaarde, onderscheid voor bepalen score, >0
+#define FIRE_TILE_1E (FIRE_TILE_1S + 4) 	// player1 vuur eindwaarde, bepaalt hoe lang fire blijft staan, >=FIRE_TILE_1S
+#define FIRE_TILE_2S 40 			// player2 vuur startwaarde, onderscheid voor bepalen score, >0
+#define FIRE_TILE_2E (FIRE_TILE_2S + 4)  	// player2 vuur eindwaarde, bepaalt hoe lang fire blijft staan, >=FIRE_TILE_2S
 #define EMPTY_TILE 9            		// locatie in array is leeg, >0
 #define PLAYER1_TILE 1          		// locatie in array bevat player 1, >0
 #define PLAYER2_TILE 2          		// locatie in array bevat player 2, >0
 #define TON_TILE 3              		// locatie in array bevat box, >0
 #define WALL_TILE 4             		// locatie in array bevat muur, >0
-//#define BOMB_TILE 5             		// locatie in array bevat bom, >0
-//#define FIRE_TILE 6             		// locatie in array bevat vuur (van explosie), >0
 
 // defines - animations
-#define BOMB_FRAMES 2				// aantal frames van de animatie, handmatig toevoegen bij drawBomb()
-#define FIRE_FRAMES 2				// aantal frames van de animatie, handmatig toevoegen bij drawFire()
+#define BOMB_FRAMES 2				// aantal frames van de animatie, handmatig toevoegen bij drawBomb(), >0, waarde begint bij 1
+#define FIRE_FRAMES 2				// aantal frames van de animatie, handmatig toevoegen bij drawFire(), >0, waarde begint bij 1
 
 #if PLAYER == 1
 #define PLAYER_TILE PLAYER1_TILE
