@@ -235,8 +235,7 @@ int main(void) {
 	for(;;){
 	
 	    Nunchuk.getState(ADDRESS);
-	    _delay_10(10);
-		
+	    _delay_ms(10);
 	}
 	/* never reached */
 	return 0;
