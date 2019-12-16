@@ -157,12 +157,14 @@ ISR(TIMER1_COMPB_vect) { // halve gametick
 int main(void) {
 	/* setup */
 	game_init();
+// drawTitle();
+// drawTitleBomb();
 
 	/* loop */
 	for(;;) {
 		Nunchuk.getState(ADDRESS); // retrieve states joystick and buttons Nunchuk
 
-		if (1 == state) { // TIMER1_COMPA_vect
+	/* if (1 == state) { // TIMER1_COMPA_vect
 			state = 0; // 1 keer uitvoeren na interrupt
 			clearDraw(tile_to_coords_x(player1_locatie), tile_to_coords_y(player1_locatie)); // haal speler weg huidige locatie
 			clearDraw(tile_to_coords_x(player2_locatie), tile_to_coords_y(player2_locatie)); // haal speler weg huidige locatie
@@ -173,20 +175,45 @@ int main(void) {
 		if (2 == state) { // TIMER1_COMPB_vect
 			state = 0; // 1 keer uitvoeren na interrupt
 			item_updating(); // animaties, en cycle door item states (bomb, fire)
-		}
+		} */
+		
+	  
+	  
+		
 	}
 
 	/* never reached */
 	return 0;
 }
 
+void displayLoseMessage() {
+
+		tft.setCursor(positionx, positiony); // selecteerd de positie voor de schaduw tekst
+		tft.setTextColor(SHADOWCOLOR); // selecteerd de shaduwkleur voor de tekst
+		tft.setTextSize(HSBUTTSIZE); // selecteerd de tekst grootte
+		tft.println("YOU LOSE"); // print de tekst
+		tft.setCursor(positionx2, positiony2); // selecteerd een nieuwe positie voor de tekst
+		tft.setTextColor(YOULOSEMESSAGE); // selecteerd de tekst kleur
+		tft.println("YOU LOSE"); // print de tekst
+}
+
+void displayWinMessage() {
+
+		tft.setCursor(positionx, positiony); // selecteerd de positie voor de schaduw tekst
+		tft.setTextColor(SHADOWCOLOR); // selecteerd de shaduwkleur voor de tekst
+		tft.setTextSize(HSBUTTSIZE); // selecteerd de tekst grootte
+		tft.println("YOU WIN"); // print de tekst
+		tft.setCursor(positionx2, positiony2); // selecteerd een nieuwe positie voor de tekst
+		tft.setTextColor(YOUWINMESSAGE); // selecteerd de tekst kleur
+		tft.println("YOU WIN"); // print de tekst
+}
 
 // globale initialisatie functie (ter vervanging van "init")
 void game_init(void) {
 	init(); // onzichtbare functie
 	timer0_init();
 	timer1_init(); // gameticks
-	init_map(); // map vullen met players, muren, boxes, etc.
+// init_map(); // map vullen met players, muren, boxes, etc.
 	screen_init();
 	Wire.begin(); // enable TWI communication
 	nunchuk_init(); // start communication between Nunchuk and Arduino
@@ -222,11 +249,11 @@ void screen_init(void) {
 	tft.setRotation(2); // rotate screen
 
 	// screen is 240 x 320
-	tft.fillScreen(LIGHTBROWN);
+	// tft.fillScreen(LIGHTBROWN);
 
 //	drawHeartLeft();
 //	drawHeartRight();
-	drawGrid();
+// drawGrid();
 	for (int i=0; i<(WIDTH_MAP * HEIGHT_MAP); i++) { // loop door volledige tile-array en teken alle items
 		uint8_t tile = tile_array[i];
 		if (tile == WALL_TILE) { // teken de muren
