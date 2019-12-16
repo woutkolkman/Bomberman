@@ -31,6 +31,23 @@
 #define AANTALLENGTEBREEDTE WIDTH_MAP		// aantal hokjes in lengte en breedte
 #define DEFAULT_PLAYER_HEALTH 3
 
+// win/lose messages
+#define positionx 93
+#define positiony 120
+#define positionx2 positionx + 2
+#define positiony2 positiony - 2
+
+// win lose message graphics
+#define YOULOSEMESSAGE ILI9341_RED
+#define YOUWINMESSAGE ILI9341_BLUE
+#define position 120
+
+// main menu colors
+#define SHADOWCOLOR ILI9341_LIGHTGREY
+
+// high score button defines
+#define HSBUTTSIZE 3
+
 // defines - colors
 #define WALL 0X6B8E 		// kleur voor de muren
 #define PLAYER1 0x135F		// kleuren van de spelers
@@ -84,6 +101,7 @@
 
 
 // global variables
+volatile screenState = 0; // screen changes depending on its screenState
 volatile uint8_t state = 0; // states om interrupts in de main te laten uitrekenen, 0 = doe niks
 volatile uint8_t player1_health = DEFAULT_PLAYER_HEALTH;
 volatile uint8_t player2_health = DEFAULT_PLAYER_HEALTH;
@@ -104,6 +122,9 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 
 
 // function prototypes
+void moveCursorNunchuk();
+void selectButton();
+void clearScreen();
 void nunchuk_init();
 void move(void);
 void drawGrid();
@@ -163,7 +184,8 @@ int main(void) {
 	/* loop */
 	for(;;) {
 		Nunchuk.getState(ADDRESS); // retrieve states joystick and buttons Nunchuk
-
+		_delay_ms(10):
+	
 	/* if (1 == state) { // TIMER1_COMPA_vect
 			state = 0; // 1 keer uitvoeren na interrupt
 			clearDraw(tile_to_coords_x(player1_locatie), tile_to_coords_y(player1_locatie)); // haal speler weg huidige locatie
@@ -177,13 +199,51 @@ int main(void) {
 			item_updating(); // animaties, en cycle door item states (bomb, fire)
 		} */
 		
+		if (screenState == 0) {
+		   drawStartButton();
+		   drawHighScoreButton();
+		   drawQuitButton();
+		}
 	  
+	   moveCursorNunchuk();
+	   selectButton();
+	   
+	   
 	  
 		
 	}
 
 	/* never reached */
 	return 0;
+}
+
+void moveCursorNunchuk() {
+
+   	if (Nunchuk.Y_Axis() == 0 && mainmenuselect < 2) {
+   	   mainmenuselect++;
+  	   } else if (Nunchuk.Y_Axis() == 255 && mainmenuselect > 0) {
+  	      mainmenuselect--;
+      }
+}
+
+void selectButton() {
+
+	if (mainmenuselect == 2 && Nunchuk.C_Button() == 1) { 
+   	screenState = 1;
+   	clearScreen();
+   } else if (mainmenuselect == 0 && Nunchuk.C_Button() == 1) {
+   	screenState = 2;
+   	clearScreen();
+   }  
+}
+
+void clearScreen() {
+
+   if (screenState == 1) {
+      tft.fillScreen(ILI9341_BLACK);
+   } else if (screenState == 2) {
+      tft.fillScreen(ILI9341_RED);
+   }
 }
 
 void displayLoseMessage() {
