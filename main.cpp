@@ -13,8 +13,8 @@
 #define AANTALLENGTEBREEDTE WIDTH_MAP 		// aantal hokjes in lengte en breedte
 #define LIGHTBROWN 0x7A00 			// voor tekenen kleur
 #define DARKBROWN 0x5980 			// voor tekenen kleur
-#define XUP 50 // was 10 					// voor tekenen
-#define YUP 10 // was 50					// voor tekenen
+#define XUP 10 					// voor tekenen
+#define YUP 50 					// voor tekenen
 #define OBJOFFSET 2 				// voor tekenen
 #define MAXOBJ 8 				// voor tekenen
 #define TRUE 1
@@ -246,7 +246,7 @@ void screen_init(void) {
 	DDRB |= (1 << DDB1) | (1 << DDB2) | (1 << DDB3) | (1 << DDB4) | (1 << DDB5); // TFT scherm
 
 	tft.begin(); // enable SPI communication
-	tft.setRotation(3); // rotate screen
+	tft.setRotation(2); // rotate screen
 
 	// screen is 240 x 320
 	// tft.fillScreen(LIGHTBROWN);
@@ -714,23 +714,19 @@ void drawPlayer2Field() {
 
 // vervang getekende vakje met een leeg vakje
 void clearDraw(uint8_t x, uint8_t y) {
-	uint8_t switch_value = x;
-	x = y;
-	y = switch_value;
-//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
 //	tft.fillRect((x * lw) + XUP + OBJOFFSET, (y * lw) + YUP + OBJOFFSET - 1, lw - 2 * OBJOFFSET + 2, lw - 2 * OBJOFFSET + 3, DARKBROWN);
 	tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET - 1, lw - 2 * OBJOFFSET + 2, lw - 2 * OBJOFFSET + 3, DARKBROWN);
-
 }
 
 
 // voor tekenen player 1
 void drawPlayer1(uint8_t x, uint8_t y) {
-//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
 //	x = BORDERDOWN - x; // snelle fix omdraaien y-as
-//	uint8_t switch_value = x;
-//	x = y;
-//	y = switch_value;
+	uint8_t switch_value = x;
+	x = y;
+	y = switch_value;
 
 	/* blokje */
 //	tft.fillRect((x * lw) + XUP + OBJOFFSET, (y * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_CYAN);
@@ -769,13 +765,14 @@ void drawPlayer1(uint8_t x, uint8_t y) {
 	tft.drawRect(x*lw + XUP + OBJOFFSET + 9, (y*lw) + YUP + OBJOFFSET , lw - 2*OBJOFFSET -12 , lw - 2*OBJOFFSET - 17, ILI9341_BLACK);
 }
 
+
 // voor tekenen player 2
 void drawPlayer2(uint8_t x, uint8_t y) {
-//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
 //	x = BORDERDOWN - x; // snelle fix omdraaien y-as
-//	uint8_t switch_value = x;
-//	x = y;
-//	y = switch_value;
+	uint8_t switch_value = x;
+	x = y;
+	y = switch_value;
 
 	/* blokje */
 //	tft.fillRect((x * lw) + XUP + OBJOFFSET, (y * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_RED);
@@ -817,23 +814,17 @@ void drawPlayer2(uint8_t x, uint8_t y) {
 
 // voor tekenen muren (in het midden)
 void drawWall(uint8_t x, uint8_t y) {
-//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
 	tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, WALL);
 //	tft.fillRect(x*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET, WALL);
-	uint8_t switch_value = x;
-	x = y;
-	y = switch_value;
 }
 
 
 // voor tekenen vuur
 void drawFire(uint8_t x, uint8_t y) {
 	int frame = (tile_array[coords_to_tile(y, x)] % BOMB_FRAMES); // voor selecteren frame
-	uint8_t switch_value = x;
-	x = y;
-	y = switch_value;
 
-//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
 
 	if(frame == 0) {
 		tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_ORANGE);
@@ -847,11 +838,11 @@ void drawFire(uint8_t x, uint8_t y) {
 void drawBomb(uint8_t x, uint8_t y) {
 	int frame = (tile_array[coords_to_tile(y, x)] % BOMB_FRAMES); // voor selecteren frame
 
-//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
 //	x = BORDERDOWN - x; // snelle fix omdraaien y-as
-//	uint8_t switch_value = x;
-//	x = y;
-//	y = switch_value;
+	uint8_t switch_value = x;
+	x = y;
+	y = switch_value;
 //	tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_PURPLE);
 
 	/* Bom tekenen */
@@ -872,11 +863,11 @@ void drawBomb(uint8_t x, uint8_t y) {
 
 // voor tekenen ton
 void drawTon(uint8_t x, uint8_t y) {
-//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
 //	x = BORDERDOWN - x; // snelle fix omdraaien y-as
-//	uint8_t switch_value = x;
-//	x = y;
-//	y = switch_value;
+	uint8_t switch_value = x;
+	x = y;
+	y = switch_value;
 //	tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_BLUE);
 
 	/* Ton tekenen */
