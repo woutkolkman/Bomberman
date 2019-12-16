@@ -32,15 +32,15 @@
 #define DEFAULT_PLAYER_HEALTH 3
 
 // win/lose messages
-#define positionx 93
-#define positiony 120
-#define positionx2 positionx + 2
-#define positiony2 positiony - 2
+#define POSITIONX 93
+#define POSITIONY 120
+#define POSITIONX2 POSITIONX + 2
+#define POSITIONY2 POSITIONY - 2
 
 // win lose message graphics
 #define YOULOSEMESSAGE ILI9341_RED
 #define YOUWINMESSAGE ILI9341_BLUE
-#define position 120
+#define POSITION 120
 
 // main menu colors
 #define SHADOWCOLOR ILI9341_LIGHTGREY
@@ -191,8 +191,6 @@
 volatile uint8_t screenState = 0; // screen changes depending on its screenState
 volatile uint8_t mainmenuselect = 0; // mainmenuselect goes from 0 - 1 - 2
 volatile uint8_t state = 0; // states om interrupts in de main te laten uitrekenen, 0 = doe niks
-volatile uint8_t player1_health = DEFAULT_PLAYER_HEALTH;
-volatile uint8_t player2_health = DEFAULT_PLAYER_HEALTH;
 volatile uint8_t brightness = 0; // brightness display
 volatile unsigned int counter = 0;
 volatile uint8_t lw = 220 / AANTALLENGTEBREEDTE; // TEKENEN VAN BREEDTE VAN EEN VAKJE
@@ -210,6 +208,8 @@ volatile uint32_t highscore2 = 3140;
 volatile uint32_t highscore3 = 220;
 volatile uint32_t highscore4 = 10;
 volatile uint32_t highscore5 = 0;
+volatile uint8_t livesleft1 = DEFAULT_PLAYER_HEALTH; //REMOVE Toegevoegd
+volatile uint8_t livesleft2 = DEFAULT_PLAYER_HEALTH;
 
 
 // use hardware SPI (on Uno, #13, #12, #11) and #10 and #9 for CS/DC
@@ -359,22 +359,22 @@ void clearScreen() {
 
 void displayLoseMessage() {
 
-		tft.setCursor(positionx, positiony); // selecteerd de positie voor de schaduw tekst
+		tft.setCursor(POSITIONX, POSITIONY); // selecteerd de positie voor de schaduw tekst
 		tft.setTextColor(SHADOWCOLOR); // selecteerd de shaduwkleur voor de tekst
 		tft.setTextSize(HSBUTTSIZE); // selecteerd de tekst grootte
 		tft.println("YOU LOSE"); // print de tekst
-		tft.setCursor(positionx2, positiony2); // selecteerd een nieuwe positie voor de tekst
+		tft.setCursor(POSITIONX2, POSITIONY2); // selecteerd een nieuwe positie voor de tekst
 		tft.setTextColor(YOULOSEMESSAGE); // selecteerd de tekst kleur
 		tft.println("YOU LOSE"); // print de tekst
 }
 
 void displayWinMessage() {
 
-		tft.setCursor(positionx, positiony); // selecteerd de positie voor de schaduw tekst
+		tft.setCursor(POSITIONX, POSITIONY); // selecteerd de positie voor de schaduw tekst
 		tft.setTextColor(SHADOWCOLOR); // selecteerd de shaduwkleur voor de tekst
 		tft.setTextSize(HSBUTTSIZE); // selecteerd de tekst grootte
 		tft.println("YOU WIN"); // print de tekst
-		tft.setCursor(positionx2, positiony2); // selecteerd een nieuwe positie voor de tekst
+		tft.setCursor(POSITIONX2, POSITIONY2); // selecteerd een nieuwe positie voor de tekst
 		tft.setTextColor(YOUWINMESSAGE); // selecteerd de tekst kleur
 		tft.println("YOU WIN"); // print de tekst
 }
@@ -594,7 +594,7 @@ void clear_tile(uint8_t tile) {
 // iedere client houdt voor zichzelf bij of de betreffende speler gedamaged wordt
 void damage_player(uint8_t fire_type) {
 	if (PLAYER == 1) {
-		player1_health--;
+		livesleft1--;
 		if (fire_type >= FIRE_TILE_1S && fire_type <= FIRE_TILE_1E) { // is het friendly-fire?
 			// speler is door eigen bom geraakt
 			// score toepassen
@@ -602,11 +602,17 @@ void damage_player(uint8_t fire_type) {
 			// speler is geraakt door bom van tegenstander
 			// score toepassen
 		}
-		if (player1_health <= 0) {
+		drawPlayer1Field();
+		if (livesleft1 <= 0) {
+			if(PLAYER == 1) {
+				displayLoseMessage();
+			} else {
+				displayWinMessage();
+			}
 			// player 2 wins
 		}
 	} else if (PLAYER == 2) {
-		player2_health--;
+		livesleft2--;
 		if (fire_type >= FIRE_TILE_2S && fire_type <= FIRE_TILE_2E) { // is het friendly-fire?
 			// speler is door eigen bom geraakt
 			// score toepassen
@@ -614,12 +620,17 @@ void damage_player(uint8_t fire_type) {
 			// speler is geraakt door bom van tegenstander
 			// score toepassen
 		}
-		if (player2_health <= 0) {
+		drawPlayer2Field();
+		if (livesleft2 <= 0) {
+			if(PLAYER == 1) {
+                                displayWinMessage();
+                        } else {
+                                displayLoseMessage();
+                        }
 			// player 1 wins
 		}
 	}
 }
-
 
 // bewegingsfunctie voor de player die wordt gespeeld (1/2)
 void move(void) {
