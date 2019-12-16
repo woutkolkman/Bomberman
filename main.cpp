@@ -101,8 +101,12 @@
 
 
 // global variables
+<<<<<<< HEAD
 volatile uint8_t screenState = 0; // screen changes depending on its screenState
 volatile uint8_t mainmenuselect = 0; // mainmenuselect goes from 0 - 1 - 2
+=======
+volatile screenState = 0; // screen changes depending on its screenState
+>>>>>>> nunchuck
 volatile uint8_t state = 0; // states om interrupts in de main te laten uitrekenen, 0 = doe niks
 volatile uint8_t player1_health = DEFAULT_PLAYER_HEALTH;
 volatile uint8_t player2_health = DEFAULT_PLAYER_HEALTH;
@@ -123,9 +127,12 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 
 
 // function prototypes
+<<<<<<< HEAD
 void drawStartButton();
 void drawHighScoreButton();
 void drawQuitButton();
+=======
+>>>>>>> nunchuck
 void moveCursorNunchuk();
 void selectButton();
 void clearScreen();
@@ -188,7 +195,11 @@ int main(void) {
 	/* loop */
 	for(;;) {
 		Nunchuk.getState(ADDRESS); // retrieve states joystick and buttons Nunchuk
+<<<<<<< HEAD
 		_delay_ms(10);
+=======
+		_delay_ms(10):
+>>>>>>> nunchuck
 	
 	/* if (1 == state) { // TIMER1_COMPA_vect
 			state = 0; // 1 keer uitvoeren na interrupt
