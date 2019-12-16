@@ -45,10 +45,7 @@
 // main menu colors
 #define SHADOWCOLOR ILI9341_LIGHTGREY
 
-// high score button defines
-#define HSBUTTSIZE 3
-
-// defines - colors
+//defines - colors
 #define WALL 0X6B8E 		// kleur voor de muren
 #define PLAYER1 0x135F		// kleuren van de spelers
 #define PLAYER2 0xD9E7
@@ -199,9 +196,6 @@ volatile uint8_t player1_locatie;
 volatile uint8_t player2_locatie;
 volatile uint8_t tile_array[(WIDTH_MAP * HEIGHT_MAP)]; // bevat players, boxes, muren, bommen, vuur
 volatile uint8_t bomb_placed = 0;
-volatile uint8_t livesleft1 = 3; //REMOVE Toegevoegd
-volatile uint8_t livesleft2 = 3;
-volatile uint8_t mainmenuselect = 0;
 volatile char pausemenuselect = 0;
 volatile uint32_t highscore1 = 68420;
 volatile uint32_t highscore2 = 3140;
