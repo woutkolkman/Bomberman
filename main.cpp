@@ -13,8 +13,8 @@
 #define AANTALLENGTEBREEDTE WIDTH_MAP 		// aantal hokjes in lengte en breedte
 #define LIGHTBROWN 0x7A00 			// voor tekenen kleur
 #define DARKBROWN 0x5980 			// voor tekenen kleur
-#define XUP 10 					// voor tekenen
-#define YUP 50 					// voor tekenen
+#define XUP 50 // was 10 					// voor tekenen
+#define YUP 10 // was 50					// voor tekenen
 #define OBJOFFSET 2 				// voor tekenen
 #define MAXOBJ 8 				// voor tekenen
 #define TRUE 1
@@ -219,7 +219,7 @@ void screen_init(void) {
 	DDRB |= (1 << DDB1) | (1 << DDB2) | (1 << DDB3) | (1 << DDB4) | (1 << DDB5); // TFT scherm
 
 	tft.begin(); // enable SPI communication
-	tft.setRotation(2); // rotate screen
+	tft.setRotation(3); // rotate screen
 
 	// screen is 240 x 320
 	tft.fillScreen(LIGHTBROWN);
@@ -687,23 +687,60 @@ void drawPlayer2Field() {
 
 // vervang getekende vakje met een leeg vakje
 void clearDraw(uint8_t x, uint8_t y) {
-	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+	uint8_t switch_value = x;
+	x = y;
+	y = switch_value;
+//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
 //	tft.fillRect((x * lw) + XUP + OBJOFFSET, (y * lw) + YUP + OBJOFFSET - 1, lw - 2 * OBJOFFSET + 2, lw - 2 * OBJOFFSET + 3, DARKBROWN);
 	tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET - 1, lw - 2 * OBJOFFSET + 2, lw - 2 * OBJOFFSET + 3, DARKBROWN);
+
 }
 
 
 // voor tekenen player 1
 void drawPlayer1(uint8_t x, uint8_t y) {
-	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
 //	x = BORDERDOWN - x; // snelle fix omdraaien y-as
-	uint8_t switch_value = x;
-	x = y;
-	y = switch_value;
+//	uint8_t switch_value = x;
+//	x = y;
+//	y = switch_value;
 
 	/* blokje */
 //	tft.fillRect((x * lw) + XUP + OBJOFFSET, (y * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_CYAN);
 //	tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_CYAN);
+
+	/* mannetje */
+	/* Pants */
+/*	tft.fillRect(x*lw + XUP + OBJOFFSET + 6.5, (y*lw) + YUP + OBJOFFSET + 10, lw - 2*OBJOFFSET - 12 , lw - 2*OBJOFFSET - 20 , ILI9341_BLACK); // pant
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET + 15, lw - 2*OBJOFFSET - 17 , lw - 2*OBJOFFSET - 13, ILI9341_BLACK); // left leg
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 11, (y*lw) + YUP + OBJOFFSET + 15, lw - 2*OBJOFFSET - 17 , lw - 2*OBJOFFSET - 13, ILI9341_BLACK); // right leg
+	/* Shoes */
+/*	tft.fillRect(x*lw + XUP + OBJOFFSET + 5, (y*lw) + YUP + OBJOFFSET + 20, lw - 2*OBJOFFSET - 16, lw - 2*OBJOFFSET - 18, PLAYER1); // left shoe
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 11, (y*lw) + YUP + OBJOFFSET + 20, lw - 2*OBJOFFSET - 16, lw - 2*OBJOFFSET - 18, PLAYER1); // right shoe	
+	/* Body  */
+/*	tft.fillRect(x*lw + XUP + OBJOFFSET + 7.5, (y*lw) + YUP + OBJOFFSET + 6, lw - 2*OBJOFFSET - 14 , lw - 2*OBJOFFSET - 12, PLAYER1); // chest 
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 3, (y*lw) + YUP + OBJOFFSET + 8, lw - 2*OBJOFFSET - 18 , lw - 2*OBJOFFSET - 14, PLAYER1); // left arm
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 4, (y*lw) + YUP + OBJOFFSET + 8, lw - 2*OBJOFFSET - 17 , lw - 2*OBJOFFSET - 17, PLAYER1); // left shoulder
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 2, (y*lw) + YUP + OBJOFFSET + 13, lw - 2*OBJOFFSET - 17 , lw - 2*OBJOFFSET - 17, SKIN);// left hand
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 14, (y*lw) + YUP + OBJOFFSET + 8, lw - 2*OBJOFFSET - 18 , lw - 2*OBJOFFSET - 14, PLAYER1); // right arm
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 13, (y*lw) + YUP + OBJOFFSET + 8, lw - 2*OBJOFFSET - 17 , lw - 2*OBJOFFSET - 17, PLAYER1); // right shoulder
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 14, (y*lw) + YUP + OBJOFFSET + 13, lw - 2*OBJOFFSET - 17 , lw - 2*OBJOFFSET - 17, SKIN);// right hand	
+	/* Head */
+/*	tft.fillCircle(x*lw + XUP + (0.3*lw) + 5, y*lw + YUP + (0.3*lw) - 1 , 5, SKIN); // head
+	/* Face */
+/*	tft.fillRect(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET + 4, lw - 2*OBJOFFSET - 18, lw - 2*OBJOFFSET - 18, ILI9341_BLACK); // left eye
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 7, (y*lw) + YUP + OBJOFFSET + 4, lw - 2*OBJOFFSET - 19, lw - 2*OBJOFFSET - 19, ILI9341_WHITE); // left eye white
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 12, (y*lw) + YUP + OBJOFFSET + 4, lw - 2*OBJOFFSET - 18, lw - 2*OBJOFFSET - 18, ILI9341_BLACK); // right eye
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 12, (y*lw) + YUP + OBJOFFSET + 4, lw - 2*OBJOFFSET - 19, lw - 2*OBJOFFSET - 19, ILI9341_WHITE); // right eye white
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 10, (y*lw) + YUP + OBJOFFSET + 8, ILI9341_BLACK);// mouth
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 11, (y*lw) + YUP + OBJOFFSET + 7, ILI9341_BLACK);
+	tft.drawPixel(x*lw + XUP + OBJOFFSET + 9, (y*lw) + YUP + OBJOFFSET + 8, ILI9341_BLACK);
+	/* Hat  */
+/*	tft.fillRect(x*lw + XUP + OBJOFFSET + 5, (y*lw) + YUP + OBJOFFSET - 2, lw - 2*OBJOFFSET -10 , lw - 2*OBJOFFSET - 16, PLAYER1); // main hat
+	tft.drawRect(x*lw + XUP + OBJOFFSET + 5, (y*lw) + YUP + OBJOFFSET - 2, lw - 2*OBJOFFSET -10 , lw - 2*OBJOFFSET - 16, ILI9341_BLACK);
+	tft.fillRect(x*lw + XUP + OBJOFFSET + 9, (y*lw) + YUP + OBJOFFSET , lw - 2*OBJOFFSET -12 , lw - 2*OBJOFFSET - 17, PLAYER1); // brim
+	tft.drawRect(x*lw + XUP + OBJOFFSET + 9, (y*lw) + YUP + OBJOFFSET , lw - 2*OBJOFFSET -12 , lw - 2*OBJOFFSET - 17, ILI9341_BLACK);
+*/
 
 	/* mannetje */
 	/* Pants */
@@ -738,14 +775,13 @@ void drawPlayer1(uint8_t x, uint8_t y) {
 	tft.drawRect(x*lw + XUP + OBJOFFSET + 9, (y*lw) + YUP + OBJOFFSET , lw - 2*OBJOFFSET -12 , lw - 2*OBJOFFSET - 17, ILI9341_BLACK);
 }
 
-
 // voor tekenen player 2
 void drawPlayer2(uint8_t x, uint8_t y) {
-	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
 //	x = BORDERDOWN - x; // snelle fix omdraaien y-as
-	uint8_t switch_value = x;
-	x = y;
-	y = switch_value;
+//	uint8_t switch_value = x;
+//	x = y;
+//	y = switch_value;
 
 	/* blokje */
 //	tft.fillRect((x * lw) + XUP + OBJOFFSET, (y * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_RED);
@@ -787,17 +823,23 @@ void drawPlayer2(uint8_t x, uint8_t y) {
 
 // voor tekenen muren (in het midden)
 void drawWall(uint8_t x, uint8_t y) {
-	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
 	tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, WALL);
 //	tft.fillRect(x*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET, WALL);
+	uint8_t switch_value = x;
+	x = y;
+	y = switch_value;
 }
 
 
 // voor tekenen vuur
 void drawFire(uint8_t x, uint8_t y) {
 	int frame = (tile_array[coords_to_tile(y, x)] % BOMB_FRAMES); // voor selecteren frame
+	uint8_t switch_value = x;
+	x = y;
+	y = switch_value;
 
-	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
 
 	if(frame == 0) {
 		tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_ORANGE);
@@ -811,11 +853,11 @@ void drawFire(uint8_t x, uint8_t y) {
 void drawBomb(uint8_t x, uint8_t y) {
 	int frame = (tile_array[coords_to_tile(y, x)] % BOMB_FRAMES); // voor selecteren frame
 
-	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
 //	x = BORDERDOWN - x; // snelle fix omdraaien y-as
-	uint8_t switch_value = x;
-	x = y;
-	y = switch_value;
+//	uint8_t switch_value = x;
+//	x = y;
+//	y = switch_value;
 //	tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_PURPLE);
 
 	/* Bom tekenen */
@@ -836,11 +878,11 @@ void drawBomb(uint8_t x, uint8_t y) {
 
 // voor tekenen ton
 void drawTon(uint8_t x, uint8_t y) {
-	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
 //	x = BORDERDOWN - x; // snelle fix omdraaien y-as
-	uint8_t switch_value = x;
-	x = y;
-	y = switch_value;
+//	uint8_t switch_value = x;
+//	x = y;
+//	y = switch_value;
 //	tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_BLUE);
 
 	/* Ton tekenen */
