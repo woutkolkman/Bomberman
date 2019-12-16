@@ -56,7 +56,7 @@ int main(void) {
 //		single_conversion();
 		#endif
 
-//		test_ir();
+		test_ir();
 	}
 
 
@@ -171,7 +171,7 @@ void single_conversion() {
 
 
 void test_ir() {
-	#define IR_TEST 1 // 0(uit)/1/2/3/4
+	#define IR_TEST 0 // 0(uit)/1/2/3/4
 
 	#if IR_TEST == 1
 	if (IR_nieuwe_input()) { IR_send((IR_receive() + 1)); }
@@ -187,7 +187,7 @@ void test_ir() {
 //	IR_send(0xFF);
 //	IR_send(0x00);
 	IR_send(0x32); // 0011 0010, print '2'
-	_delay_ms(1500);
+	_delay_ms(5000);
 	#elif IR_TEST == 4
 	USART_Transmit(IR_receive());
 	_delay_ms(3000);
