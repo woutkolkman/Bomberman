@@ -877,11 +877,11 @@ void drawPlayer1Field() { // tekent de hartjes op de jusite plek en haalt ze weg
 	}
 }
 
-void drawPlayer2Field() {
+void drawPlayer2Field() { // player 2
 	tft.fillRect(280, 155, 30, 70, ILI9341_BLACK);
-	if(livesleft2 >= 1) {
+	if(livesleft2 == 1) {
 		drawHeart(285, 200, 20, 18); //teken hartje
-	}if(livesleft2 >= 2) {
+	}if(livesleft2 == 2) {
 		drawHeart(285, 200, 20, 18); //teken hartje
 		drawHeart(285, 180, 20, 18); //als 2 levens, teken 2e hartje
 	}if(livesleft2 == 3) {
