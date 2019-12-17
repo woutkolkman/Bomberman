@@ -33,18 +33,18 @@
 #define DEFAULT_PLAYER_HEALTH 3
 
 // win/lose messages
-#define POSITIONX 93
-#define POSITIONY 120
-#define POSITIONX2 POSITIONX + 2
-#define POSITIONY2 POSITIONY - 2
-
-// win lose message graphics
+#define POSITIONX 109				// message posititon schaduw tekst x
+#define POSITIONY 115				// message posititon schaduw tekst y
+#define POSITIONX2 POSITIONX + 2		// message position tekst x
+#define POSITIONY2 POSITIONY - 2		// message position tekst y
+#define POSITIONRX 75				// message rechtangle position x
+#define POSITIONRY 83				// message rechtangle position y
+#define POSITIONRW 167		 		// message rechtangle width 
+#define POSITIONRH 72				// message rechtangle heigth		
 #define YOULOSEMESSAGE ILI9341_RED
-#define YOUWINMESSAGE ILI9341_BLUE
+#define YOUWINMESSAGE 0x5623
+#define YOUWINSHADOW 0x52A9
 #define POSITION 120
-
-// main menu colors
-#define SHADOWCOLOR ILI9341_LIGHTGREY
 
 // defines - colors
 #define WALL 0X6B8E 		// kleur voor de muren
@@ -363,7 +363,7 @@ void clearScreen() {
 }
 
 void displayLoseMessage() {
-
+		tft.fillRect(POSITIONRX, POSITIONRY, POSITIONRW, POSITIONRH, ILI9341_BLACK); // blokje om tekst
 		tft.setCursor(POSITIONX, POSITIONY); // selecteerd de positie voor de schaduw tekst
 		tft.setTextColor(SHADOWCOLOR); // selecteerd de shaduwkleur voor de tekst
 		tft.setTextSize(HSBUTTSIZE); // selecteerd de tekst grootte
@@ -374,9 +374,9 @@ void displayLoseMessage() {
 }
 
 void displayWinMessage() {
-
+		tft.fillRect(POSITIONRX, POSITIONRY, POSITIONRW, POSITIONRH, ILI9341_BLACK); // blokje om tekst
 		tft.setCursor(POSITIONX, POSITIONY); // selecteerd de positie voor de schaduw tekst
-		tft.setTextColor(SHADOWCOLOR); // selecteerd de shaduwkleur voor de tekst
+		tft.setTextColor(YOUWINSHADOW); // selecteerd de shaduwkleur voor de tekst
 		tft.setTextSize(HSBUTTSIZE); // selecteerd de tekst grootte
 		tft.println("YOU WIN"); // print de tekst
 		tft.setCursor(POSITIONX2, POSITIONY2); // selecteerd een nieuwe positie voor de tekst
@@ -876,8 +876,9 @@ void drawHeart(uint16_t x, uint16_t y, uint16_t b, uint16_t h) { // tekent hartj
 
 void drawPlayer1Field() { // tekent de hartjes op de jusite plek en haalt ze weg
 	tft.fillRect(10, 15, 30, 70, ILI9341_BLACK);
-	drawHeart(15, 20, 20, 18); //teken hartje
-	if(livesleft1 >= 2) {
+	if(livesleft1 >= 1) {
+		drawHeart(15, 20, 20, 18);//teken hartje
+	}if(livesleft1 >= 2) {
 		drawHeart(15, 40, 20, 18); //als 2 levens, teken 2e hartje
 	}if(livesleft1 == 3) {
 		drawHeart(15, 60, 20, 18); //als 3 levens, teken 3e hartje
@@ -887,10 +888,11 @@ void drawPlayer1Field() { // tekent de hartjes op de jusite plek en haalt ze weg
 
 void drawPlayer2Field() {
 	tft.fillRect(280, 155, 30, 70, ILI9341_BLACK);
-	drawHeart(285, 200, 20, 18); //teken hartje
-	if(livesleft2 >= 2) {
+	if(livesleft1 >= 1) {
+		drawHeart(285, 200, 20, 18); //teken hartje
+	}if(livesleft2 >= 2) {
 		drawHeart(285, 180, 20, 18); //als 2 levens, teken 2e hartje
-	} if(livesleft2 == 3) {
+	}if(livesleft2 == 3) {
 		drawHeart(285, 160, 20, 18); //als 3 levens, teken 3e hartje
 	}
 }
