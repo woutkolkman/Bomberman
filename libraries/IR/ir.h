@@ -6,6 +6,7 @@
 // voorkom meerdere keren includen
 #ifndef IR_H
 #define IR_H
+#define AANTAL_BITS_TYPE uint8_t
 
 
 /* defines */
@@ -47,7 +48,7 @@ public:
 
 
 /* function prototypes - gebruikt door functies in ir.cpp */
-void schakel_IR_LED(uint8_t aan);
+//void schakel_IR_LED(uint8_t aan);
 void var_delay_ms(int ms);
 void prepare_send(void);
 void prepare_receive(void);
@@ -56,7 +57,8 @@ void prepare_receive(void);
 /* function prototypes - te gebruiken voor main.cpp */
 void IR_prepare(uint8_t frequentie); // frequentie kan alleen 38 of 56 zijn
 void IR_send(uint8_t waarde);
-uint8_t IR_receive(void);
+void IR_send_direct(uint8_t waarde);
+AANTAL_BITS_TYPE IR_receive(void);
 uint8_t IR_nieuwe_input(void);
 
 

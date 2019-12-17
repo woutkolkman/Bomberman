@@ -1,10 +1,14 @@
-/* defines IR */
-#define FREQUENCY 56 // 38/56, geef frequentie aan IR LED
-//#define ADC_FREERUNNING // als dit defined is werkt de ADC op freerunning
-//#define ADC_WAIT // als dit defined is wacht de processor totdat de ADC conversie klaar is
-#define VAR_TYPE_IR uint8_t // variabele type voor IR communicatie
-// defines
+/* defines */
 #define PLAYER 1 				// 1/2
+#if PLAYER == 1 				// player-specifieke define settings
+#define FREQUENCY 38 				// 38/56, geef frequentie aan IR LED
+#elif PLAYER == 2
+#define FREQUENCY 56 				// 38/56, geef frequentie aan IR LED
+#endif
+#define BAUD 9600 				// baudrate USART
+//#define ADC_FREERUNNING 			// als dit defined is werkt de ADC op freerunning
+//#define ADC_WAIT 				// als dit defined is wacht de processor totdat de ADC conversie klaar is
+#define VAR_TYPE_IR uint8_t 			// variabele type voor IR communicatie
 #define ADDRESS 0x52 				// nunchuk adres
 #define GAMETICK_FREQUENCY 1 			// gameticks in HZ, max 0,119HZ, min 7812,5HZ
 #define FCLK 16000000 				// arduino clock frequency
@@ -12,7 +16,6 @@
 #define OFFSET_VAKJE 24 			// breedte & hoogte van een vakje
 #define OFFSET_PLAYER_X 12 			// offset waarop player in vakje zit X
 #define OFFSET_PLAYER_Y 20 			// offset waarop player in vakje zit Y
-#define BAUD 9600 				// baudrate USART
 #define TFT_DC 9 				// initialisatie LCD
 #define TFT_CS 10 				// initialisatie LCD
 #define AANTALLENGTEBREEDTE WIDTH_MAP 		// aantal hokjes in lengte en breedte
@@ -44,8 +47,8 @@
 #define POSITIONY2 POSITIONY - 2		// message position tekst y
 #define POSITIONRX 75				// message rechtangle position x
 #define POSITIONRY 83				// message rechtangle position y
-#define POSITIONRW 167		 		// message rechtangle width 
-#define POSITIONRH 72				// message rechtangle heigth		
+#define POSITIONRW 167		 		// message rechtangle width
+#define POSITIONRH 72				// message rechtangle heigth
 #define YOULOSEMESSAGE ILI9341_RED
 #define YOUWINMESSAGE 0x5623
 #define YOUWINSHADOW 0x52A9
@@ -76,6 +79,11 @@
 #define PLAYER2_TILE 2          		// locatie in array bevat player 2, >0
 #define TON_TILE 3              		// locatie in array bevat box, >0
 #define WALL_TILE 4             		// locatie in array bevat muur, >0
+#if PLAYER == 1
+#define PLAYER_TILE PLAYER1_TILE
+#elif PLAYER == 2
+#define PLAYER_TILE PLAYER2_TILE
+#endif
 
 // defines - animations
 #define BOMB_FRAMES 2				// aantal frames van de animatie, handmatig toevoegen bij drawBomb(), >0, waarde begint bij 1
@@ -95,7 +103,8 @@
 #define FIRE 0xF9E1 // kleur van vuur van de bom
 #define SELECTEDTEXTCOLOR ILI9341_GREEN
 #define SHADOWCOLOR ILI9341_LIGHTGREY // shaduw kleur letters
-// startbutton defines
+
+// defines - startbutton
 #define STARTBUTRX 50 //start button rectangle position x
 #define STARTBUTRY 50 //start button rectangle position y
 #define STARTBUTRW 220 //start button rectangle width
@@ -105,7 +114,8 @@
 #define STARTBUTTSIZE 2 //start button text size
 #define STARTBUTSTPOSX STARTBUTTPOSX + 2
 #define STARTBUTSTPOSY STARTBUTTPOSY - 2
-// buttoncolor defines
+
+// defines - buttoncolor
 #define TEXTCOLOR ILI9341_BLACK
 #define STARTBUTCOLOR 0x0575
 #define STARTBUTSELCOLOR 0xAFFF
@@ -115,10 +125,12 @@
 #define HSBUTSELCOLOR 0x87F0
 #define QUITBUTCOLOR 0xC800
 #define QUITBUTSELCOLOR 0xFAAA
-// continue define
+
+// defines - continue
 #define CONTBUTTPOSX STARTBUTTPOSX - 10
 #define CONTBUTSTPOSX STARTBUTSTPOSX - 10
-// High score button defines
+
+// defines - High score button
 #define HSBUTRX 50
 #define HSBUTRY 100
 #define HSBUTRW 220
@@ -128,12 +140,14 @@
 #define HSBUTTSIZE 2
 #define HSBUTSTPOSX HSBUTTPOSX + 2
 #define HSBUTSTPOSY HSBUTTPOSY - 2
-// High score lis defines
+
+// defines - High score lis defines
 #define HSFIELDX 30
 #define HSFIELDY 45
 #define HSFIELDW 260
 #define HSFIELDH 150
-// Quit button defines 
+
+// defines - Quit button defines
 #define QUITBUTRX 50
 #define QUITBUTRY 150
 #define QUITBUTRW 220
@@ -143,7 +157,8 @@
 #define QUITBUTTSIZE 2
 #define QUITBUTSTPOSX QUITBUTTPOSX + 2
 #define QUITBUTSTPOSY QUITBUTTPOSY - 2
-// Back button defines
+
+// defines - Back button defines
 #define BACKBUTRX 120
 #define BACKBUTRY 200
 #define BACKBUTRW 80
@@ -153,8 +168,9 @@
 #define BACKBUTTSIZE 2
 #define BACKTPOSX 135
 #define BACKTPOSY 210
-// meer menu's kleuren
-#define PAUSEMENUCOLOR 0xFD60 
+
+// defines - meer menu's kleuren
+#define PAUSEMENUCOLOR 0xFD60
 #define FIRESPREAD ILI9341_RED
 #define GOLD 0xFE00
 #define SILVER 0x94B2
@@ -167,9 +183,11 @@
 #define PAUZETEXT 0xBABE// tekst kleur titel highscores menu
 #define BACKBUTROOD 0xF165 //kleur backbutton color
 
+
 // algmeen
 #define deleteScreen tft.fillScreen(ILI9341_BLACK);
 #define quitScreen tft.fillScreen(ILI9341_BLACK);
+
 
 /* includes IR */
 //#include <cspi.h>
@@ -188,11 +206,6 @@
 #include <usart.h>
 #include <stdint.h>
 
-#if PLAYER == 1
-#define PLAYER_TILE PLAYER1_TILE
-#elif PLAYER == 2
-#define PLAYER_TILE PLAYER2_TILE
-#endif
 
 // global variables
 volatile uint8_t selectButtonFlag = 1; // variabele om functionaliteit menu te enablen/disablen
@@ -217,8 +230,10 @@ volatile uint8_t livesleft1 = DEFAULT_PLAYER_HEALTH;
 volatile uint8_t livesleft2 = DEFAULT_PLAYER_HEALTH;
 volatile uint8_t counttomain = 0; //when losing or winning, wait 5 seconds (or 5 gameticks) to return to main menu
 
+
 // use hardware SPI (on Uno, #13, #12, #11) and #10 and #9 for CS/DC
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
+
 
 // function prototypes
 void moveCursorNunchuk();
@@ -271,15 +286,14 @@ void drawTitleBomb();
 void drawTitleBackground();
 void drawBomb2(uint16_t x, uint8_t y);
 void drawIets();
-
-/* function prototypes IR */
 void ir_ontcijfer(VAR_TYPE_IR input);
 void ir_verzenden(void);
 void test_ir(void); // test
-
+void ir_check_input(void);
 #ifndef ADC_FREERUNNING
 void single_conversion(void);
 #endif
+
 
 /* ISR */
 ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
@@ -300,7 +314,7 @@ int main(void) {
 	/* setup */
 	DDRB |= (1 << DDB1) | (1 << DDB2) | (1 << DDB3) | (1 << DDB4) | (1 << DDB5); // TFT scherm
 
-	game_init();	
+	game_init();
 	tft.begin(); // enable SPI communication
 	tft.setRotation(3); // rotate screen
 	drawMainMenu();
@@ -311,81 +325,89 @@ int main(void) {
 	for(;;) {
 		Nunchuk.getState(ADDRESS); // retrieve states joystick and buttons Nunchuk
 		_delay_ms(10);
-	
-	if (screenState == 2) { // is start button is pressed 
-		selectButtonFlag = 0; // reset flag, op deze manier blijft functionaliteit mainmenu uit
-		if (1 == state) { // TIMER1_COMPA_vect
-			state = 0; // 1 keer uitvoeren na interrupt
-			if(livesleft1 == 0 || livesleft2 == 0) {
-                                if(counttomain == TOMAINMENULENGTH) {
-                                        screenState = 0;
-                                        drawMainMenu();
-                                        livesleft1 = DEFAULT_PLAYER_HEALTH;
-                                        livesleft2 = DEFAULT_PLAYER_HEALTH;
-                                        counttomain = 0;
-                                } else {
-                                        counttomain++;
-                                }
-                        } else {
-				clearDraw(tile_to_coords_x(player1_locatie), tile_to_coords_y(player1_locatie)); // haal speler weg huidige locatie
-				clearDraw(tile_to_coords_x(player2_locatie), tile_to_coords_y(player2_locatie)); // haal speler weg huidige locatie
-				move(); // pas nunchuk toe
-				item_updating(); // animaties, en cycle door item states (bomb, fire)
-				draw_screen(); // teken players opnieuw
+
+		ir_check_input(); // pas IR ontvangen informatie toe wanneer beschikbaar
+
+		if (screenState == 2) { // is start button is pressed
+			selectButtonFlag = 0; // reset flag, op deze manier blijft functionaliteit mainmenu uit
+			if (1 == state) { // TIMER1_COMPA_vect
+				state = 0; // 1 keer uitvoeren na interrupt
+				if(livesleft1 == 0 || livesleft2 == 0) {
+	                                if(counttomain == TOMAINMENULENGTH) {
+	                                        screenState = 0;
+        	                                drawMainMenu();
+                	                        livesleft1 = DEFAULT_PLAYER_HEALTH;
+                        	                livesleft2 = DEFAULT_PLAYER_HEALTH;
+                                	        counttomain = 0;
+                               		} else {
+                                	        counttomain++;
+                                	}
+                       		} else {
+					clearDraw(tile_to_coords_x(player1_locatie), tile_to_coords_y(player1_locatie)); // haal speler weg huidige locatie
+					clearDraw(tile_to_coords_x(player2_locatie), tile_to_coords_y(player2_locatie)); // haal speler weg huidige locatie
+					move(); // pas nunchuk toe
+					item_updating(); // animaties, en cycle door item states (bomb, fire)
+					draw_screen(); // teken players opnieuw
+				}
 			}
-		}
-		if (2 == state) { // TIMER1_COMPB_vect
-			state = 0; // 1 keer uitvoeren na interrupt
-			item_updating(); // animaties, en cycle door item states (bomb, fire)
-		}
-    }
-    
-    if (selectButtonFlag == 1) {		// in main menu knoppen kunnen selecteren
-       selectButton();					// in het begin staat flag altijd op 1, als spel bezig is op 0
-    }
-    
+			if (2 == state) { // TIMER1_COMPB_vect
+				state = 0; // 1 keer uitvoeren na interrupt
+				item_updating(); // animaties, en cycle door item states (bomb, fire)
+			}
+    		}
+
+    		if (selectButtonFlag == 1) {		// in main menu knoppen kunnen selecteren
+       			selectButton();					// in het begin staat flag altijd op 1, als spel bezig is op 0
+    		}
+
 		if (screenState == 0) { // aan het begin van het spel staat screenState op 0 om menuopties weer te geven
-		   drawStartButton();
-		   drawHighScoreButton();
-		   drawQuitButton();
+			drawStartButton();
+			drawHighScoreButton();
+			drawQuitButton();
 		}
+
+		#ifndef ADC_FREERUNNING
+//		single_conversion();
+		#endif
 	}
+
 	/* never reached */
 	return 0;
 }
 
-void moveCursorNunchuk() {
 
-   	if (Nunchuk.Y_Axis() == 0 && mainmenuselect < 2) {
-   	   mainmenuselect++;
-  	   } else if (Nunchuk.Y_Axis() == 255 && mainmenuselect > 0) {
-  	      mainmenuselect--;
-      }
+void moveCursorNunchuk() {
+	if (Nunchuk.Y_Axis() == 0 && mainmenuselect < 2) {
+		mainmenuselect++;
+	} else if (Nunchuk.Y_Axis() == 255 && mainmenuselect > 0) {
+		mainmenuselect--;
+	}
 }
+
 
 void selectButton() {
-
 	moveCursorNunchuk(); // move cursor over buttons
 
-	if (mainmenuselect == 2 && Nunchuk.C_Button() == 1) { 
-   	screenState = 1;
-   	clearScreen();
-   } else if (mainmenuselect == 0 && Nunchuk.C_Button() == 1) {
-   	screenState = 2;
-   	clearScreen();
-   }  
+	if (mainmenuselect == 2 && Nunchuk.C_Button() == 1) {
+		screenState = 1;
+		clearScreen();
+	} else if (mainmenuselect == 0 && Nunchuk.C_Button() == 1) {
+		screenState = 2;
+		clearScreen();
+	}
 }
+
 
 void clearScreen() {
-
-   if (screenState == 2) { // if start button is pressed
-      init_map(); // start map
-      screen_init();
-   } else if (screenState == 1) { // if quit button is pressed
-      quitScreen;
-      selectButtonFlag = 0;
-   }
+	if (screenState == 2) { // if start button is pressed
+		init_map(); // start map
+		screen_init();
+	} else if (screenState == 1) { // if quit button is pressed
+		quitScreen;
+		selectButtonFlag = 0;
+	}
 }
+
 
 void displayLoseMessage() {
 		tft.fillRect(POSITIONRX, POSITIONRY, POSITIONRW, POSITIONRH, ILI9341_BLACK); // blokje om tekst
@@ -398,6 +420,7 @@ void displayLoseMessage() {
 		tft.println("YOU LOSE"); // print de tekst
 }
 
+
 void displayWinMessage() {
 		tft.fillRect(POSITIONRX, POSITIONRY, POSITIONRW, POSITIONRH, ILI9341_BLACK); // blokje om tekst
 		tft.setCursor(POSITIONX, POSITIONY); // selecteerd de positie voor de schaduw tekst
@@ -409,21 +432,19 @@ void displayWinMessage() {
 		tft.println("YOU WIN"); // print de tekst
 }
 
+
 // globale initialisatie functie (ter vervanging van "init")
 void game_init(void) {
-	// init functie van IR 
-	USART_Init(); // init serial
 	IR_prepare(FREQUENCY); // init IR
-	// einde init functie van IR
 
 	init(); // onzichtbare functie
 	timer0_init();
 	timer1_init(); // gameticks
-// init_map(); // map vullen met players, muren, boxes, etc.
-// screen_init();
+//	init_map(); // map vullen met players, muren, boxes, etc.
+//	screen_init();
 	Wire.begin(); // enable TWI communication
 	nunchuk_init(); // start communication between Nunchuk and Arduino
-//	USART_Init();
+//	USART_Init(); // init serial
 
 //	for (int i=0; i<=6; i++) { // dummy reads tegen te voeg plaatsen van bom bij sommige nunchuks
 //		Nunchuk.getState(ADDRESS);
@@ -447,6 +468,13 @@ void game_init(void) {
 	sei();
 }
 
+
+// functie voor het checken van input via IR, verwijst door naar ir_ontcijfer
+void ir_check_input(void) {
+	if (IR_nieuwe_input()) { ir_ontcijfer(IR_receive); } // pas IR ontvangen informatie toe wanneer beschikbaar
+}
+
+
 // functie voor het ontcijferen en verwerken van nieuwe IR input
 void ir_ontcijfer(VAR_TYPE_IR input) {
 	// roep functie aan bij nieuwe informatie (PCINT?)
@@ -464,6 +492,7 @@ void ir_ontcijfer(VAR_TYPE_IR input) {
 	// ...
 }
 
+
 // functie voor het verzamelen en verzenden van IR output
 void ir_verzenden() {
 	// roep functie aan op gameticks
@@ -479,6 +508,7 @@ void ir_verzenden() {
 
 	IR_send(waarde);
 }
+
 
 void screen_init(void) {
 	// screen is 240 x 320
@@ -684,6 +714,7 @@ void damage_player(uint8_t fire_type) {
 	}
 }
 
+
 // bewegingsfunctie voor de player die wordt gespeeld (1/2)
 void move(void) {
 	// kan maar 1 kant op bewegen per keer, zolang er niks in de weg staat en player niet van de map afgaat
@@ -809,7 +840,7 @@ void item_updating(void) {
 				drawFire(tile_to_coords_x(i), tile_to_coords_y(i));
 			}
 		}
-    }
+	}
 }
 
 
@@ -1105,6 +1136,7 @@ void drawBomb(uint8_t x, uint8_t y) {
 	}
 }
 
+
 void drawBomb2(uint16_t x, uint8_t y) { // tekent de bomentjes gebruikt voor de achtergrond
 	tft.fillRect( x-1, y-15 , 3 , 5, LONT2); // lontje bom
 	tft.fillRect( x-1, y-15, 3, 2, FIRE); // fire
@@ -1113,8 +1145,9 @@ void drawBomb2(uint16_t x, uint8_t y) { // tekent de bomentjes gebruikt voor de 
 	tft.fillCircle( x, y, 7, ILI9341_BLACK); // lichaam bom
 	tft.drawCircle( x, y, 7, ILI9341_WHITE);
 	tft.fillRect(x-3, y-3, 2, 2, ILI9341_WHITE); // details
-	tft.fillRect(x-4, y-2, 2, 2, ILI9341_WHITE);	
+	tft.fillRect(x-4, y-2, 2, 2, ILI9341_WHITE);
 }
+
 
 // voor tekenen ton
 void drawTon(uint8_t x, uint8_t y) {
@@ -1193,7 +1226,7 @@ void single_conversion() {
 
 
 void test_ir() {
-	#define IR_TEST 1 // 0(uit)/1/2/3/4
+	#define IR_TEST 0 // 0(uit)/1/2/3/4
 
 	#if IR_TEST == 1
 	if (IR_nieuwe_input()) { IR_send((IR_receive() + 1)); }
@@ -1209,10 +1242,15 @@ void test_ir() {
 //	IR_send(0xFF);
 //	IR_send(0x00);
 	IR_send(0x32); // 0011 0010, print '2'
-	_delay_ms(1500);
+//	IR_send(0x33);
+//	IR_send(0x41);
+//	IR_send(0x42);
+	_delay_ms(3500);
 	#elif IR_TEST == 4
-	USART_Transmit(IR_receive());
-	_delay_ms(3000);
+	if (IR_nieuwe_input()) {
+		_delay_ms(500);
+		USART_Transmit(IR_receive());
+	}
 	#endif
 
 	ADCSRB &= ~(1 << ADTS2) & ~(1 << ADTS1) & ~(1 << ADTS0); // free running mode
@@ -1221,14 +1259,16 @@ void test_ir() {
 	ADCSRA |= (1 << ADSC); // start eerste meting
 }
 
+
 /* Alle schermpjes/menu's/knopjes */
 void drawMainMenu() { // teken main menu
 	drawTitle(); // tekent titel
 	drawTitleBomb(); // tekent de bom op de 'o'
-	drawStartButton(); // tekent de Start knop op het main menu 
+	drawStartButton(); // tekent de Start knop op het main menu
 	drawHighScoreButton(); // tekent de Highscore knop op het main menu
 	drawQuitButton(); // tekent de Quit knop op het main menu
 }
+
 
 void drawTitle() { // titel van main menu
 	tft.fillScreen(MAINMENUCOLOR); // main menu achtergrond kleur
@@ -1237,15 +1277,16 @@ void drawTitle() { // titel van main menu
 	tft.drawRect(41, 4, 233, 43, ILI9341_BLACK);
 	tft.setCursor(TITLETPOSX + 2, TITLETPOSY - 2); // positie van schaduw tekst
 	tft.setTextSize(TITLETSIZE); //textsize
-	tft.setTextColor(SHADOWBCOLOR); // shaduw kleur van titel 
+	tft.setTextColor(SHADOWBCOLOR); // shaduw kleur van titel
 	tft.println("B MBERMAN"); // schrijven van schaduw titel
 	tft.setCursor(TITLETPOSX, TITLETPOSY);	// positie van titel
 	tft.setTextColor(BCOLOR); // titel kleur
 	tft.println("B MBERMAN"); // schrijven van titel
 }
 
+
 void drawTitleBomb() { // bom vorimge 'o' in main menu
-	tft.fillRect(83, 9, 4, 10, LONT2); // lontje bom 
+	tft.fillRect(83, 9, 4, 10, LONT2); // lontje bom
 	tft.fillRect(80, 14, 10, 5, ILI9341_BLACK); // topje bom
 	tft.drawRect(80, 14, 10, 5, ILI9341_WHITE);
         tft.fillCircle(84, 29, 10, ILI9341_BLACK); // lichaam bom
@@ -1254,6 +1295,7 @@ void drawTitleBomb() { // bom vorimge 'o' in main menu
         tft.fillRect(79, 24, 3, 3, ILI9341_WHITE);
 	tft.fillRect(83, 7, 4, 4, FIRE); // fire
 }
+
 
 void drawStartButton() { // tekent de start knop kan voor meerdere menu's gebruikt worden
 	if(mainmenuselect == 0) { //voor nunchuck 0 = Start button geselecteerd
@@ -1275,6 +1317,7 @@ void drawStartButton() { // tekent de start knop kan voor meerdere menu's gebrui
 	tft.drawRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, ILI9341_BLACK); // omleining van knop
 }
 
+
 void drawHighScoreButton() { // tekent de knop voor de highscores, kan voor meerdere menu's
 	if(mainmenuselect == 1) {//voor nunchuck 1 = Highscores knop geselecteerd
 		tft.fillRect(HSBUTRX, HSBUTRY, HSBUTRW, HSBUTRH, HSBUTSELCOLOR); // maakt het figuur voor de knop geselecteerd
@@ -1295,6 +1338,7 @@ void drawHighScoreButton() { // tekent de knop voor de highscores, kan voor meer
 	tft.drawRect(HSBUTRX, HSBUTRY, HSBUTRW, HSBUTRH, ILI9341_BLACK); // omleining van knop
 }
 
+
 void drawHighScores() {  // Tekent Highscores menu
 	tft.fillScreen(HSBUTCOLOR); // tekent de highscore achtergrond kleur
 	drawTitleBackground(); // tekent de bom achtergrond
@@ -1311,12 +1355,13 @@ void drawHighScores() {  // Tekent Highscores menu
 	drawBackButton(); // tekent de terug knop
 }
 
+
 void drawHighScoreboard() { // Het score board waar de scores in staan
 	tft.fillRect(HSFIELDX, HSFIELDY, HSFIELDW, (HSFIELDH), ILI9341_BLACK); // Achtergrond kleur
 	tft.drawRect(HSFIELDX, HSFIELDY, HSFIELDW, 0.2*HSFIELDH, GOLD); // 1e high score kleur
 	tft.drawRect(HSFIELDX, HSFIELDY+ 0.2*HSFIELDH, HSFIELDW, 0.2*HSFIELDH, SILVER); // 2e high score kleur
 	tft.drawRect(HSFIELDX, HSFIELDY+ 0.4*HSFIELDH, HSFIELDW, 0.2*HSFIELDH, BRONZE); // 3e high score kleur
-	tft.drawRect(HSFIELDX, HSFIELDY+ 0.6*HSFIELDH, HSFIELDW, 0.2*HSFIELDH, ILI9341_WHITE); // 4e en 
+	tft.drawRect(HSFIELDX, HSFIELDY+ 0.6*HSFIELDH, HSFIELDW, 0.2*HSFIELDH, ILI9341_WHITE); // 4e en
 	tft.drawRect(HSFIELDX, HSFIELDY+ 0.8*HSFIELDH, HSFIELDW, 0.2*HSFIELDH, ILI9341_WHITE); // 5e high score kleuren
 	tft.setCursor(HSFIELDX + 10, HSFIELDY + 10); // locatie tekst 1e high score
 	tft.setTextSize(2); // tekst grootte
@@ -1341,7 +1386,8 @@ void drawHighScoreboard() { // Het score board waar de scores in staan
         tft.print(highscore5);
 }
 
-void drawQuitButton() { // tekent de quit knop, voor meerdere menu's gebruikt 
+
+void drawQuitButton() { // tekent de quit knop, voor meerdere menu's gebruikt
 	if(mainmenuselect == 2 || pausemenuselect == 1) {//voor nunchuck als de 3e knop in main menu is geselecteerd of de 2e knop in het pauze menu
 		tft.fillRect(QUITBUTRX, QUITBUTRY, QUITBUTRW, QUITBUTRH, QUITBUTSELCOLOR); // tekent het figuur waarbij de knop geselecteerd is
 		tft.setCursor(QUITBUTSTPOSX, QUITBUTSTPOSY); // selecteerd de positie van de schaduw tekst
@@ -1361,6 +1407,7 @@ void drawQuitButton() { // tekent de quit knop, voor meerdere menu's gebruikt
 	tft.drawRect(QUITBUTRX, QUITBUTRY, QUITBUTRW, QUITBUTRH, ILI9341_BLACK); // omleining knop
 }
 
+
 void drawPauseMenu() { // Tekent pauze menu
 	tft.fillScreen(PAUSEMENUCOLOR); // tekent de achtergrond kleur van pauze menu
 	drawTitleBackground(); // tekent de bom achtergrond
@@ -1376,6 +1423,7 @@ void drawPauseMenu() { // Tekent pauze menu
 	drawContinueButton(); // tekent de continue knop
 	drawQuitButton(); // tekent de quit knop
 }
+
 
 void drawContinueButton() { // tekent de continue knop
 	if(pausemenuselect == 0) { //voor nunchuck als de 1e knop in het pauze menu is geselecteerd 
@@ -1397,6 +1445,7 @@ void drawContinueButton() { // tekent de continue knop
 	tft.drawRect(STARTBUTRX, STARTBUTRY, STARTBUTRW, STARTBUTRH, ILI9341_BLACK); // omleining knop
 }
 
+
 void drawBackButton() { // tekent de terug knop
 	tft.fillRect(BACKBUTRX, BACKBUTRY, BACKBUTRW, BACKBUTRH, BACKBUTROOD);  // tekent het figuur voor de knop
 	tft.setCursor(BACKSTPOSX, BACKSTPOSY); // selecteerd de positie van de schaduw tekst
@@ -1408,33 +1457,34 @@ void drawBackButton() { // tekent de terug knop
         tft.println("BACK"); // print de teskt
 }
 
+
 void drawTitleBackground(){ // tekent de bom achtergrond
 	for(int x = 20; x < 320; x = x + 40){ // tekent een gelijk aantal bommetjes op de hoogte y = 25
 		int y = 25;
-		drawBomb2(x, y);	
+		drawBomb2(x, y);
 	}
 	for(int x = 0; x < 360; x = x + 40){ // hoogte op 60
 		int y = 60;
-		drawBomb2(x, y);	
+		drawBomb2(x, y);
 	}
 	for(int x = 20; x < 320; x = x + 40){ // hoogte op 95
 		int y = 95;
-		drawBomb2(x, y);	
+		drawBomb2(x, y);
 	}
 	for(int x = 0; x < 360; x = x + 40){ // hoogte op 130
 		int y = 130;
-		drawBomb2(x, y);	
+		drawBomb2(x, y);
 	}
 	for(int x = 20; x < 320; x = x + 40){ // hoogte op 165
 		int y = 165;
-		drawBomb2(x, y);	
+		drawBomb2(x, y);
 	}
 	for(int x = 0; x < 360; x = x + 40){ // hoogte op 200
 		int y = 200;
-		drawBomb2(x, y);	
+		drawBomb2(x, y);
 	}
 	for(int x = 20; x < 320; x = x + 40){ // hoogte op 235
 		int y = 235;
-		drawBomb2(x, y);	
+		drawBomb2(x, y);
 	}
 }
