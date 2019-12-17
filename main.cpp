@@ -1,7 +1,11 @@
 /* defines */
-#define FREQUENCY 56 // 38/56, geef frequentie aan IR LED
-#define BAUD 9600 // baudrate USART
 #define PLAYER 1 // 1/2
+#if PLAYER == 1 // player-specifieke define settings
+#define FREQUENCY 38 // 38/56, geef frequentie aan IR LED
+#elif PLAYER == 2
+#define FREQUENCY 56 // 38/56, geef frequentie aan IR LED
+#endif
+#define BAUD 9600 // baudrate USART
 //#define ADC_FREERUNNING // als dit defined is werkt de ADC op freerunning
 //#define ADC_WAIT // als dit defined is wacht de processor totdat de ADC conversie klaar is
 #define VAR_TYPE_IR uint8_t // variabele type voor IR communicatie
@@ -57,6 +61,9 @@ int main(void) {
 		#endif
 
 		test_ir();
+
+//		_delay_ms(1000);
+//		USART_Transmit(0x2E);
 	}
 
 
@@ -171,7 +178,7 @@ void single_conversion() {
 
 
 void test_ir() {
-	#define IR_TEST 1 // 0(uit)/1/2/3/4
+	#define IR_TEST 0 // 0(uit)/1/2/3/4
 
 	#if IR_TEST == 1
 	if (IR_nieuwe_input()) { IR_send((IR_receive() + 1)); }
@@ -187,9 +194,14 @@ void test_ir() {
 //	IR_send(0xFF);
 //	IR_send(0x00);
 	IR_send(0x32); // 0011 0010, print '2'
+//	IR_send(0x33);
+//	IR_send(0x41);
+//	IR_send(0x42);
 	_delay_ms(3500);
 	#elif IR_TEST == 4
-	USART_Transmit(IR_receive());
-	_delay_ms(3000);
+	if (IR_nieuwe_input()) {
+		_delay_ms(500);
+		USART_Transmit(IR_receive());
+	}
 	#endif
 }

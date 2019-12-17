@@ -1,5 +1,7 @@
 /*
  *	IR communication library - half-duplex
+ *
+ *	Byte gelijk aan RESEND_BITS is in gebruik, roep dit niet aan om loop te voorkomen
  */
 
 
@@ -10,27 +12,24 @@
  * waarden van de counter lopen niet lineair op, waarschijnlijk door het gebruik van delays
  */
 
-//#define BITIS1_MS 30 				// ms waarop LED aanstaat voor 1
 #define BITIS1 55 /*(BITIS1_MS / MS_PER_TICK)*/
 #define BITIS1_S_56 200				// zelfde als BITIS1, alleen voor verzenden
-#define BITIS1_S_38 135
-//#define BITIS0_MS 20 				// ms waarop LED aanstaat voor 0
+#define BITIS1_S_38 140
 #define BITIS0 40 /*(BITIS0_MS / MS_PER_TICK)*/
 #define BITIS0_S_56 100				// zelfde als BITIS0, alleen voor verzenden
 #define BITIS0_S_38 68
-//#define STARTBIT_MS 400 			// ms waarop LED aanstaat voor startbit
 #define STARTBIT 114 /*(STARTBIT_MS / MS_PER_TICK)*/
 #define STARTBIT_S_56 400				// zelfde als STARTBIT, alleen voor verzenden
 #define STARTBIT_S_38 271
-//#define STOPBIT_MS 200 			// ms waarop LED aanstaat voor stopbit
 #define STOPBIT 100 /*(STOPBIT_MS / MS_PER_TICK)*/
 #define STOPBIT_S_56 300				// zelfde als STOPBIT, alleen voor verzenden
 #define STOPBIT_S_38 204
 #define OFFSET 20 /*(4 / MS_PER_TICK)*/ 	// offset waarde voor kleine afwijking (ontvangen)
-//#define TIJD0_MS 20 				// tijd waarop LED tussen bits uit is
 #define TIJD0_S_56 20				// tijd waarop LED tussen bits uit is
 #define TIJD0_S_38 20				// tijd waarop LED tussen bits uit is
 
+
+#define SEND_RECEIVE_QUEUE_SIZE 10		// grootte wachtrij verzenden/ontvangen
 #define KHZ_1 0x35/*53*//*52*/ 			// timer2 OVF count 38KHZ
 #define KHZ_2 0x24/*36*/ 			// timer2 OVF count 56KHZ
 #define DUTYCYCLE_1 (KHZ_1 / 2) 		// dutycycle 50% 38KHZ
@@ -42,6 +41,8 @@
 //#ifdef DYNAMIC_TIJD0
 //#define MAXTIJD_PER_BIT 60 			// tijd van bit + TIJD0, moet groter zijn dan BITIS1_MS & BITIS0_MS
 //#endif
+#define RESEND_BITS 0xFF 			// als input gelijk is aan dit, stuur laatste byte opnieuw
+#define RESEND_TRIES 5				// maximaal aantal keer informatie opnieuw proberen op te halen
 #define AANTAL_BITS 8 				// geeft direct aantal bits aan, pas ook type aan
 #define AANTAL_BITS_TYPE uint8_t 		// pas dit aan als aantal bits wordt aangepast
 #define PRINT_ONTVANGST 			// debug, print via USART
@@ -57,7 +58,6 @@ volatile uint8_t dutycycle = DUTYCYCLE_1; // huidige dutycycle voor IR_send, sta
 volatile uint8_t prevcounter;
 volatile uint8_t currcounter;
 volatile unsigned int diffcounter; // 0-65535 / 0-4294967295
-volatile AANTAL_BITS_TYPE input; // bevat de gestuurde byte
 volatile AANTAL_BITS_TYPE raw_input; // wordt overgezet naar "input" bij stopbit
 volatile uint8_t timer2_ovfs = 0; // telt aantal overflows bij ontvangen data
 volatile int aantal_bits = 0; // telt aantal bits of dit geldig is
@@ -70,12 +70,16 @@ volatile int startbit_s; // verschilt bij 38/56 khz
 volatile int stopbit_s; // verschilt bij 38/56 khz
 volatile int tijd0_s; // verschilt bij 38/56 khz
 volatile uint8_t aan_het_verzenden = 0; // staat op 1 als er informatie verzonden mag worden
-volatile uint8_t output = 0; // gegevens om te verzenden
+volatile uint8_t aantal_verzenden = 0; // hoeveelheid berichten om te verzenden in de queue
 volatile uint8_t state = 0; // state voor verzenden informatie in ISR
 volatile uint8_t aantal_bits_verzonden = 0;
 volatile uint8_t verzend_na_ontvangen = 0;
 volatile unsigned int send_goal = 0;
 volatile unsigned int send_count = 0;
+volatile AANTAL_BITS_TYPE send_queue[SEND_RECEIVE_QUEUE_SIZE];
+volatile AANTAL_BITS_TYPE receive_queue[SEND_RECEIVE_QUEUE_SIZE];
+volatile AANTAL_BITS_TYPE prev_send = 0x00; // voor opnieuw verzenden bericht (als het verkeerd is aangekomen)
+volatile uint8_t curr_resend_tries = 0;
 
 
 ///* function prototypes */
@@ -116,21 +120,38 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 			USART_Transmit(0x41); // test
 			#endif
 		} else if (diffcounter >= (STOPBIT - OFFSET) && diffcounter <= (STOPBIT + OFFSET)) { // stopbit
-			if (AANTAL_BITS == aantal_bits) { // aantal bits checken op geldigheid
-				input = raw_input; // input teruggeven aan programma wanneer alles binnen is
-				aantal_bits = 0; // aantal bits check resetten
-				nieuwe_input = 1; // geef aan dat er nieuwe input is
-
-				// softwarematige interrupt genereren met PCINT?
-			}
-			aan_het_ontvangen = 0; // aangeven dat er niks meer wordt ontvangen
-
 			#ifdef PRINT_ONTVANGST
 			USART_Transmit(0x4F); // test
 			#endif
 
-			if (verzend_na_ontvangen) { // als er informatie verzonden kan worden
-				IR_send(output); // verzend die informatie
+			if (AANTAL_BITS == aantal_bits) { // aantal bits checken op geldigheid
+				if (RESEND_BITS == raw_input) {
+					// laatste bericht is niet goed aangekomen, verstuur opnieuw
+//					aantal_verzenden++;
+					_delay_ms(10); // voorkomt soort loop waarin constant ongeldige berichten worden verstuurd
+					IR_send_direct(prev_send); // meest vorige bericht dat is verstuurd opnieuw laten versturen
+				} else {
+					// sla input op om te laten uitlezen door hoofdprogramma
+					if (1 + nieuwe_input < SEND_RECEIVE_QUEUE_SIZE) { // niet buiten array kunnen schrijven
+						nieuwe_input++; // geef aan dat er nieuwe input is
+						receive_queue[nieuwe_input] = raw_input; // input teruggeven aan programma wanneer alles binnen is
+					}
+
+					// softwarematige interrupt genereren met PCINT?
+				}
+				curr_resend_tries = 0;
+			} else {
+				if (curr_resend_tries < RESEND_TRIES) { // maximaal aantal keer informatie opnieuw proberen op te halen
+					IR_send_direct(RESEND_BITS); // vraag om laatste bericht opnieuw te versturen
+					curr_resend_tries++;
+				}
+			}
+			aan_het_ontvangen = 0; // aangeven dat er niks meer wordt ontvangen
+			aantal_bits = 0; // aantal bits check resetten
+
+			if (aantal_verzenden) { // als er informatie verzonden kan worden
+				aantal_verzenden--; // opnieuw invoeren bericht
+				IR_send_direct(send_queue[(1 + aantal_verzenden)]);
 			}
 		} else { // byte informatie
 			raw_input = (raw_input>>1); // shift input 1 naar rechts, nieuwe bit komt links
@@ -157,7 +178,9 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 			}
 		}
 
-		TIMSK2 &= ~(1<<OCIE2A); // OCR2A compare match interrupt uitschakelen, weer aanzetten bij neergaande flank
+		if (!aan_het_verzenden) { // niet aanroepen als timer klaar staat om iets te verzenden
+			TIMSK2 &= ~(1<<OCIE2A); // OCR2A compare match interrupt uitschakelen, weer aanzetten bij neergaande flank
+		}
 	} else { // neergaande flank (1 -> 0)
 		prevcounter = TCNT2; // onthoud counterstand, als het goed is 0, anders dicht in de buurt van 0.
 		TIMSK2 |= (1<<OCIE2A); // OCR2A compare match interrupt, tel aantal overflows in TIMER2_COMPA_vect ISR
@@ -172,7 +195,7 @@ ISR (TIMER2_COMPA_vect) { // wordt aangeroepen bij timer2 overflows, wanneer dat
 	timer2_ovfs++; // wordt niks mee gedaan tijdens verzenden, wordt gereset bij ontvangen
 
 	/* code voor verzenden */
-	if (aan_het_verzenden == 1 // als er output is om te verzenden, en ...
+	if (aan_het_verzenden // als er output is om te verzenden, en ...
 	&& aan_het_ontvangen == 0) { // als er niks ontvangen wordt, verzendt
 		send_count += 1; // counter iets ophogen om doel te bereiken
 
@@ -185,12 +208,19 @@ ISR (TIMER2_COMPA_vect) { // wordt aangeroepen bij timer2 overflows, wanneer dat
 				if (state == 4) { // afsluiten bericht nadat stopbit is verzonden
 					state = 0;
 					aan_het_verzenden = 0;
+					aantal_verzenden--;
 
 					// interrupts uitzetten
 					TIMSK2 &= ~(1<<OCIE2A); // OCR2A compare match interrupt uit
 
 					// luisteren naar nieuwe input ontvanger
 					prepare_receive();
+
+					// als er nog iets verzonden kan worden, verzend dit
+					if (aantal_verzenden) {
+						aantal_verzenden--; // opnieuw invoeren bericht
+						IR_send(send_queue[(1 + aantal_verzenden)]);
+					}
 				}
 			} else { // als PWM poort uit staat
 				// bereken volgende doel
@@ -200,13 +230,14 @@ ISR (TIMER2_COMPA_vect) { // wordt aangeroepen bij timer2 overflows, wanneer dat
 				} else if (state == 1) { // startbit
 					send_goal = startbit_s;
 					state++;
+					prev_send = send_queue[aantal_verzenden]; // opslaan bericht om mogelijk opnieuw te verzenden als het verkeerd is aangekomen
 				} else if (state == 2) { // informatie
-					if (output & (1<<0)) { // verzend 1
+					if (send_queue[aantal_verzenden] & (1<<0)) { // verzend 1
 						send_goal = bitis1_s;
 					} else { // verzend 0
 						send_goal = bitis0_s;
 					}
-					output = (output>>1); // volgende bit (van rechts naar links)
+					send_queue[aantal_verzenden] = (send_queue[aantal_verzenden]>>1); // volgende bit (van rechts naar links)
 					aantal_bits_verzonden++; // houd bij hoeveel bits er zijn verzonden
 					if (aantal_bits_verzonden >= AANTAL_BITS) {
 						state++;
@@ -266,91 +297,68 @@ void IR_prepare(uint8_t frequentie) {
 
 
 void IR_send(uint8_t waarde) {
-	// functie zet waardes in variabelen, om in ISR te gebruiken
-	output = waarde;
+	_delay_ms(50); // korte delay zodat tweede arduino ook de kans krijgt om informatie te verzenden
 
-	verzend_na_ontvangen = 0; // resetten variabele
+	IR_send_direct(waarde);
+}
+
+
+// functie opgesplitst in tweeen, bij ongeldige input moet dit direct worden verstuurd
+void IR_send_direct(uint8_t waarde) {
+	// functie zet waardes in variabelen, om in ISR te gebruiken
+	if (1 + aantal_verzenden < SEND_RECEIVE_QUEUE_SIZE) { // niet buiten array kunnen schrijven
+		aantal_verzenden++;
+		send_queue[aantal_verzenden] = waarde;
+	}
+	// TODO, implementeren dat een waarde gelijk aan RESEND_BITS niet verzonden kan worden?
+
+//	verzend_na_ontvangen = 0; // resetten variabele
 	if (aan_het_ontvangen) { // als er nog informatie ontvangen wordt
 		// verzend pas nadat informatie ontvangen is (half-duplex)
-		verzend_na_ontvangen = 1;
+//		verzend_na_ontvangen = 1;
 		// gaat niet goed als er geen stopbit(s) worden gelezen
 	} else {
 		// voorbereiding
-		prepare_send();
+		if (!aan_het_verzenden) {
+			prepare_send();
+		}
 
 		// laatste regel zodat ISR niet vroegtijdig begint
 		aan_het_verzenden = 1; // zet verzenden via timer aan
 	}
-
-//===============================================================================
-//	// wacht tot informatie is ontvangen
-//	while (informatie_aan_het_ontvangen);
-//	// gaat niet goed als er geen stopbit wordt gelezen
-//
-//	// voorbereiding
-//	prepare_send();
-//
-//	// variabelen
-//	int vorige_bit_ms = 0;
-//
-//	// startbit
-//	schakel_IR_LED(1);
-//	_delay_ms(STARTBIT_MS);
-//	schakel_IR_LED(0);
-//	_delay_ms(TIJD0_MS);
-//
-//	// byte
-//	for (int i=1; i<=AANTAL_BITS; i++) {
-//		schakel_IR_LED(1);
-//		if (waarde & (1<<0)) { // LSB is 1
-//			_delay_ms(BITIS1_MS);
-//
-//			#ifdef DYNAMIC_TIJD0
-//			vorige_bit_ms = BITIS1_MS;
-//			#endif
-//		} else { // LSB is 0
-//			_delay_ms(BITIS0_MS);
-//
-//			#ifdef DYNAMIC_TIJD0
-//			vorige_bit_ms = BITIS0_MS;
-//			#endif
-//		}
-//		schakel_IR_LED(0);
-//		#ifndef DYNAMIC_TIJD0 // default
-//		_delay_ms(TIJD0_MS);
-//
-//		#else // dynamisch aanpassen TIJD0
-//		var_delay_ms(MAXTIJD_PER_BIT - vorige_bit_ms);
-//		#endif
-//
-//		waarde = (waarde>>1); // volgende bit (van rechts naar links)
-//	}
-//
-//	// stopbit
-//	schakel_IR_LED(1);
-//	_delay_ms(STOPBIT_MS);
-//	schakel_IR_LED(0);
-//
-//	// luisteren naar nieuwe input ontvanger
-//	prepare_receive();
-//===========================================================================
 }
 
 
 // returned 1 als er nieuwe input is dat nog niet is uitgelezen
 uint8_t IR_nieuwe_input(void) {
-	return nieuwe_input;
+	if (nieuwe_input) {
+		return 1;
+	} else {
+		return 0;
+	}
+//	return nieuwe_input;
 }
 
 
-uint8_t IR_receive(void) {
-	// mogelijk functie aanpassen om interrupt te genereren op ontvangst informatie
-	nieuwe_input = 0;
-	return input;
+AANTAL_BITS_TYPE IR_receive(void) {
+	// mogelijk functie aanpassen om interrupt te genereren op ontvangst informatie?
+	if (nieuwe_input) {
+		AANTAL_BITS_TYPE returnable = receive_queue[nieuwe_input];
+		nieuwe_input--;
+		return returnable;
+	} else {
+		return 0;
+	}
 }
 
 
 // ===========================================================================
+
+
+// laatste bericht opnieuw verzenden
+void IR_resend(void) {
+
+}
 
 
 //// voor aan- en uitschakelen IR LED
