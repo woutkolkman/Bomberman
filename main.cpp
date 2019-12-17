@@ -320,10 +320,9 @@ int main(void) {
 		}
     }
 		if (screenState == 0) {
-		   //drawMainMenu();
-		   //drawStartButton();
-		   //drawHighScoreButton();
-		   //drawQuitButton();
+		   drawStartButton();
+		   drawHighScoreButton();
+		   drawQuitButton();
 		}
 
 	   selectButton();
@@ -878,7 +877,6 @@ void drawPlayer1Field() { // tekent de hartjes op de jusite plek en haalt ze weg
 	}
 }
 
-
 void drawPlayer2Field() {
 	tft.fillRect(280, 155, 30, 70, ILI9341_BLACK);
 	if(livesleft2 == 1) {
@@ -892,7 +890,6 @@ void drawPlayer2Field() {
 		drawHeart(15, 60, 20, 18); //als 3 levens, teken 3e hartje
 	}
 }
-
 
 // vervang getekende vakje met een leeg vakje
 void clearDraw(uint8_t x, uint8_t y) {
