@@ -19,6 +19,7 @@
 #define MAXOBJ 8 				// voor tekenen
 #define TRUE 1
 #define FALSE 0
+#define TOMAINMENULENGTH 20			//tijd (in gameticks) hoelang het duurt voor mainmenu wordt getoond na einde spel
 
 #define BORDERLEFTSIDE 0 			// min X
 #define BORDERRIGHTSIDE 8 			// max X
@@ -160,7 +161,7 @@
 #define SHADOWPCOLOR 0x500F   // shaduw kleur voor de titel van pauze menu
 #define PAUZETEXT 0xBABE// tekst kleur titel highscores menu
 #define BACKBUTROOD 0xF165 //kleur backbutton color
-  
+
 
 #if PLAYER == 1
 #define PLAYER_TILE PLAYER1_TILE
@@ -202,9 +203,9 @@ volatile uint32_t highscore2 = 3140;
 volatile uint32_t highscore3 = 220;
 volatile uint32_t highscore4 = 10;
 volatile uint32_t highscore5 = 0;
-volatile uint8_t livesleft1 = DEFAULT_PLAYER_HEALTH; //REMOVE Toegevoegd
+volatile uint8_t livesleft1 = DEFAULT_PLAYER_HEALTH;
 volatile uint8_t livesleft2 = DEFAULT_PLAYER_HEALTH;
-
+volatile uint8_t counttomain = 0; //when losing or winning, wait 5 seconds (or 5 gameticks) to return to main menu
 
 // use hardware SPI (on Uno, #13, #12, #11) and #10 and #9 for CS/DC
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
@@ -289,36 +290,45 @@ int main(void) {
 	_delay_ms(5000);*/
 
 	game_init();
-	
+
 	/* loop */
 	for(;;) {
 		Nunchuk.getState(ADDRESS); // retrieve states joystick and buttons Nunchuk
 		_delay_ms(10);
-	
-	 if (1 == state) { // TIMER1_COMPA_vect
+
+		if (1 == state) { // TIMER1_COMPA_vect
 			state = 0; // 1 keer uitvoeren na interrupt
 			clearDraw(tile_to_coords_x(player1_locatie), tile_to_coords_y(player1_locatie)); // haal speler weg huidige locatie
 			clearDraw(tile_to_coords_x(player2_locatie), tile_to_coords_y(player2_locatie)); // haal speler weg huidige locatie
 			move(); // pas nunchuk toe
 			item_updating(); // animaties, en cycle door item states (bomb, fire)
 			draw_screen(); // teken players opnieuw
+			if(livesleft1 == 0 || livesleft2 == 0) {
+				if(counttomain == TOMAINMENULENGTH) {
+					screenState = 0;
+					livesleft1 = DEFAULT_PLAYER_HEALTH;
+					livesleft2 = DEFAULT_PLAYER_HEALTH;
+					counttomain = 0;
+				} else {
+					counttomain++;
+				}
+			}
 		}
 		if (2 == state) { // TIMER1_COMPB_vect
 			state = 0; // 1 keer uitvoeren na interrupt
 			item_updating(); // animaties, en cycle door item states (bomb, fire)
 		}
-		
-		/*if (screenState == 0) {
-		   //drawStartButton();
-		   //drawHighScoreButton();
-		   //drawQuitButton();
-		}*/		
-	  
+
+		if (screenState == 0) {
+		   drawStartButton();
+		   drawHighScoreButton();
+		   drawQuitButton();
+		}
+
 	   moveCursorNunchuk();
 	   selectButton();
-	   
-	}
 
+	}
 	/* never reached */
 	return 0;
 }
@@ -419,7 +429,7 @@ void screen_init(void) {
 	drawPlayer1Field(); // tekent de hartjes van player 1
 	drawPlayer2Field(); // tekent de hartjes van player 2
 	// tekent de speler's hartjes
-	
+
 
 	drawGrid();
 	for (int i=0; i<(WIDTH_MAP * HEIGHT_MAP); i++) { // loop door volledige tile-array en teken alle items
@@ -600,11 +610,10 @@ void damage_player(uint8_t fire_type) {
 		drawPlayer1Field();
 		if (livesleft1 <= 0) {
 			if(PLAYER == 1) {
-				displayLoseMessage();
+				displayLoseMessage(); //player 1 lose
 			} else {
-				displayWinMessage();
+				displayWinMessage(); //player 2 wins
 			}
-			// player 2 wins
 		}
 	} else if (PLAYER == 2) {
 		livesleft2--;
@@ -618,11 +627,10 @@ void damage_player(uint8_t fire_type) {
 		drawPlayer2Field();
 		if (livesleft2 <= 0) {
 			if(PLAYER == 1) {
-                                displayWinMessage();
+                                displayWinMessage(); //player 1 wins
                         } else {
-                                displayLoseMessage();
-                        }
-			// player 1 wins
+                                displayLoseMessage(); //player 2 loses
+                	}
 		}
 	}
 }
@@ -1194,7 +1202,7 @@ void drawHighScores() {  // Tekent Highscores menu
 	tft.drawRect(46, 4, 226, 43, ILI9341_BLACK);
 	tft.setCursor(TITLETPOSX + 17, TITLETPOSY ); // startpositie schaduw tekst
 	tft.setTextSize(TITLETSIZE - 1); // tekst grootte
-	tft.setTextColor(SHADOWHCOLOR); // schaduw kleur schaduw tekst		
+	tft.setTextColor(SHADOWHCOLOR); // schaduw kleur schaduw tekst
 	tft.println("HIGH-SCORES"); // tekent het woord
 	tft.setCursor(TITLETPOSX + 15, TITLETPOSY + 2); //startpositie tekst
 	tft.setTextColor(HIGHSCORESTEXT); // kleur voor normale tekst
