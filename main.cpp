@@ -283,6 +283,7 @@ ISR(TIMER1_COMPB_vect) { // halve gametick
 
 int main(void) {
 	/* setup */
+	//test
 	game_init();
 	DDRB |= (1 << DDB1) | (1 << DDB2) | (1 << DDB3) | (1 << DDB4) | (1 << DDB5); // TFT scherm
 	tft.begin(); // enable SPI communication
@@ -320,9 +321,10 @@ int main(void) {
 		}
     }
 		if (screenState == 0) {
-		   drawStartButton();
-		   drawHighScoreButton();
-		   drawQuitButton();
+		   drawMainMenu();
+		   //drawStartButton();
+		   //drawHighScoreButton();
+		   //drawQuitButton();
 		}
 
 	   selectButton();
