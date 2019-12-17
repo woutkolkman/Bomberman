@@ -119,7 +119,7 @@
 #define HSBUTRH 40
 #define HSBUTTPOSX 95
 #define HSBUTTPOSY 115
-#define HSBUTTSIZE 3
+#define HSBUTTSIZE 2
 #define HSBUTSTPOSX HSBUTTPOSX + 2
 #define HSBUTSTPOSY HSBUTTPOSY - 2
 // High score lis defines
@@ -196,8 +196,6 @@ volatile uint8_t player1_locatie;
 volatile uint8_t player2_locatie;
 volatile uint8_t tile_array[(WIDTH_MAP * HEIGHT_MAP)]; // bevat players, boxes, muren, bommen, vuur
 volatile uint8_t bomb_placed = 0;
-volatile uint8_t livesleft1 = 3; //REMOVE Toegevoegd
-volatile uint8_t livesleft2 = 3;
 volatile char pausemenuselect = 0;
 volatile uint32_t highscore1 = 68420;
 volatile uint32_t highscore2 = 3140;
@@ -213,9 +211,6 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 
 
 // function prototypes
-void drawStartButton();
-void drawHighScoreButton();
-void drawQuitButton();
 void moveCursorNunchuk();
 void selectButton();
 void clearScreen();
@@ -284,8 +279,8 @@ ISR(TIMER1_COMPB_vect) { // halve gametick
 
 int main(void) {
 	/* setup */
-	game_init();
-	/*_delay_ms(5000);
+	/*game_init();
+	_delay_ms(50);
 	drawMainMenu();
 	_delay_ms(5000);
 	drawHighScores();
