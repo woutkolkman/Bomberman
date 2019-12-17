@@ -12,19 +12,24 @@
 
 //#define BITIS1_MS 30 				// ms waarop LED aanstaat voor 1
 #define BITIS1 55 /*(BITIS1_MS / MS_PER_TICK)*/
-#define BITIS1_S 200				// zelfde als BITIS1, alleen voor verzenden
+#define BITIS1_S_56 200				// zelfde als BITIS1, alleen voor verzenden
+#define BITIS1_S_38 135
 //#define BITIS0_MS 20 				// ms waarop LED aanstaat voor 0
-#define BITIS0 35 /*(BITIS0_MS / MS_PER_TICK)*/
-#define BITIS0_S 100				// zelfde als BITIS0, alleen voor verzenden
+#define BITIS0 40 /*(BITIS0_MS / MS_PER_TICK)*/
+#define BITIS0_S_56 100				// zelfde als BITIS0, alleen voor verzenden
+#define BITIS0_S_38 68
 //#define STARTBIT_MS 400 			// ms waarop LED aanstaat voor startbit
-#define STARTBIT 130 /*(STARTBIT_MS / MS_PER_TICK)*/
-#define STARTBIT_S 400				// zelfde als STARTBIT, alleen voor verzenden
+#define STARTBIT 114 /*(STARTBIT_MS / MS_PER_TICK)*/
+#define STARTBIT_S_56 400				// zelfde als STARTBIT, alleen voor verzenden
+#define STARTBIT_S_38 271
 //#define STOPBIT_MS 200 			// ms waarop LED aanstaat voor stopbit
-#define STOPBIT 80 /*(STOPBIT_MS / MS_PER_TICK)*/
-#define STOPBIT_S 300				// zelfde als STOPBIT, alleen voor verzenden
+#define STOPBIT 100 /*(STOPBIT_MS / MS_PER_TICK)*/
+#define STOPBIT_S_56 300				// zelfde als STOPBIT, alleen voor verzenden
+#define STOPBIT_S_38 204
 #define OFFSET 20 /*(4 / MS_PER_TICK)*/ 	// offset waarde voor kleine afwijking (ontvangen)
 //#define TIJD0_MS 20 				// tijd waarop LED tussen bits uit is
-#define TIJD0_S 10				// tijd waarop LED tussen bits uit is
+#define TIJD0_S_56 20				// tijd waarop LED tussen bits uit is
+#define TIJD0_S_38 20				// tijd waarop LED tussen bits uit is
 
 #define KHZ_1 0x35/*53*//*52*/ 			// timer2 OVF count 38KHZ
 #define KHZ_2 0x24/*36*/ 			// timer2 OVF count 56KHZ
@@ -33,10 +38,10 @@
 #define FREQUENCY_1_SETNAME 38 			// KHZ
 #define FREQUENCY_2_SETNAME 56 			// KHZ
 #define DEFAULT_FREQUENCY_SETNAME FREQUENCY_1_SETNAME // als er geen geldige frequentie meegegeven is, is dit de standaard frequentie
-#define DYNAMIC_TIJD0 				// als defined, pas TIJD0 dynamisch aan aan de tijdsduur van de gestuurde bit
-#ifdef DYNAMIC_TIJD0
-#define MAXTIJD_PER_BIT 60 			// tijd van bit + TIJD0, moet groter zijn dan BITIS1_MS & BITIS0_MS
-#endif
+//#define DYNAMIC_TIJD0 				// als defined, pas TIJD0 dynamisch aan aan de tijdsduur van de gestuurde bit
+//#ifdef DYNAMIC_TIJD0
+//#define MAXTIJD_PER_BIT 60 			// tijd van bit + TIJD0, moet groter zijn dan BITIS1_MS & BITIS0_MS
+//#endif
 #define AANTAL_BITS 8 				// geeft direct aantal bits aan, pas ook type aan
 #define AANTAL_BITS_TYPE uint8_t 		// pas dit aan als aantal bits wordt aangepast
 #define PRINT_ONTVANGST 			// debug, print via USART
@@ -50,6 +55,7 @@
 volatile uint8_t khz = KHZ_1; // huidige frequentie voor IR_send, standaard frequentie 1
 volatile uint8_t dutycycle = DUTYCYCLE_1; // huidige dutycycle voor IR_send, standaard dutycycle 1
 volatile uint8_t prevcounter;
+volatile uint8_t currcounter;
 volatile unsigned int diffcounter; // 0-65535 / 0-4294967295
 volatile AANTAL_BITS_TYPE input; // bevat de gestuurde byte
 volatile AANTAL_BITS_TYPE raw_input; // wordt overgezet naar "input" bij stopbit
@@ -58,9 +64,14 @@ volatile int aantal_bits = 0; // telt aantal bits of dit geldig is
 volatile uint8_t nieuwe_input = 0; // wordt op 1 gezet bij nieuwe input en gereset bij uitlezen
 volatile uint8_t aan_het_ontvangen = 0; // wordt op 1 gezet bij het ontvangen van informatie, zodat zender ondertussen niet aangaat
 
+volatile int bitis1_s; // verschilt bij 38/56 khz
+volatile int bitis0_s; // verschilt bij 38/56 khz
+volatile int startbit_s; // verschilt bij 38/56 khz
+volatile int stopbit_s; // verschilt bij 38/56 khz
+volatile int tijd0_s; // verschilt bij 38/56 khz
 volatile uint8_t aan_het_verzenden = 0; // staat op 1 als er informatie verzonden mag worden
 volatile uint8_t output = 0; // gegevens om te verzenden
-volatile uint8_t state = 0;
+volatile uint8_t state = 0; // state voor verzenden informatie in ISR
 volatile uint8_t aantal_bits_verzonden = 0;
 volatile uint8_t verzend_na_ontvangen = 0;
 volatile unsigned int send_goal = 0;
@@ -83,15 +94,16 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 	 */
 
 	if (PIND & (1<<PD2)) { // opgaande flank (0 -> 1)
+		currcounter = TCNT2;
 
 		// bepaal verschil huidige counterstand en vorige counterstand
-		if (TCNT2 < prevcounter) { // als huidige counterstand lager is dan opgeslagen, tel rond
-			diffcounter = (OCR2A - prevcounter) + TCNT2;
+		if (currcounter < prevcounter) { // als huidige counterstand lager is dan opgeslagen, tel rond
+			diffcounter = (OCR2A - prevcounter) + currcounter;
 			if (timer2_ovfs != 0) { // voorkomt diffcounter += ORC2A * -1
 				diffcounter += (OCR2A * (timer2_ovfs - 1)); // aantal overflows bijop tellen
 			}
 		} else {
-			diffcounter = TCNT2 - prevcounter;
+			diffcounter = currcounter - prevcounter;
 			diffcounter += (OCR2A * timer2_ovfs); // aantal overflows bijop tellen
 		}
 
@@ -139,6 +151,7 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 			} else {
 				#ifdef PRINT_ONTVANGST
 				USART_Transmit(0x21); // test
+//				USART_Transmit(diffcounter);
 				#endif
 //				informatie_aan_het_ontvangen = 0;
 			}
@@ -161,14 +174,15 @@ ISR (TIMER2_COMPA_vect) { // wordt aangeroepen bij timer2 overflows, wanneer dat
 	/* code voor verzenden */
 	if (aan_het_verzenden == 1 // als er output is om te verzenden, en ...
 	&& aan_het_ontvangen == 0) { // als er niks ontvangen wordt, verzendt
-		send_count++; // counter iets ophogen om doel te bereiken
+		send_count += 1; // counter iets ophogen om doel te bereiken
+
 		if (send_count >= send_goal) { // doel bereikt?
 			if (TCCR2A & (1<<COM2B1)) { // als PWM poort aan staat
 				TCCR2A ^= (1<<COM2B1); // schakel PWM poort (uit)
-				send_goal = TIJD0_S; // tijd waarop LED uit is
+				send_goal = tijd0_s; // tijd waarop LED uit is
 				// TODO, implementeren dat tijd dynamisch aangepast wordt gebaseerd op het type bit dat wordt verstuurd?
 
-				if (state == 3) { // afsluiten bericht nadat stopbit is verzonden
+				if (state == 4) { // afsluiten bericht nadat stopbit is verzonden
 					state = 0;
 					aan_het_verzenden = 0;
 
@@ -180,23 +194,26 @@ ISR (TIMER2_COMPA_vect) { // wordt aangeroepen bij timer2 overflows, wanneer dat
 				}
 			} else { // als PWM poort uit staat
 				// bereken volgende doel
-				if (state == 0) { // startbit
-					send_goal = STARTBIT_S;
+				if (state == 0) { // dummy bit, 1e bit wordt niet goed gelezen, TODO fixen
+					send_goal = startbit_s;
 					state++;
-				} else if (state == 1) { // informatie
+				} else if (state == 1) { // startbit
+					send_goal = startbit_s;
+					state++;
+				} else if (state == 2) { // informatie
 					if (output & (1<<0)) { // verzend 1
-						send_goal = BITIS1_S;
+						send_goal = bitis1_s;
 					} else { // verzend 0
-						send_goal = BITIS0_S;
+						send_goal = bitis0_s;
 					}
 					output = (output>>1); // volgende bit (van rechts naar links)
 					aantal_bits_verzonden++; // houd bij hoeveel bits er zijn verzonden
 					if (aantal_bits_verzonden >= AANTAL_BITS) {
 						state++;
 					}
-				} else if (state == 2) { // stopbit
+				} else if (state == 3) { // stopbit
 					aantal_bits_verzonden = 0; // resetten variabele
-					send_goal = STOPBIT_S;
+					send_goal = stopbit_s;
 					state++;
 				}
 
@@ -228,9 +245,19 @@ void IR_prepare(uint8_t frequentie) {
 	if (frequentie == FREQUENCY_1_SETNAME) { // wordt in variabelen ingesteld zodat main.cpp dit aan kan passen
 		khz = KHZ_1;
 		dutycycle = DUTYCYCLE_1;
+		bitis1_s = BITIS1_S_38;
+		bitis0_s = BITIS0_S_38;
+		startbit_s = STARTBIT_S_38;
+		stopbit_s = STOPBIT_S_38;
+		tijd0_s = TIJD0_S_38;
 	} else if (frequentie == FREQUENCY_2_SETNAME) {
 		khz = KHZ_2;
 		dutycycle = DUTYCYCLE_2;
+		bitis1_s = BITIS1_S_56;
+		bitis0_s = BITIS0_S_56;
+		startbit_s = STARTBIT_S_56;
+		stopbit_s = STOPBIT_S_56;
+		tijd0_s = TIJD0_S_56;
 	}
 
 	prepare_receive(); // standaard voor luisteren/meten input

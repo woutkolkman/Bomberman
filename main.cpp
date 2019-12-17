@@ -171,7 +171,7 @@ void single_conversion() {
 
 
 void test_ir() {
-	#define IR_TEST 0 // 0(uit)/1/2/3/4
+	#define IR_TEST 1 // 0(uit)/1/2/3/4
 
 	#if IR_TEST == 1
 	if (IR_nieuwe_input()) { IR_send((IR_receive() + 1)); }
