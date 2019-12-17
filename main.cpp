@@ -189,7 +189,7 @@
 
 
 // global variables
-volatile uint8_t selectButtonFlag = 1;
+volatile uint8_t selectButtonFlag = 1; // variabele om functionaliteit menu te enablen/disablen
 volatile uint8_t screenState = 0; // screen changes depending on its screenState
 volatile uint8_t mainmenuselect = 0; // mainmenuselect goes from 0 - 1 - 2
 volatile uint8_t state = 0; // states om interrupts in de main te laten uitrekenen, 0 = doe niks
