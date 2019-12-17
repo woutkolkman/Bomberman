@@ -164,6 +164,7 @@
 
 // algmeen
 #define deleteScreen tft.fillScreen(ILI9341_BLACK);
+#define quitScreen tft.fillScreen(ILI9341_BLACK);
 
 #if PLAYER == 1
 #define PLAYER_TILE PLAYER1_TILE
@@ -358,8 +359,8 @@ void clearScreen() {
    if (screenState == 2) { // if start button is pressed
       init_map(); // start map
       screen_init();
-   } else if (screenState == 2) { // if quit button is pressed
-      deleteScreen;
+   } else if (screenState == 1) { // if quit button is pressed
+      quitScreen;
    }
 }
 
