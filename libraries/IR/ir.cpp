@@ -11,20 +11,20 @@
  */
 
 //#define BITIS1_MS 30 				// ms waarop LED aanstaat voor 1
-#define BITIS1 50 /*(BITIS1_MS / MS_PER_TICK)*/
-#define BITIS1_S 300				// zelfde als BITIS1, alleen voor verzenden
+#define BITIS1 55 /*(BITIS1_MS / MS_PER_TICK)*/
+#define BITIS1_S 200				// zelfde als BITIS1, alleen voor verzenden
 //#define BITIS0_MS 20 				// ms waarop LED aanstaat voor 0
-#define BITIS0 575 /*(BITIS0_MS / MS_PER_TICK)*/
-#define BITIS0_S 200				// zelfde als BITIS0, alleen voor verzenden
+#define BITIS0 35 /*(BITIS0_MS / MS_PER_TICK)*/
+#define BITIS0_S 100				// zelfde als BITIS0, alleen voor verzenden
 //#define STARTBIT_MS 400 			// ms waarop LED aanstaat voor startbit
-#define STARTBIT 6490 /*(STARTBIT_MS / MS_PER_TICK)*/
+#define STARTBIT 130 /*(STARTBIT_MS / MS_PER_TICK)*/
 #define STARTBIT_S 400				// zelfde als STARTBIT, alleen voor verzenden
 //#define STOPBIT_MS 200 			// ms waarop LED aanstaat voor stopbit
-#define STOPBIT 3370 /*(STOPBIT_MS / MS_PER_TICK)*/
-#define STOPBIT_S 200				// zelfde als STOPBIT, alleen voor verzenden
+#define STOPBIT 80 /*(STOPBIT_MS / MS_PER_TICK)*/
+#define STOPBIT_S 300				// zelfde als STOPBIT, alleen voor verzenden
 #define OFFSET 20 /*(4 / MS_PER_TICK)*/ 	// offset waarde voor kleine afwijking (ontvangen)
 //#define TIJD0_MS 20 				// tijd waarop LED tussen bits uit is
-#define TIJD0_S 20				// tijd waarop LED tussen bits uit is
+#define TIJD0_S 10				// tijd waarop LED tussen bits uit is
 
 #define KHZ_1 0x35/*53*//*52*/ 			// timer2 OVF count 38KHZ
 #define KHZ_2 0x24/*36*/ 			// timer2 OVF count 56KHZ
@@ -118,7 +118,6 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 			#endif
 
 			if (verzend_na_ontvangen) { // als er informatie verzonden kan worden
-				verzend_na_ontvangen = 0; // resetten variabele
 				IR_send(output); // verzend die informatie
 			}
 		} else { // byte informatie
@@ -180,8 +179,6 @@ ISR (TIMER2_COMPA_vect) { // wordt aangeroepen bij timer2 overflows, wanneer dat
 					prepare_receive();
 				}
 			} else { // als PWM poort uit staat
-				TCCR2A ^= (1<<COM2B1); // schakel PWM poort (aan)
-
 				// bereken volgende doel
 				if (state == 0) { // startbit
 					send_goal = STARTBIT_S;
@@ -202,6 +199,8 @@ ISR (TIMER2_COMPA_vect) { // wordt aangeroepen bij timer2 overflows, wanneer dat
 					send_goal = STOPBIT_S;
 					state++;
 				}
+
+				TCCR2A ^= (1<<COM2B1); // schakel PWM poort (aan)
 			}
 			send_count = 0; // resetten count
 		}
@@ -243,6 +242,7 @@ void IR_send(uint8_t waarde) {
 	// functie zet waardes in variabelen, om in ISR te gebruiken
 	output = waarde;
 
+	verzend_na_ontvangen = 0; // resetten variabele
 	if (aan_het_ontvangen) { // als er nog informatie ontvangen wordt
 		// verzend pas nadat informatie ontvangen is (half-duplex)
 		verzend_na_ontvangen = 1;

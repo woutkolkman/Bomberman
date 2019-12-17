@@ -187,7 +187,7 @@ void test_ir() {
 //	IR_send(0xFF);
 //	IR_send(0x00);
 	IR_send(0x32); // 0011 0010, print '2'
-	_delay_ms(5000);
+	_delay_ms(3500);
 	#elif IR_TEST == 4
 	USART_Transmit(IR_receive());
 	_delay_ms(3000);
