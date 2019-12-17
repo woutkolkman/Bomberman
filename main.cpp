@@ -13,8 +13,8 @@
 #define AANTALLENGTEBREEDTE WIDTH_MAP 		// aantal hokjes in lengte en breedte
 #define LIGHTBROWN 0x7A00 			// voor tekenen kleur
 #define DARKBROWN 0x5980 			// voor tekenen kleur
-#define XUP 10 					// voor tekenen
-#define YUP 50 					// voor tekenen
+#define XUP 50 	// 10				// voor tekenen
+#define YUP 10 	// 50				// voor tekenen
 #define OBJOFFSET 2 				// voor tekenen
 #define MAXOBJ 8 				// voor tekenen
 #define TRUE 1
@@ -45,7 +45,7 @@
 // main menu colors
 #define SHADOWCOLOR ILI9341_LIGHTGREY
 
-//defines - colors
+// defines - colors
 #define WALL 0X6B8E 		// kleur voor de muren
 #define PLAYER1 0x135F		// kleuren van de spelers
 #define PLAYER2 0xD9E7
@@ -119,7 +119,7 @@
 #define HSBUTRH 40
 #define HSBUTTPOSX 95
 #define HSBUTTPOSY 115
-#define HSBUTTSIZE 2
+#define HSBUTTSIZE 3
 #define HSBUTSTPOSX HSBUTTPOSX + 2
 #define HSBUTSTPOSY HSBUTTPOSY - 2
 // High score lis defines
@@ -196,6 +196,8 @@ volatile uint8_t player1_locatie;
 volatile uint8_t player2_locatie;
 volatile uint8_t tile_array[(WIDTH_MAP * HEIGHT_MAP)]; // bevat players, boxes, muren, bommen, vuur
 volatile uint8_t bomb_placed = 0;
+volatile uint8_t livesleft1 = 3; //REMOVE Toegevoegd
+volatile uint8_t livesleft2 = 3;
 volatile char pausemenuselect = 0;
 volatile uint32_t highscore1 = 68420;
 volatile uint32_t highscore2 = 3140;
@@ -263,6 +265,7 @@ void drawQuitButton();
 void drawTitleBomb();
 void drawTitleBackground();
 void drawBomb2(uint16_t x, uint8_t y);
+void drawIets();
 
 /* ISR */
 ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
@@ -281,19 +284,23 @@ ISR(TIMER1_COMPB_vect) { // halve gametick
 
 int main(void) {
 	/* setup */
-	//drawMainMenu();
-	//_delay_ms(5000);
-	//drawHighScores();
-	//_delay_ms(5000);
-	//drawPauseMenu();
-	//_delay_ms(5000);
 	game_init();
+	/*_delay_ms(5000);
+	drawMainMenu();
+	_delay_ms(5000);
+	drawHighScores();
+	_delay_ms(5000);
+	drawPauseMenu();
+	_delay_ms(5000);*/
+
+	game_init();
+	
 	/* loop */
 	for(;;) {
 		Nunchuk.getState(ADDRESS); // retrieve states joystick and buttons Nunchuk
 		_delay_ms(10);
 	
-	/* if (1 == state) { // TIMER1_COMPA_vect
+	 if (1 == state) { // TIMER1_COMPA_vect
 			state = 0; // 1 keer uitvoeren na interrupt
 			clearDraw(tile_to_coords_x(player1_locatie), tile_to_coords_y(player1_locatie)); // haal speler weg huidige locatie
 			clearDraw(tile_to_coords_x(player2_locatie), tile_to_coords_y(player2_locatie)); // haal speler weg huidige locatie
@@ -304,19 +311,18 @@ int main(void) {
 		if (2 == state) { // TIMER1_COMPB_vect
 			state = 0; // 1 keer uitvoeren na interrupt
 			item_updating(); // animaties, en cycle door item states (bomb, fire)
-		} */
-		
-		if (screenState == 0) {
-		   drawStartButton();
-		   drawHighScoreButton();
-		   drawQuitButton();
 		}
+		
+		/*if (screenState == 0) {
+		   //drawStartButton();
+		   //drawHighScoreButton();
+		   //drawQuitButton();
+		}*/		
 	  
 	   moveCursorNunchuk();
 	   selectButton();
 	   
 	}
-
 
 	/* never reached */
 	return 0;
@@ -378,7 +384,7 @@ void game_init(void) {
 	init(); // onzichtbare functie
 	timer0_init();
 	timer1_init(); // gameticks
-// init_map(); // map vullen met players, muren, boxes, etc.
+	init_map(); // map vullen met players, muren, boxes, etc.
 	screen_init();
 	Wire.begin(); // enable TWI communication
 	nunchuk_init(); // start communication between Nunchuk and Arduino
@@ -411,7 +417,7 @@ void screen_init(void) {
 	DDRB |= (1 << DDB1) | (1 << DDB2) | (1 << DDB3) | (1 << DDB4) | (1 << DDB5); // TFT scherm
 
 	tft.begin(); // enable SPI communication
-	tft.setRotation(2); // rotate screen
+	tft.setRotation(3); // rotate screen
 
 	// screen is 240 x 320
 	tft.fillScreen(LIGHTBROWN);
@@ -889,7 +895,10 @@ void drawPlayer2Field() {
 
 // vervang getekende vakje met een leeg vakje
 void clearDraw(uint8_t x, uint8_t y) {
-	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+	uint8_t switch_value = x;
+	x = y;
+	y = switch_value;
 //	tft.fillRect((x * lw) + XUP + OBJOFFSET, (y * lw) + YUP + OBJOFFSET - 1, lw - 2 * OBJOFFSET + 2, lw - 2 * OBJOFFSET + 3, DARKBROWN);
 	tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET - 1, lw - 2 * OBJOFFSET + 2, lw - 2 * OBJOFFSET + 3, DARKBROWN);
 }
@@ -897,11 +906,11 @@ void clearDraw(uint8_t x, uint8_t y) {
 
 // voor tekenen player 1
 void drawPlayer1(uint8_t x, uint8_t y) {
-	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
 //	x = BORDERDOWN - x; // snelle fix omdraaien y-as
-	uint8_t switch_value = x;
-	x = y;
-	y = switch_value;
+//	uint8_t switch_value = x;
+//	x = y;
+//	y = switch_value;
 
 	/* blokje */
 //	tft.fillRect((x * lw) + XUP + OBJOFFSET, (y * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_CYAN);
@@ -943,11 +952,11 @@ void drawPlayer1(uint8_t x, uint8_t y) {
 
 // voor tekenen player 2
 void drawPlayer2(uint8_t x, uint8_t y) {
-	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
 //	x = BORDERDOWN - x; // snelle fix omdraaien y-as
-	uint8_t switch_value = x;
-	x = y;
-	y = switch_value;
+//	uint8_t switch_value = x;
+//	x = y;
+//	y = switch_value;
 
 	/* blokje */
 //	tft.fillRect((x * lw) + XUP + OBJOFFSET, (y * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_RED);
@@ -989,7 +998,7 @@ void drawPlayer2(uint8_t x, uint8_t y) {
 
 // voor tekenen muren (in het midden)
 void drawWall(uint8_t x, uint8_t y) {
-	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
 	tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, WALL);
 //	tft.fillRect(x*lw + XUP + OBJOFFSET, (y*lw) + YUP + OBJOFFSET, lw - 2*OBJOFFSET +1, lw - 2*OBJOFFSET, WALL);
 }
@@ -998,8 +1007,11 @@ void drawWall(uint8_t x, uint8_t y) {
 // voor tekenen vuur
 void drawFire(uint8_t x, uint8_t y) {
 	int frame = (tile_array[coords_to_tile(y, x)] % BOMB_FRAMES); // voor selecteren frame
+	uint8_t switch_value = x;
+	x = y;
+	y = switch_value;
 
-	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
 
 	if(frame == 0) {
 		tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_ORANGE);
@@ -1013,11 +1025,11 @@ void drawFire(uint8_t x, uint8_t y) {
 void drawBomb(uint8_t x, uint8_t y) {
 	int frame = (tile_array[coords_to_tile(y, x)] % BOMB_FRAMES); // voor selecteren frame
 
-	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
 //	x = BORDERDOWN - x; // snelle fix omdraaien y-as
-	uint8_t switch_value = x;
-	x = y;
-	y = switch_value;
+//	uint8_t switch_value = x;
+//	x = y;
+//	y = switch_value;
 //	tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_PURPLE);
 
 	/* Bom tekenen */
@@ -1048,11 +1060,11 @@ void drawBomb2(uint16_t x, uint8_t y) { // tekent de bomentjes gebruikt voor de 
 
 // voor tekenen ton
 void drawTon(uint8_t x, uint8_t y) {
-	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
+//	y = BORDERRIGHTSIDE - y; // snelle fix omdraaien x-as
 //	x = BORDERDOWN - x; // snelle fix omdraaien y-as
-	uint8_t switch_value = x;
-	x = y;
-	y = switch_value;
+//	uint8_t switch_value = x;
+//	x = y;
+//	y = switch_value;
 //	tft.fillRect((y * lw) + XUP + OBJOFFSET, (x * lw) + YUP + OBJOFFSET, lw - 2 * OBJOFFSET + 1, lw - 2 * OBJOFFSET + 1, ILI9341_BLUE);
 
 	/* Ton tekenen */
@@ -1105,6 +1117,7 @@ void adc_init(void) { // initialiseer ADC
 	ADCSRA |= (1 << ADEN); // enable ADC
 	ADCSRA |= (1 << ADSC); // start eerste meting
 }
+
 /* Alle schermpjes/menu's/knopjes */
 void drawMainMenu() { // teken main menu
 	drawTitle(); // tekent titel
