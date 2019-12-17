@@ -288,8 +288,9 @@ int main(void) {
 	DDRB |= (1 << DDB1) | (1 << DDB2) | (1 << DDB3) | (1 << DDB4) | (1 << DDB5); // TFT scherm
 	tft.begin(); // enable SPI communication
 	tft.setRotation(3); // rotate screen
-	drawTitle();
-	drawTitleBomb();
+	drawMainMenu();
+	//drawTitle();
+	//drawTitleBomb();
 
 	/* loop */
 	for(;;) {
@@ -300,22 +301,22 @@ int main(void) {
 		selectButtonFlag = 0; // reset flag, op deze manier blijft functionaliteit mainmenu uit
 		if (1 == state) { // TIMER1_COMPA_vect
 			state = 0; // 1 keer uitvoeren na interrupt
-			clearDraw(tile_to_coords_x(player1_locatie), tile_to_coords_y(player1_locatie)); // haal speler weg huidige locatie
-			clearDraw(tile_to_coords_x(player2_locatie), tile_to_coords_y(player2_locatie)); // haal speler weg huidige locatie
-			move(); // pas nunchuk toe
-			item_updating(); // animaties, en cycle door item states (bomb, fire)
-			draw_screen(); // teken players opnieuw
 			if(livesleft1 == 0 || livesleft2 == 0) {
-				if(counttomain == TOMAINMENULENGTH) {
-					screenState = 0;
-					drawMainMenu();
-					selectButtonFlag = 1; // als speler1 / speler2 wint/verliest functionaliteit menu weer aanzetten
-					livesleft1 = DEFAULT_PLAYER_HEALTH;
-					livesleft2 = DEFAULT_PLAYER_HEALTH;
-					counttomain = 0;
-				} else {
-					counttomain++;
-				}
+                                if(counttomain == TOMAINMENULENGTH) {
+                                        screenState = 0;
+                                        drawMainMenu();
+                                        livesleft1 = DEFAULT_PLAYER_HEALTH;
+                                        livesleft2 = DEFAULT_PLAYER_HEALTH;
+                                        counttomain = 0;
+                                } else {
+                                        counttomain++;
+                                }
+                        } else {
+				clearDraw(tile_to_coords_x(player1_locatie), tile_to_coords_y(player1_locatie)); // haal speler weg huidige locatie
+				clearDraw(tile_to_coords_x(player2_locatie), tile_to_coords_y(player2_locatie)); // haal speler weg huidige locatie
+				move(); // pas nunchuk toe
+				item_updating(); // animaties, en cycle door item states (bomb, fire)
+				draw_screen(); // teken players opnieuw
 			}
 		}
 		if (2 == state) { // TIMER1_COMPB_vect
@@ -426,7 +427,6 @@ void game_init(void) {
 	// enable global interrupts
 	sei();
 }
-
 
 void screen_init(void) {
 	// screen is 240 x 320
