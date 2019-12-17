@@ -305,6 +305,7 @@ int main(void) {
                                 if(counttomain == TOMAINMENULENGTH) {
                                         screenState = 0;
                                         drawMainMenu();
+                                        selectButtonFlag = 1; // als speler1 / speler2 wint/verliest functionaliteit menu weer aanzetten
                                         livesleft1 = DEFAULT_PLAYER_HEALTH;
                                         livesleft2 = DEFAULT_PLAYER_HEALTH;
                                         counttomain = 0;
