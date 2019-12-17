@@ -287,8 +287,8 @@ int main(void) {
 	DDRB |= (1 << DDB1) | (1 << DDB2) | (1 << DDB3) | (1 << DDB4) | (1 << DDB5); // TFT scherm
 	tft.begin(); // enable SPI communication
 	tft.setRotation(3); // rotate screen
-	drawTitle();
-	drawTitleBomb();
+	//drawTitle();
+	//drawTitleBomb();
 
 	/* loop */
 	for(;;) {
@@ -320,7 +320,7 @@ int main(void) {
 		}
     }
 		if (screenState == 0) {
-		   //drawMainMenu();
+		   drawMainMenu();
 		   //drawStartButton();
 		   //drawHighScoreButton();
 		   //drawQuitButton();
@@ -881,15 +881,15 @@ void drawPlayer1Field() { // tekent de hartjes op de jusite plek en haalt ze weg
 
 void drawPlayer2Field() {
 	tft.fillRect(280, 155, 30, 70, ILI9341_BLACK);
-	if(livesleft2 == 1) {
-		drawHeart(15, 20, 20, 18);//teken hartje
-	}if(livesleft2 == 2) {
-		drawHeart(15, 20, 20, 18);//teken hartje
-		drawHeart(15, 40, 20, 18); //als 2 levens, teken 2e hartje
+	if(livesleft2 >= 1) {
+		drawHeart(285, 200, 20, 18); //teken hartje
+	}if(livesleft2 >= 2) {
+		drawHeart(285, 200, 20, 18); //teken hartje
+		drawHeart(285, 180, 20, 18); //als 2 levens, teken 2e hartje
 	}if(livesleft2 == 3) {
-		drawHeart(15, 20, 20, 18);//teken hartje
-		drawHeart(15, 40, 20, 18); //als 2 levens, teken 2e hartje
-		drawHeart(15, 60, 20, 18); //als 3 levens, teken 3e hartje
+		drawHeart(285, 200, 20, 18); //teken hartje
+		drawHeart(285, 180, 20, 18); //als 2 levens, teken 2e hartje
+		drawHeart(285, 160, 20, 18); //als 3 levens, teken 3e hartje
 	}
 }
 
