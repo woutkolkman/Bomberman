@@ -162,6 +162,8 @@
 #define PAUZETEXT 0xBABE// tekst kleur titel highscores menu
 #define BACKBUTROOD 0xF165 //kleur backbutton color
 
+// algmeen
+#define deleteScreen tft.fillScreen(ILI9341_BLACK);
 
 #if PLAYER == 1
 #define PLAYER_TILE PLAYER1_TILE
@@ -280,22 +282,19 @@ ISR(TIMER1_COMPB_vect) { // halve gametick
 
 int main(void) {
 	/* setup */
-	/*game_init();
-	_delay_ms(50);
-	drawMainMenu();
-	_delay_ms(5000);
-	drawHighScores();
-	_delay_ms(5000);
-	drawPauseMenu();
-	_delay_ms(5000);*/
-
 	game_init();
+	DDRB |= (1 << DDB1) | (1 << DDB2) | (1 << DDB3) | (1 << DDB4) | (1 << DDB5); // TFT scherm
+	tft.begin(); // enable SPI communication
+	tft.setRotation(3); // rotate screen
+	drawTitle();
+	drawTitleBomb();
 
 	/* loop */
 	for(;;) {
 		Nunchuk.getState(ADDRESS); // retrieve states joystick and buttons Nunchuk
 		_delay_ms(10);
-
+	
+	if (screenState == 2) { // is start button is pressed 
 		if (1 == state) { // TIMER1_COMPA_vect
 			state = 0; // 1 keer uitvoeren na interrupt
 			clearDraw(tile_to_coords_x(player1_locatie), tile_to_coords_y(player1_locatie)); // haal speler weg huidige locatie
@@ -318,14 +317,13 @@ int main(void) {
 			state = 0; // 1 keer uitvoeren na interrupt
 			item_updating(); // animaties, en cycle door item states (bomb, fire)
 		}
-
+    }
 		if (screenState == 0) {
 		   drawStartButton();
 		   drawHighScoreButton();
 		   drawQuitButton();
 		}
 
-	   moveCursorNunchuk();
 	   selectButton();
 
 	}
@@ -344,6 +342,8 @@ void moveCursorNunchuk() {
 
 void selectButton() {
 
+	moveCursorNunchuk(); // move cursor over buttons
+
 	if (mainmenuselect == 2 && Nunchuk.C_Button() == 1) { 
    	screenState = 1;
    	clearScreen();
@@ -355,10 +355,11 @@ void selectButton() {
 
 void clearScreen() {
 
-   if (screenState == 1) {
-      tft.fillScreen(ILI9341_BLACK);
-   } else if (screenState == 2) {
-      tft.fillScreen(ILI9341_RED);
+   if (screenState == 2) { // if start button is pressed
+      init_map(); // start map
+      screen_init();
+   } else if (screenState == 2) { // if quit button is pressed
+      deleteScreen;
    }
 }
 
@@ -389,8 +390,8 @@ void game_init(void) {
 	init(); // onzichtbare functie
 	timer0_init();
 	timer1_init(); // gameticks
-	init_map(); // map vullen met players, muren, boxes, etc.
-	screen_init();
+// init_map(); // map vullen met players, muren, boxes, etc.
+// screen_init();
 	Wire.begin(); // enable TWI communication
 	nunchuk_init(); // start communication between Nunchuk and Arduino
 //	USART_Init();
@@ -419,11 +420,6 @@ void game_init(void) {
 
 
 void screen_init(void) {
-	DDRB |= (1 << DDB1) | (1 << DDB2) | (1 << DDB3) | (1 << DDB4) | (1 << DDB5); // TFT scherm
-
-	tft.begin(); // enable SPI communication
-	tft.setRotation(3); // rotate screen
-
 	// screen is 240 x 320
 	tft.fillScreen(LIGHTBROWN);
 	drawPlayer1Field(); // tekent de hartjes van player 1
@@ -458,15 +454,7 @@ void screen_init(void) {
 
 void draw_screen(void) {
 	// screen is 240 x 320
-//	tft.fillScreen(LIGHTBROWN);
 
-//	tft.fillRect(XUP, YUP, AANTALLENGTEBREEDTE * lw, AANTALLENGTEBREEDTE * lw, DARKBROWN);
-//	drawGrid();
-//      drawPlayer1(8, 0);
-//      drawPlayer2(0, 8);
-//	drawBomb(4, 2);
-//	drawPlayer1(player1_x, player1_y);
-//	drawPlayer2(player2_x, player2_y);
 	drawPlayer1(tile_to_coords_x(player1_locatie), tile_to_coords_y(player1_locatie));
 	drawPlayer2(tile_to_coords_x(player2_locatie), tile_to_coords_y(player2_locatie));
 }
