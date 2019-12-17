@@ -471,7 +471,7 @@ void game_init(void) {
 
 // functie voor het checken van input via IR, verwijst door naar ir_ontcijfer
 void ir_check_input(void) {
-	if (IR_nieuwe_input()) { ir_ontcijfer(IR_receive); } // pas IR ontvangen informatie toe wanneer beschikbaar
+	if (IR_nieuwe_input()) { ir_ontcijfer(IR_receive()); } // pas IR ontvangen informatie toe wanneer beschikbaar
 }
 
 
@@ -1252,11 +1252,6 @@ void test_ir() {
 		USART_Transmit(IR_receive());
 	}
 	#endif
-
-	ADCSRB &= ~(1 << ADTS2) & ~(1 << ADTS1) & ~(1 << ADTS0); // free running mode
-
-	ADCSRA |= (1 << ADEN); // enable ADC
-	ADCSRA |= (1 << ADSC); // start eerste meting
 }
 
 

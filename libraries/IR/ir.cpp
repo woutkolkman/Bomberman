@@ -71,7 +71,7 @@ volatile int stopbit_s; // verschilt bij 38/56 khz
 volatile int tijd0_s; // verschilt bij 38/56 khz
 volatile uint8_t aan_het_verzenden = 0; // staat op 1 als er informatie verzonden mag worden
 volatile uint8_t aantal_verzenden = 0; // hoeveelheid berichten om te verzenden in de queue
-volatile uint8_t state = 0; // state voor verzenden informatie in ISR
+volatile uint8_t state_send = 0; // state voor verzenden informatie in ISR
 volatile uint8_t aantal_bits_verzonden = 0;
 volatile uint8_t verzend_na_ontvangen = 0;
 volatile unsigned int send_goal = 0;
@@ -132,7 +132,7 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 					IR_send_direct(prev_send); // meest vorige bericht dat is verstuurd opnieuw laten versturen
 				} else {
 					// sla input op om te laten uitlezen door hoofdprogramma
-					if (1 + nieuwe_input < SEND_RECEIVE_QUEUE_SIZE) { // niet buiten array kunnen schrijven
+					if ((1 + nieuwe_input) < SEND_RECEIVE_QUEUE_SIZE) { // niet buiten array kunnen schrijven
 						nieuwe_input++; // geef aan dat er nieuwe input is
 						receive_queue[nieuwe_input] = raw_input; // input teruggeven aan programma wanneer alles binnen is
 					}
@@ -205,8 +205,8 @@ ISR (TIMER2_COMPA_vect) { // wordt aangeroepen bij timer2 overflows, wanneer dat
 				send_goal = tijd0_s; // tijd waarop LED uit is
 				// TODO, implementeren dat tijd dynamisch aangepast wordt gebaseerd op het type bit dat wordt verstuurd?
 
-				if (state == 4) { // afsluiten bericht nadat stopbit is verzonden
-					state = 0;
+				if (state_send == 4) { // afsluiten bericht nadat stopbit is verzonden
+					state_send = 0;
 					aan_het_verzenden = 0;
 					aantal_verzenden--;
 
@@ -224,14 +224,14 @@ ISR (TIMER2_COMPA_vect) { // wordt aangeroepen bij timer2 overflows, wanneer dat
 				}
 			} else { // als PWM poort uit staat
 				// bereken volgende doel
-				if (state == 0) { // dummy bit, 1e bit wordt niet goed gelezen, TODO fixen
+				if (state_send == 0) { // dummy bit, 1e bit wordt niet goed gelezen, TODO fixen
 					send_goal = startbit_s;
-					state++;
-				} else if (state == 1) { // startbit
+					state_send++;
+				} else if (state_send == 1) { // startbit
 					send_goal = startbit_s;
-					state++;
+					state_send++;
 					prev_send = send_queue[aantal_verzenden]; // opslaan bericht om mogelijk opnieuw te verzenden als het verkeerd is aangekomen
-				} else if (state == 2) { // informatie
+				} else if (state_send == 2) { // informatie
 					if (send_queue[aantal_verzenden] & (1<<0)) { // verzend 1
 						send_goal = bitis1_s;
 					} else { // verzend 0
@@ -240,12 +240,12 @@ ISR (TIMER2_COMPA_vect) { // wordt aangeroepen bij timer2 overflows, wanneer dat
 					send_queue[aantal_verzenden] = (send_queue[aantal_verzenden]>>1); // volgende bit (van rechts naar links)
 					aantal_bits_verzonden++; // houd bij hoeveel bits er zijn verzonden
 					if (aantal_bits_verzonden >= AANTAL_BITS) {
-						state++;
+						state_send++;
 					}
-				} else if (state == 3) { // stopbit
+				} else if (state_send == 3) { // stopbit
 					aantal_bits_verzonden = 0; // resetten variabele
 					send_goal = stopbit_s;
-					state++;
+					state_send++;
 				}
 
 				TCCR2A ^= (1<<COM2B1); // schakel PWM poort (aan)
