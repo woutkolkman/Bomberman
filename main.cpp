@@ -306,6 +306,7 @@ int main(void) {
 			if(livesleft1 == 0 || livesleft2 == 0) {
 				if(counttomain == TOMAINMENULENGTH) {
 					screenState = 0;
+					drawMainMenu();
 					livesleft1 = DEFAULT_PLAYER_HEALTH;
 					livesleft2 = DEFAULT_PLAYER_HEALTH;
 					counttomain = 0;
