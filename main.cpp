@@ -189,6 +189,7 @@
 
 
 // global variables
+volatile uint8_t selectButtonFlag = 1;
 volatile uint8_t screenState = 0; // screen changes depending on its screenState
 volatile uint8_t mainmenuselect = 0; // mainmenuselect goes from 0 - 1 - 2
 volatile uint8_t state = 0; // states om interrupts in de main te laten uitrekenen, 0 = doe niks
@@ -287,8 +288,8 @@ int main(void) {
 	DDRB |= (1 << DDB1) | (1 << DDB2) | (1 << DDB3) | (1 << DDB4) | (1 << DDB5); // TFT scherm
 	tft.begin(); // enable SPI communication
 	tft.setRotation(3); // rotate screen
-	//drawTitle();
-	//drawTitleBomb();
+	drawTitle();
+	drawTitleBomb();
 
 	/* loop */
 	for(;;) {
@@ -296,6 +297,7 @@ int main(void) {
 		_delay_ms(10);
 	
 	if (screenState == 2) { // is start button is pressed 
+		selectButtonFlag = 0; // reset flag, op deze manier blijft functionaliteit mainmenu uit
 		if (1 == state) { // TIMER1_COMPA_vect
 			state = 0; // 1 keer uitvoeren na interrupt
 			clearDraw(tile_to_coords_x(player1_locatie), tile_to_coords_y(player1_locatie)); // haal speler weg huidige locatie
@@ -320,14 +322,17 @@ int main(void) {
 			item_updating(); // animaties, en cycle door item states (bomb, fire)
 		}
     }
+    
+    if (selectButtonFlag == 1) {
+       selectButton();
+    }
+    
 		if (screenState == 0) {
 		   drawStartButton();
 		   drawHighScoreButton();
 		   drawQuitButton();
 		}
-
-	   selectButton();
-
+	
 	}
 	/* never reached */
 	return 0;
@@ -362,6 +367,7 @@ void clearScreen() {
       screen_init();
    } else if (screenState == 1) { // if quit button is pressed
       quitScreen;
+      selectButtonFlag = 0;
    }
 }
 
