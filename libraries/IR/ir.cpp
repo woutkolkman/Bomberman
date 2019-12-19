@@ -27,7 +27,7 @@
 #define OFFSET 20 /*(4 / MS_PER_TICK)*/ 	// offset waarde voor kleine afwijking (ontvangen)
 #define TIJD0_S_56 15				// tijd waarop LED tussen bits uit is
 #define TIJD0_S_38 10				// tijd waarop LED tussen bits uit is
-
+// TODO, defines automatisch uitrekenen, lage prioriteit
 
 #define SEND_RECEIVE_QUEUE_SIZE 10		// grootte wachtrij verzenden/ontvangen
 #define KHZ_1 0x35/*53*//*52*/ 			// timer2 OVF count 38KHZ
@@ -124,14 +124,15 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 			#ifdef PRINT_ONTVANGST
 			USART_Transmit(0x4F); // test
 			#endif
-
+l
 			// aantal bits vanaf LSB in byte zetten
 //			raw_input = (raw_input>>(AANTAL_BITS_TYPE_BITS - AANTAL_BITS));
+			// TODO, als AANTAL_BITS ongelijk is aan AANTAL_BITS_TYPE_BITS moet de byte nog (AANTAL_BITS_TYPE_BITS - AANTAL_BITS) naar rechts geshift worden
 
 			if (AANTAL_BITS == aantal_bits) { // aantal bits checken op geldigheid
 
-				if ((unsigned int) RESEND_BITS == (unsigned int) raw_input
-				&& (unsigned int) prev_send != (unsigned int) RESEND_BITS) {
+				if ((unsigned int) RESEND_BITS == (unsigned int) raw_input // systeem ontvangt request om vorige bericht opnieuw te verzenden
+				&& (unsigned int) prev_send != (unsigned int) RESEND_BITS) { // vorige bericht is niet een request voor resend (anders loop)
 					// laatste bericht is niet goed aangekomen, verstuur opnieuw
 //					aantal_verzenden++;
 					_delay_ms(10); // voorkomt soort loop waarin constant ongeldige berichten worden verstuurd
@@ -158,7 +159,8 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 
 			if (aantal_verzenden) { // als er informatie verzonden kan worden
 				aantal_verzenden--; // opnieuw invoeren bericht
-				IR_send_direct(send_queue[(1 + aantal_verzenden)]);
+//				_delay_ms(10); // stabiliteit? niet getest dus weggelaten
+				IR_send_direct(send_queue[(1 + aantal_verzenden)]); // direct verzenden (half-duplex)
 			}
 		} else { // byte informatie
 			raw_input = (raw_input>>1); // shift input 1 naar rechts, nieuwe bit komt links
@@ -199,7 +201,7 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 ISR (TIMER2_COMPA_vect) { // wordt aangeroepen bij timer2 overflows, wanneer data wordt ontvangen om tijd te meten
 	/* code voor ontvangen */
 	// aangeroepen om de 16,384 ms met prescaler 1024
-	timer2_ovfs++; // wordt niks mee gedaan tijdens verzenden, wordt gereset bij ontvangen
+	timer2_ovfs++; // wordt niks mee gedaan tijdens verzenden, wordt gereset en gebruikt bij ontvangen
 
 	/* code voor verzenden */
 	if (aan_het_verzenden // als er output is om te verzenden, en ...
@@ -210,7 +212,7 @@ ISR (TIMER2_COMPA_vect) { // wordt aangeroepen bij timer2 overflows, wanneer dat
 			if (TCCR2A & (1<<COM2B1)) { // als PWM poort aan staat
 				TCCR2A ^= (1<<COM2B1); // schakel PWM poort (uit)
 				send_goal = tijd0_s; // tijd waarop LED uit is
-				// TODO, implementeren dat tijd dynamisch aangepast wordt gebaseerd op het type bit dat wordt verstuurd?
+				// TODO, implementeren dat tijd dynamisch aangepast wordt gebaseerd op het type bit dat wordt verstuurd? lage prioriteit
 
 				if (state_send == 4) { // afsluiten bericht nadat stopbit is verzonden
 					state_send = 0;
@@ -314,7 +316,7 @@ void IR_send(AANTAL_BITS_TYPE waarde) {
 }
 
 
-// functie opgesplitst in tweeen, bij ongeldige input moet dit direct worden verstuurd
+// functie opgesplitst in tweeen. bij ongeldige input, direct request for resend verzenden
 void IR_send_direct(AANTAL_BITS_TYPE waarde) {
 	// functie zet waardes in variabelen, om in ISR te gebruiken
 	if (1 + aantal_verzenden < SEND_RECEIVE_QUEUE_SIZE) { // niet buiten array kunnen schrijven
@@ -342,7 +344,7 @@ void IR_send_direct(AANTAL_BITS_TYPE waarde) {
 
 // returned 1 als er nieuwe input is dat nog niet is uitgelezen
 uint8_t IR_nieuwe_input(void) {
-	if (nieuwe_input) {
+	if (nieuwe_input) { // nieuwe_input gaat gelijk op met het aantal berichten in de receive_queue array
 		return 1;
 	} else {
 		return 0;

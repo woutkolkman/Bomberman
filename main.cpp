@@ -3,8 +3,6 @@
 void init(void);
 
 
-
-
 // use hardware SPI (on Uno, #13, #12, #11) and #10 and #9 for CS/DC
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 
@@ -556,7 +554,7 @@ void bomb_placing(void) {
 // updated items op het veld, bombs & fire item states, ook voor animaties
 void item_updating(void) {
 	for (int i=0; i<(WIDTH_MAP * HEIGHT_MAP); i++) { // loop door volledige tile_array
-                uint8_t tile = tile_array[i];
+        uint8_t tile = tile_array[i];
 		if (tile_bevat_bomb(i) == PLAYER1_TILE) { // player 1 bom
 			tile_array[i]++; // volgende frame
 			tile++;
@@ -605,10 +603,10 @@ void item_updating(void) {
 
 				drawFire(tile_to_coords_x(i), tile_to_coords_y(i));
 			}
-//		} else if () {
-//
-//		} else if () {
-//
+//		} else if (tile == PLAYER1_TILE) {
+//			// update player1 als PLAYER == 2, teken player1 op player1_locatie
+//		} else if (tile == PLAYER2_TILE) {
+//			// update player2 als PLAYER == 1, teken player2 op player2_locatie
 		}
 	}
 }
@@ -1117,13 +1115,13 @@ void drawHighScoreboard() { // Het score board waar de scores in staan
 	tft.print("3: ");
 	tft.print(highscore3);
 	tft.setCursor(HSFIELDX + 10, HSFIELDY + 100); // locatie tekst 4e high score
-        tft.setTextColor(ILI9341_WHITE);
-        tft.print("4: ");
-        tft.print(highscore4);
-        tft.setCursor(HSFIELDX + 10, HSFIELDY + 130); // locatie tekst 5e high score
-        tft.setTextColor(ILI9341_WHITE);
-        tft.print("5: ");
-        tft.print(highscore5);
+    tft.setTextColor(ILI9341_WHITE);
+    tft.print("4: ");
+    tft.print(highscore4);
+    tft.setCursor(HSFIELDX + 10, HSFIELDY + 130); // locatie tekst 5e high score
+    tft.setTextColor(ILI9341_WHITE);
+    tft.print("5: ");
+    tft.print(highscore5);
 }
 
 
