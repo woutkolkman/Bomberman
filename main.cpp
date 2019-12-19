@@ -342,9 +342,6 @@ int main(void) {
 
 		ir_check_input(); // pas IR ontvangen informatie toe wanneer beschikbaar
 
-//		test_ir(); // weghalen
-
-		#if 1 // weghalen
 		if (screenState == 2) { // is start button is pressed
 			selectButtonFlag = 0; // reset flag, op deze manier blijft functionaliteit mainmenu uit
 			if (1 == state) { // TIMER1_COMPA_vect
@@ -382,7 +379,6 @@ int main(void) {
 			drawHighScoreButton();
 			drawQuitButton();
 		}
-		#endif
 
 		#ifndef ADC_FREERUNNING
 //		single_conversion();
@@ -502,19 +498,6 @@ void ir_ontcijfer(VAR_TYPE_IR input) {
 //	uint8_t kopie = input;
 //	uint8_t kopie = (input & 0xFF00);
 	uint8_t kopie = (input>>8);
-
-	#if 0 // functie later weghalen
-	USART_Transmit(0x2E);
-	for(int i=0; i<16; i++){
-		if (input & 0x8000){
-			USART_Transmit(0x31);
-		} else {
-			USART_Transmit(0x30);
-		}
-		input = (input<<1);
-	}
-	USART_Transmit(0x2E);
-	#endif
 
 	// verwerk input naar variabelen
 	if (kopie == PLAYER1_CODE) {
