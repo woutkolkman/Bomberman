@@ -25,8 +25,8 @@
 #define STOPBIT_S_56 300				// zelfde als STOPBIT, alleen voor verzenden
 #define STOPBIT_S_38 204
 #define OFFSET 20 /*(4 / MS_PER_TICK)*/ 	// offset waarde voor kleine afwijking (ontvangen)
-#define TIJD0_S_56 20				// tijd waarop LED tussen bits uit is
-#define TIJD0_S_38 20				// tijd waarop LED tussen bits uit is
+#define TIJD0_S_56 15				// tijd waarop LED tussen bits uit is
+#define TIJD0_S_38 10				// tijd waarop LED tussen bits uit is
 
 
 #define SEND_RECEIVE_QUEUE_SIZE 10		// grootte wachtrij verzenden/ontvangen
@@ -43,9 +43,10 @@
 //#endif
 #define RESEND_BITS 0xFF 			// als input gelijk is aan dit, stuur laatste byte opnieuw
 #define RESEND_TRIES 5				// maximaal aantal keer informatie opnieuw proberen op te halen
-#define AANTAL_BITS 8 				// geeft direct aantal bits aan, pas ook type aan
-#define AANTAL_BITS_TYPE uint8_t 		// pas dit aan als aantal bits wordt aangepast
-#define PRINT_ONTVANGST 			// debug, print via USART
+#define AANTAL_BITS 16 				// geeft direct aantal bits aan, pas ook type aan, minimaal 8, of pas RESEND_BITS aan
+#define AANTAL_BITS_TYPE uint16_t 		// pas dit aan als aantal bits wordt aangepast
+#define AANTAL_BITS_TYPE_BITS 16 		// aantal bits mogelijk bij dit type data
+//#define PRINT_ONTVANGST 			// debug, print via USART, nog wel USART_Init() aanroepen
 
 
 /* includes */
@@ -124,8 +125,13 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 			USART_Transmit(0x4F); // test
 			#endif
 
+			// aantal bits vanaf LSB in byte zetten
+//			raw_input = (raw_input>>(AANTAL_BITS_TYPE_BITS - AANTAL_BITS));
+
 			if (AANTAL_BITS == aantal_bits) { // aantal bits checken op geldigheid
-				if (RESEND_BITS == raw_input) {
+
+				if ((unsigned int) RESEND_BITS == (unsigned int) raw_input
+				&& (unsigned int) prev_send != (unsigned int) RESEND_BITS) {
 					// laatste bericht is niet goed aangekomen, verstuur opnieuw
 //					aantal_verzenden++;
 					_delay_ms(10); // voorkomt soort loop waarin constant ongeldige berichten worden verstuurd
@@ -142,6 +148,7 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 				curr_resend_tries = 0;
 			} else {
 				if (curr_resend_tries < RESEND_TRIES) { // maximaal aantal keer informatie opnieuw proberen op te halen
+					_delay_ms(10); // voorkomt soort loop waarin constant ongeldige berichten worden verstuurd
 					IR_send_direct(RESEND_BITS); // vraag om laatste bericht opnieuw te versturen
 					curr_resend_tries++;
 				}
@@ -156,14 +163,14 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 		} else { // byte informatie
 			raw_input = (raw_input>>1); // shift input 1 naar rechts, nieuwe bit komt links
 			if (diffcounter >= (BITIS1 - OFFSET) && diffcounter <= (BITIS1 + OFFSET)) { // bit is een 1
-				raw_input |= (1<<7); // zet MSB op 1
+				raw_input |= (1<<(AANTAL_BITS-1)); // zet MSB op 1
 				aantal_bits++;
 
 				#ifdef PRINT_ONTVANGST
 				USART_Transmit(0x31); // test
 				#endif
 			} else if (diffcounter >= (BITIS0 - OFFSET) && diffcounter <= (BITIS0 + OFFSET)) { // bit is een 0
-				raw_input &= ~(1<<7); // zet MSB op 0 (mag weggelaten worden)
+				raw_input &= ~(1<<(AANTAL_BITS-1)); // zet MSB op 0 (mag weggelaten worden)
 				aantal_bits++;
 
 				#ifdef PRINT_ONTVANGST
@@ -258,6 +265,10 @@ ISR (TIMER2_COMPA_vect) { // wordt aangeroepen bij timer2 overflows, wanneer dat
 
 /* functions */
 void IR_prepare(uint8_t frequentie) {
+//	#ifdef PRINT_ONTVANGST
+//	USART_Init();
+//	#endif
+
 	DDRD |= (1<<PD3); // pin 3 output (IR LED)
 
 	/* PCINT - Voor IR ontvanger */
@@ -296,7 +307,7 @@ void IR_prepare(uint8_t frequentie) {
 }
 
 
-void IR_send(uint8_t waarde) {
+void IR_send(AANTAL_BITS_TYPE waarde) {
 	_delay_ms(50); // korte delay zodat tweede arduino ook de kans krijgt om informatie te verzenden
 
 	IR_send_direct(waarde);
@@ -304,7 +315,7 @@ void IR_send(uint8_t waarde) {
 
 
 // functie opgesplitst in tweeen, bij ongeldige input moet dit direct worden verstuurd
-void IR_send_direct(uint8_t waarde) {
+void IR_send_direct(AANTAL_BITS_TYPE waarde) {
 	// functie zet waardes in variabelen, om in ISR te gebruiken
 	if (1 + aantal_verzenden < SEND_RECEIVE_QUEUE_SIZE) { // niet buiten array kunnen schrijven
 		aantal_verzenden++;
