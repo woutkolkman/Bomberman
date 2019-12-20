@@ -224,6 +224,7 @@ volatile uint8_t player1_locatie;
 volatile uint8_t player2_locatie;
 volatile uint8_t tile_array[(WIDTH_MAP * HEIGHT_MAP)]; // bevat players, boxes, muren, bommen, vuur
 volatile uint8_t bomb_placed = 0;
+volatile uint8_t mainmenuselected;
 volatile uint8_t counttomain = 0; //when losing or winning, wait 5 seconds (or 5 gameticks) to return to main menu
 
 // function prototypes
