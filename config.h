@@ -8,7 +8,7 @@
 
 //#define ADC_FREERUNNING                       // als dit defined is werkt de ADC op freerunning
 //#define ADC_WAIT                              // als dit defined is wacht de processor totdat de ADC conversie klaar is
-#define VAR_TYPE_IR uint8_t                     // variabele type voor IR communicatie
+#define VAR_TYPE_IR uint16_t                     // variabele type voor IR communicatie
 #define ADDRESS 0x52                            // nunchuk adres
 #define GAMETICK_FREQUENCY 1                    // gameticks in HZ, max 0,119HZ, min 7812,5HZ
 #define FCLK 16000000                           // arduino clock frequency
@@ -69,7 +69,7 @@
 // defines - tile states
 #define BOMB_TILE_1S 10                         // player1 bom startwaarde, onderscheid voor bepalen score, >0
 #define BOMB_TILE_1E (BOMB_TILE_1S + 12)        // player1 bom eindwaarde, bepaalt na welke tijd bom afgaat, >=BOMB_TILE_1S
-#define BOMB_TILE_2S 20                         // player2 bom startwaarde, onderscheid voor bepalen score, >0
+#define BOMB_TILE_2S 25                         // player2 bom startwaarde, onderscheid voor bepalen score, >0
 #define BOMB_TILE_2E (BOMB_TILE_2S + 12)        // player2 bom eindwaarde, bepaalt na welke tijd bom afgaat, >=BOMB_TILE_2S
 #define FIRE_TILE_1S 40                         // player1 vuur startwaarde, onderscheid voor bepalen score, >0
 #define FIRE_TILE_1E (FIRE_TILE_1S + 5)         // player1 vuur eindwaarde, bepaalt hoe lang fire blijft staan, >=FIRE_TILE_1S

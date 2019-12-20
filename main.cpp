@@ -43,6 +43,7 @@ int main(void) {
 	                                if(counttomain == TOMAINMENULENGTH) {
 	                                        screenState = 0;
         	                                drawMainMenu();
+						selectButtonFlag = 1;
                 	                        livesleft1 = DEFAULT_PLAYER_HEALTH;
                         	                livesleft2 = DEFAULT_PLAYER_HEALTH;
                                 	        counttomain = 0;
@@ -175,6 +176,7 @@ void ir_ontcijfer(VAR_TYPE_IR input) {
 //		tile_array[data] = PLAYER2_TILE;
 	} else if (kopie == LOST_CODE) {
 		// you win message
+		displayWinMessage();
 	} else if (kopie == READY_CODE) {
 		// andere systeem is klaar om informatie te ontvangen, of om het spel te beginnen
 	} else if (kopie == BOMB1_CODE) {
@@ -186,11 +188,11 @@ void ir_ontcijfer(VAR_TYPE_IR input) {
 	} else if (kopie == WALL_CODE) {
 		tile_array[data] = WALL_TILE;
 	} else if (kopie == UPDATE_HEALTH1_CODE) {
-		// update health player 1
-		// teken hartjes
+		livesleft1 = data; // update health player 1
+		drawPlayer1Field(); // teken hartjes
 	} else if (kopie == UPDATE_HEALTH2_CODE) {
-		// update health player 2
-		// teken hartjes
+		livesleft2 = data; // update health player 2
+		drawPlayer2Field(); // teken hartjes
 	}
 }
 
@@ -390,10 +392,11 @@ void damage_player(uint8_t fire_type) {
 			// score toepassen
 		}
 		drawPlayer1Field(); // hartjes
+		ir_verzenden(UPDATE_HEALTH1_CODE, livesleft1);
 		if (livesleft1 <= 0) {
 //			if(PLAYER == 1) {
 			displayLoseMessage(); //player 1 lose
-			// transmit lose ir
+			ir_verzenden(LOST_CODE, 0x00); // transmit lose ir
 //			} else {
 //				displayWinMessage(); //player 2 wins
 //			}
@@ -408,12 +411,13 @@ void damage_player(uint8_t fire_type) {
 			// score toepassen
 		}
 		drawPlayer2Field(); // hartjes
+		ir_verzenden(UPDATE_HEALTH2_CODE, livesleft2);
 		if (livesleft2 <= 0) {
 //			if(PLAYER == 1) {
 //                                displayWinMessage(); //player 1 wins
 //                        } else {
                 	displayLoseMessage(); //player 2 loses
-			// transmit lose ir
+			ir_verzenden(LOST_CODE, 0x00); // transmit lose ir
 //                	}
 		}
 	}
