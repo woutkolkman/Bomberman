@@ -33,8 +33,6 @@ int main(void) {
 	/* loop */
 	for(;;) {
 		Nunchuk.getState(ADDRESS); // retrieve states joystick and buttons Nunchuk
-		_delay_ms(10);
-
 		ir_check_input(); // pas IR ontvangen informatie toe wanneer beschikbaar
 
 		if (screenState == 2) { // is start button is pressed
@@ -60,8 +58,10 @@ int main(void) {
 				}
 			}
 			if (2 == state) { // TIMER1_COMPB_vect
-				state = 0; // 1 keer uitvoeren na interrupt
-				item_updating(); // animaties, en cycle door item states (bomb, fire)
+				if(livesleft1 && livesleft2) {
+					state = 0; // 1 keer uitvoeren na interrupt
+					item_updating(); // animaties, en cycle door item states (bomb, fire)
+				}
 			}
     		}
 
@@ -69,10 +69,13 @@ int main(void) {
        			selectButton();					// in het begin staat flag altijd op 1, als spel bezig is op 0
     		}
 
-		if (screenState == 0) { // aan het begin van het spel staat screenState op 0 om menuopties weer te geven
-			drawStartButton();
-			drawHighScoreButton();
-			drawQuitButton();
+		if (screenState == 0) {
+            if(mainmenuselect != mainmenuselected) {// aan het begin van het spel staat screenState op 0 om menuopties weer te geven
+                drawStartButton();
+                drawHighScoreButton();
+                drawQuitButton();
+                mainmenuselected = mainmenuselect;
+            }
 		}
 
 		#ifndef ADC_FREERUNNING
@@ -688,7 +691,7 @@ void nunchuk_init() {
 
 
 void timer0_init(void) {
-	
+
 }
 
 void timer1_init(void) { // gameticks timer 1
