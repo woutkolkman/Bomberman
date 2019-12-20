@@ -1,144 +1,8 @@
-/* defines */
-#define PLAYER 1 				// 1/2
-#if PLAYER == 1 				// player-specifieke define settings
-#define FREQUENCY 38 				// 38/56, geef frequentie aan IR LED
-#elif PLAYER == 2
-#define FREQUENCY 56 				// 38/56, geef frequentie aan IR LED
-#endif
-#define BAUD 9600 				// baudrate USART
-//#define ADC_FREERUNNING 			// als dit defined is werkt de ADC op freerunning
-//#define ADC_WAIT 				// als dit defined is wacht de processor totdat de ADC conversie klaar is
-#define VAR_TYPE_IR uint8_t 			// variabele type voor IR communicatie
-#define ADDRESS 0x52 				// nunchuk adres
-#define GAMETICK_FREQUENCY 1 			// gameticks in HZ, max 0,119HZ, min 7812,5HZ
-#define FCLK 16000000 				// arduino clock frequency
-#define PRESCALER_TIMER1 1024 			// prescaler, zie ook functie timer1_init()
-#define OFFSET_VAKJE 24 			// breedte & hoogte van een vakje
-#define OFFSET_PLAYER_X 12 			// offset waarop player in vakje zit X
-#define OFFSET_PLAYER_Y 20 			// offset waarop player in vakje zit Y
-#define TFT_DC 9 				// initialisatie LCD
-#define TFT_CS 10 				// initialisatie LCD
-#define LIGHTBROWN 0x7A00 			// voor tekenen kleur
-#define DARKBROWN 0x5980 			// voor tekenen kleur
-#define XUP 50 	// 10				// voor tekenen
-#define YUP 10 	// 50				// voor tekenen
-#define OBJOFFSET 2 				// voor tekenen
-#define MAXOBJ 8 				// voor tekenen
-#define TRUE 1
-#define FALSE 0
-#define TOMAINMENULENGTH 20			//tijd (in gameticks) hoelang het duurt voor mainmenu wordt getoond na einde spel
 
-#define BORDERLEFTSIDE 0 			// min X
-#define BORDERRIGHTSIDE 8 			// max X
-#define WIDTH_MAP (BORDERRIGHTSIDE + 1)
-#define BORDERUP 0 				// max Y
-#define BORDERDOWN 8 				// min Y
-#define HEIGHT_MAP (BORDERDOWN + 1)
-#define FIRE_SPREADING 2			// geeft aan hoeveel vakken vuur moet bevatten vanuit de locatie van de bom
-#define MAX_BOMBS 2				// geeft maximaal aantal bommen aan dat iedere player mag plaatsen
-#define DEFAULT_PLAYER_HEALTH 3
-
-// defines - tile states
-#define BOMB_TILE_1S 10 			// player1 bom startwaarde, onderscheid voor bepalen score, >0
-#define BOMB_TILE_1E (BOMB_TILE_1S + 12) 	// player1 bom eindwaarde, bepaalt na welke tijd bom afgaat, >=BOMB_TILE_1S
-#define BOMB_TILE_2S 20 			// player2 bom startwaarde, onderscheid voor bepalen score, >0
-#define BOMB_TILE_2E (BOMB_TILE_2S + 12) 	// player2 bom eindwaarde, bepaalt na welke tijd bom afgaat, >=BOMB_TILE_2S
-#define FIRE_TILE_1S 40 			// player1 vuur startwaarde, onderscheid voor bepalen score, >0
-#define FIRE_TILE_1E (FIRE_TILE_1S + 5) 	// player1 vuur eindwaarde, bepaalt hoe lang fire blijft staan, >=FIRE_TILE_1S
-#define FIRE_TILE_2S 50 			// player2 vuur startwaarde, onderscheid voor bepalen score, >0
-#define FIRE_TILE_2E (FIRE_TILE_2S + 5)  	// player2 vuur eindwaarde, bepaalt hoe lang fire blijft staan, >=FIRE_TILE_2S
-#define EMPTY_TILE 9            		// locatie in array is leeg, >0
-#define PLAYER1_TILE 1          		// locatie in array bevat player 1, >0
-#define PLAYER2_TILE 2          		// locatie in array bevat player 2, >0
-#define TON_TILE 3              		// locatie in array bevat box, >0
-#define WALL_TILE 4             		// locatie in array bevat muur, >0
-#if PLAYER == 1
-#define PLAYER_TILE PLAYER1_TILE
-#elif PLAYER == 2
-#define PLAYER_TILE PLAYER2_TILE
-#endif
-
-// defines - animations
-#define BOMB_FRAMES 2				// aantal frames van de animatie, handmatig toevoegen bij drawBomb(), >0, waarde begint bij 1
-#define FIRE_FRAMES 2				// aantal frames van de animatie, handmatig toevoegen bij drawFire(), >0, waarde begint bij 1
-
-// algmeen
-#define deleteScreen tft.fillScreen(ILI9341_BLACK);
-#define quitScreen tft.fillScreen(ILI9341_BLACK);
-
-
-/* includes IR */
-//#include <cspi.h>
 #include "libraries/IR/ir.h" // IR library
-// includes
-#include <util/setbaud.h>
-#include <avr/interrupt.h>
-#include <avr/io.h>
-#include <util/delay.h>
-#include <Adafruit_ILI9341.h> // LCD library
-#include <Adafruit_GFX.h>// LCD library
-#include <Arduino.h> // LCD library
-#include <SPI.h>
-#include <Wire.h>
-#include <Nunchuk.h>
-#include <usart.h>
-#include <stdint.h>
-
-
-// global variables
-volatile uint8_t selectButtonFlag = 1; // variabele om functionaliteit menu te enablen/disablen
-volatile uint8_t screenState = 0; // screen changes depending on its screenState
-volatile uint8_t state = 0; // states om interrupts in de main te laten uitrekenen, 0 = doe niks
-volatile uint8_t brightness = 0; // brightness display
-volatile unsigned int counter = 0;
-volatile uint8_t aantal_geplaatste_bommen = 0;
-volatile uint8_t player1_locatie;
-volatile uint8_t player2_locatie;
-volatile uint8_t tile_array[(WIDTH_MAP * HEIGHT_MAP)]; // bevat players, boxes, muren, bommen, vuur
-volatile uint8_t bomb_placed = 0;
-volatile uint8_t counttomain = 0; //when losing or winning, wait 5 seconds (or 5 gameticks) to return to main menu
-
-
-// use hardware SPI (on Uno, #13, #12, #11) and #10 and #9 for CS/DC
-//Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
-
-
-// function prototypes
-void moveCursorNunchuk();
-void selectButton();
-void nunchuk_init();
-void move(void);
-void adc_init(void);
-void init(void);
-void timer0_init(void);
-void timer1_init(void);
-void adc_init(void);
-void game_init(void);
-void screen_init(void);
-void draw_screen(void);
-void init_map(void);
-uint8_t coords_to_tile(uint8_t x, uint8_t y);
-uint8_t tile_to_coords_x(uint8_t tile);
-uint8_t tile_to_coords_y(uint8_t tile);
-uint8_t tile_is_leeg(uint8_t tile);
-void clearScreen();
-void bomb_placing(void);
-void item_updating(void);
-uint8_t tile_bevat_vuur(uint8_t tile);
-uint8_t tile_bevat_bomb(uint8_t tile);
-void bomb_explode(uint8_t tile);
-uint8_t fire_placing(uint8_t tile, uint8_t fire_type, uint8_t eerste_bomb);
-void ir_ontcijfer(VAR_TYPE_IR input);
-void ir_verzenden(void);
-void test_ir(void); // test
-void ir_check_input(void);
-void clear_tile(uint8_t tile);
-#ifndef ADC_FREERUNNING
-void single_conversion(void);
-#endif
-
+#include "config.h"
 #include "functions/drawfunctions.cpp"
-
+void init(void);
 
 /* ISR */
 ISR(ADC_vect) { // wordt aangeroepen wanneer ADC conversie klaar is
@@ -254,7 +118,7 @@ void game_init(void) {
 //	screen_init();
 	Wire.begin(); // enable TWI communication
 	nunchuk_init(); // start communication between Nunchuk and Arduino
-//	USART_Init(); // init serial
+	USART_Init(); // init serial
 
 //	for (int i=0; i<=6; i++) { // dummy reads tegen te voeg plaatsen van bom bij sommige nunchuks
 //		Nunchuk.getState(ADDRESS);
@@ -290,33 +154,49 @@ void ir_ontcijfer(VAR_TYPE_IR input) {
 	// roep functie aan bij nieuwe informatie (PCINT?)
 
 	// bepaal type informatie (zie laatste 3 bits)
-	VAR_TYPE_IR kopie = input;
-	kopie = (kopie>>5);
-	if (kopie == 0x00) {
-		// type 1
-	} else if (kopie == 0x01) {
-		// type 2
-	} // etc.
+	uint8_t data = input;
+//	uint8_t kopie = input;
+//	uint8_t kopie = (input & 0xFF00);
+	uint8_t kopie = (input>>8);
 
 	// verwerk input naar variabelen
-	// ...
+	if (kopie == PLAYER1_CODE) {
+//		clear_tile(player1_locatie);
+		clearDraw(tile_to_coords_x(player1_locatie), tile_to_coords_y(player1_locatie));
+		player1_locatie = data;
+//		tile_array[data] = PLAYER1_TILE;
+	} else if (kopie == PLAYER2_CODE) {
+//		clear_tile(player1_locatie);
+		clearDraw(tile_to_coords_x(player2_locatie), tile_to_coords_y(player2_locatie));
+		player2_locatie = data;
+//		tile_array[data] = PLAYER2_TILE;
+	} else if (kopie == LOST_CODE) {
+		// you win message
+	} else if (kopie == READY_CODE) {
+		// andere systeem is klaar om informatie te ontvangen, of om het spel te beginnen
+	} else if (kopie == BOMB1_CODE) {
+		tile_array[data] = BOMB_TILE_1S;
+	} else if (kopie == BOMB2_CODE) {
+		tile_array[data] = BOMB_TILE_2S;
+	} else if (kopie == TON_CODE) {
+		tile_array[data] = TON_TILE;
+	} else if (kopie == WALL_CODE) {
+		tile_array[data] = WALL_TILE;
+	} else if (kopie == UPDATE_HEALTH1_CODE) {
+		// update health player 1
+		// teken hartjes
+	} else if (kopie == UPDATE_HEALTH2_CODE) {
+		// update health player 2
+		// teken hartjes
+	}
 }
 
 
 // functie voor het verzamelen en verzenden van IR output
-void ir_verzenden() {
-	// roep functie aan op gameticks
-
-	VAR_TYPE_IR waarde = 0x00;
-
-	// bepaal volgende type informatie en stel laatste 3 bits in
-	// ...
-	// data alleen versturen als het is veranderd van de vorige keer?
-
-	// haal informatie op en stel rest van de bits in
-	// ...
-
-	IR_send(waarde);
+void ir_verzenden(uint8_t data_type, uint8_t data) {
+	VAR_TYPE_IR waarde = data; // stel eerste 8 bits in
+	waarde |= (data_type<<8); // stel laatste 8 bits in
+	IR_send(waarde); // verzend data
 }
 
 
@@ -506,13 +386,14 @@ void damage_player(uint8_t fire_type) {
 			// speler is geraakt door bom van tegenstander
 			// score toepassen
 		}
-		drawPlayer1Field();
+		drawPlayer1Field(); // hartjes
 		if (livesleft1 <= 0) {
-			if(PLAYER == 1) {
-				displayLoseMessage(); //player 1 lose
-			} else {
-				displayWinMessage(); //player 2 wins
-			}
+//			if(PLAYER == 1) {
+			displayLoseMessage(); //player 1 lose
+			// transmit lose ir
+//			} else {
+//				displayWinMessage(); //player 2 wins
+//			}
 		}
 	} else if (PLAYER == 2) {
 		livesleft2--;
@@ -523,13 +404,14 @@ void damage_player(uint8_t fire_type) {
 			// speler is geraakt door bom van tegenstander
 			// score toepassen
 		}
-		drawPlayer2Field();
+		drawPlayer2Field(); // hartjes
 		if (livesleft2 <= 0) {
-			if(PLAYER == 1) {
-                                displayWinMessage(); //player 1 wins
-                        } else {
-                                displayLoseMessage(); //player 2 loses
-                	}
+//			if(PLAYER == 1) {
+//                                displayWinMessage(); //player 1 wins
+//                        } else {
+                	displayLoseMessage(); //player 2 loses
+			// transmit lose ir
+//                	}
 		}
 	}
 }
@@ -537,65 +419,103 @@ void damage_player(uint8_t fire_type) {
 
 // bewegingsfunctie voor de player die wordt gespeeld (1/2)
 void move(void) {
+	volatile uint8_t *player_pointer;
+	#if PLAYER == 1
+	player_pointer = &player1_locatie;
+	#elif PLAYER == 2
+	player_pointer = &player2_locatie;
+	#endif
+	if (!player_pointer) { // player_pointer = NULL
+		return;
+	}
+
 	// kan maar 1 kant op bewegen per keer, zolang er niks in de weg staat en player niet van de map afgaat
 	if (Nunchuk.X_Axis() == 255) { // 1 naar rechts
-        	if (tile_to_coords_x(player1_locatie) < BORDERRIGHTSIDE // als player niet van map afgaat
-		&& (tile_is_leeg(1 + player1_locatie) // en als er niks in de weg staat, of
-		|| tile_bevat_vuur(1 + player1_locatie))) { // ..als er vuur in de weg staat
-			tile_array[player1_locatie] = EMPTY_TILE;
+        	if (tile_to_coords_x(*player_pointer) < BORDERRIGHTSIDE // als player niet van map afgaat
+		&& (tile_is_leeg(1 + *player_pointer) // en als er niks in de weg staat, of
+		|| tile_bevat_vuur(1 + *player_pointer))) { // ..als er vuur in de weg staat
+			tile_array[*player_pointer] = EMPTY_TILE;
 			bomb_placing(); // check of er een bomb geplaatst moet worden
-                	player1_locatie++;
-			if (tile_bevat_vuur(player1_locatie)) { damage_player(tile_array[player1_locatie]); } // als player1_locatie nu vuur bevat, damage player
+                	*player_pointer += 1;
+			if (tile_bevat_vuur(*player_pointer)) { damage_player(tile_array[*player_pointer]); } // als player1_locatie nu vuur bevat, damage player
+			#if PLAYER == 1
 			tile_array[player1_locatie] = PLAYER1_TILE;
+			ir_verzenden(PLAYER1_CODE, player1_locatie); // verzend via IR
+			#elif PLAYER == 2
+			tile_array[player2_locatie] = PLAYER2_TILE;
+			ir_verzenden(PLAYER2_CODE, player2_locatie); // verzend via IR
+			#endif
         	}
 	} else if (Nunchuk.X_Axis() == 0) { // 1 naar links
-        	if (tile_to_coords_x(player1_locatie) > BORDERLEFTSIDE // als player niet van map afgaat
-		&& (tile_is_leeg(-1 + player1_locatie) // en als er niks in de weg staat, of
-		|| tile_bevat_vuur(-1 + player1_locatie))) { // ..als er vuur in de weg staat
-			tile_array[player1_locatie] = EMPTY_TILE;
+        	if (tile_to_coords_x(*player_pointer) > BORDERLEFTSIDE // als player niet van map afgaat
+		&& (tile_is_leeg(-1 + *player_pointer) // en als er niks in de weg staat, of
+		|| tile_bevat_vuur(-1 + *player_pointer))) { // ..als er vuur in de weg staat
+			tile_array[*player_pointer] = EMPTY_TILE;
 			bomb_placing(); // check of er een bomb geplaatst moet worden
-                	player1_locatie--;
-			if (tile_bevat_vuur(player1_locatie)) { damage_player(tile_array[player1_locatie]); } // als player1_locatie nu vuur bevat, damage player
+                	*player_pointer -= 1;
+			if (tile_bevat_vuur(*player_pointer)) { damage_player(tile_array[*player_pointer]); } // als player1_locatie nu vuur bevat, damage player
+			#if PLAYER == 1
 			tile_array[player1_locatie] = PLAYER1_TILE;
+			ir_verzenden(PLAYER1_CODE, player1_locatie); // verzend via IR
+			#elif PLAYER == 2
+			tile_array[player2_locatie] = PLAYER2_TILE;
+			ir_verzenden(PLAYER2_CODE, player2_locatie); // verzend via IR
+			#endif
         	}
 	} else if (Nunchuk.Y_Axis() == 255) { // 1 omhoog
-                if (tile_to_coords_y(player1_locatie) > BORDERUP // als player niet van map afgaat
-		&& (tile_is_leeg(-WIDTH_MAP + player1_locatie) // en als er niks in de weg staat, of
-		|| tile_bevat_vuur(-WIDTH_MAP + player1_locatie))) { // ..als er vuur in de weg staat
-			tile_array[player1_locatie] = EMPTY_TILE;
+                if (tile_to_coords_y(*player_pointer) > BORDERUP // als player niet van map afgaat
+		&& (tile_is_leeg(-WIDTH_MAP + *player_pointer) // en als er niks in de weg staat, of
+		|| tile_bevat_vuur(-WIDTH_MAP + *player_pointer))) { // ..als er vuur in de weg staat
+			tile_array[*player_pointer] = EMPTY_TILE;
 			bomb_placing(); // check of er een bomb geplaatst moet worden
-                        player1_locatie -= WIDTH_MAP;
-			if (tile_bevat_vuur(player1_locatie)) { damage_player(tile_array[player1_locatie]); } // als player1_locatie nu vuur bevat, damage player
+                        *player_pointer -= WIDTH_MAP;
+			if (tile_bevat_vuur(*player_pointer)) { damage_player(tile_array[*player_pointer]); } // als player1_locatie nu vuur bevat, damage player
+			#if PLAYER == 1
 			tile_array[player1_locatie] = PLAYER1_TILE;
+			ir_verzenden(PLAYER1_CODE, player1_locatie); // verzend via IR
+			#elif PLAYER == 2
+			tile_array[player2_locatie] = PLAYER2_TILE;
+			ir_verzenden(PLAYER2_CODE, player2_locatie); // verzend via IR
+			#endif
                 }
         } else if (Nunchuk.Y_Axis() == 0) { // 1 omlaag
-                if (tile_to_coords_y(player1_locatie) < BORDERDOWN // als player niet van map afgaat
-		&& (tile_is_leeg(WIDTH_MAP + player1_locatie) // en als er niks in de weg staat, of
-		|| tile_bevat_vuur(WIDTH_MAP + player1_locatie))) { // ..als er vuur in de weg staat
-			tile_array[player1_locatie] = EMPTY_TILE;
+                if (tile_to_coords_y(*player_pointer) < BORDERDOWN // als player niet van map afgaat
+		&& (tile_is_leeg(WIDTH_MAP + *player_pointer) // en als er niks in de weg staat, of
+		|| tile_bevat_vuur(WIDTH_MAP + *player_pointer))) { // ..als er vuur in de weg staat
+			tile_array[*player_pointer] = EMPTY_TILE;
 			bomb_placing(); // check of er een bomb geplaatst moet worden
-                        player1_locatie += WIDTH_MAP;
-			if (tile_bevat_vuur(player1_locatie)) { damage_player(tile_array[player1_locatie]); } // als player1_locatie nu vuur bevat, damage player
+                        *player_pointer += WIDTH_MAP;
+			if (tile_bevat_vuur(*player_pointer)) { damage_player(tile_array[*player_pointer]); } // als player1_locatie nu vuur bevat, damage player
+			#if PLAYER == 1
 			tile_array[player1_locatie] = PLAYER1_TILE;
+			ir_verzenden(PLAYER1_CODE, player1_locatie); // verzend via IR
+			#elif PLAYER == 2
+			tile_array[player2_locatie] = PLAYER2_TILE;
+			ir_verzenden(PLAYER2_CODE, player2_locatie); // verzend via IR
+			#endif
                 }
         }
 	if (Nunchuk.Z_Button() == 1) { // als bomb button is ingedrukt
 		bomb_placed = 1; // bij volgende move(), leg een bomb neer
 	}
+//	free((void*) player_pointer); // niet weghalen, TODO mogelijk pointer weghalen
 }
 
 
 // plaats bom als button was ingedrukt, vervangt huidige locatie player met een bom
 void bomb_placing(void) {
 	if (bomb_placed == 1 && aantal_geplaatste_bommen < MAX_BOMBS) {
-		tile_array[player1_locatie] =
 		#if PLAYER == 1
-		BOMB_TILE_1S
-		#elif PLAYER == 2
-		BOMB_TILE_2S
-		#endif
-		; // plaats bom van huidige speler
+		tile_array[player1_locatie] = BOMB_TILE_1S;
+		ir_verzenden(BOMB1_CODE, player1_locatie); // verzend via IR
 		drawBomb(tile_to_coords_x(player1_locatie), tile_to_coords_y(player1_locatie)); // tijdelijk
+		#elif PLAYER == 2
+		tile_array[player2_locatie] = BOMB_TILE_2S;
+		ir_verzenden(BOMB2_CODE, player2_locatie); // verzend via IR
+		drawBomb(tile_to_coords_x(player2_locatie), tile_to_coords_y(player2_locatie)); // tijdelijk
+		#endif
+		// plaats bom van huidige speler
+
 		bomb_placed = 0;
 		aantal_geplaatste_bommen++;
 	} else {
@@ -607,7 +527,7 @@ void bomb_placing(void) {
 // updated items op het veld, bombs & fire item states, ook voor animaties
 void item_updating(void) {
 	for (int i=0; i<(WIDTH_MAP * HEIGHT_MAP); i++) { // loop door volledige tile_array
-                uint8_t tile = tile_array[i];
+        uint8_t tile = tile_array[i];
 		if (tile_bevat_bomb(i) == PLAYER1_TILE) { // player 1 bom
 			tile_array[i]++; // volgende frame
 			tile++;
@@ -620,8 +540,7 @@ void item_updating(void) {
 
 				drawBomb(tile_to_coords_x(i), tile_to_coords_y(i));
 			}
-		}
-		if (tile_bevat_bomb(i) == PLAYER2_TILE) { // player 2 bom
+		} else if (tile_bevat_bomb(i) == PLAYER2_TILE) { // player 2 bom
 			tile_array[i]++; // volgende frame
 			tile++;
 			clearDraw(tile_to_coords_x(i), tile_to_coords_y(i));
@@ -633,8 +552,7 @@ void item_updating(void) {
 
 				drawBomb(tile_to_coords_x(i), tile_to_coords_y(i));
 			}
-		}
-		if (tile_bevat_vuur(i) == PLAYER1_TILE) {
+		} else if (tile_bevat_vuur(i) == PLAYER1_TILE) {
 			tile_array[i]++; // volgende frame
 			tile++;
 			clearDraw(tile_to_coords_x(i), tile_to_coords_y(i));
@@ -646,8 +564,7 @@ void item_updating(void) {
 
 				drawFire(tile_to_coords_x(i), tile_to_coords_y(i));
 			}
-		}
-		if (tile_bevat_vuur(i) == PLAYER2_TILE) {
+		} else if (tile_bevat_vuur(i) == PLAYER2_TILE) {
 			tile_array[i]++; // volgende frame
 			tile++;
 			clearDraw(tile_to_coords_x(i), tile_to_coords_y(i));
@@ -659,6 +576,10 @@ void item_updating(void) {
 
 				drawFire(tile_to_coords_x(i), tile_to_coords_y(i));
 			}
+//		} else if (tile == PLAYER1_TILE) {
+//			// update player1 als PLAYER == 2, teken player1 op player1_locatie
+//		} else if (tile == PLAYER2_TILE) {
+//			// update player2 als PLAYER == 1, teken player2 op player2_locatie
 		}
 	}
 }
@@ -671,14 +592,19 @@ void bomb_explode(uint8_t tile) {
 	// bepaal van welke speler de bom is
 	if (tile_bevat_bomb(tile) == PLAYER1_TILE) { // bom is van player 1
 		te_tekenen_tile = FIRE_TILE_1S; // teken vuur van player 1
+		#if PLAYER == 1
 		aantal_geplaatste_bommen--;
+		#endif
 	} else if (tile_bevat_bomb(tile) == PLAYER2_TILE) { // bom is van player 2
 		te_tekenen_tile = FIRE_TILE_2S; // teken vuur van player 2
+		#if PLAYER == 2
+		aantal_geplaatste_bommen--;
+		#endif
 	} else { // meegekregen tile is geen bomb
 		return;
 	}
 
-	fire_placing(tile, te_tekenen_tile, TRUE); // vervang bom door vuur
+	fire_placing(tile, te_tekenen_tile+1, TRUE); // vervang bom door vuur
 
 	int i = 0;
 	while (i<FIRE_SPREADING) { // vuur verspreiden omhoog
@@ -812,7 +738,6 @@ void single_conversion() {
 }
 #endif
 
-
 void test_ir() {
 	#define IR_TEST 0 // 0(uit)/1/2/3/4
 
@@ -829,7 +754,9 @@ void test_ir() {
 //	IR_send(0xAA); // 1010 1010
 //	IR_send(0xFF);
 //	IR_send(0x00);
-	IR_send(0x32); // 0011 0010, print '2'
+//	IR_send(0x32); // 0011 0010, print '2'
+	IR_send(0x1432);
+//	IR_send(0xFFFF);
 //	IR_send(0x33);
 //	IR_send(0x41);
 //	IR_send(0x42);

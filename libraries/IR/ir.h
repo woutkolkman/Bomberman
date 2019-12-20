@@ -6,7 +6,7 @@
 // voorkom meerdere keren includen
 #ifndef IR_H
 #define IR_H
-#define AANTAL_BITS_TYPE uint8_t
+#define AANTAL_BITS_TYPE uint16_t
 
 
 /* defines */
@@ -56,8 +56,8 @@ void prepare_receive(void);
 
 /* function prototypes - te gebruiken voor main.cpp */
 void IR_prepare(uint8_t frequentie); // frequentie kan alleen 38 of 56 zijn
-void IR_send(uint8_t waarde);
-void IR_send_direct(uint8_t waarde);
+void IR_send(AANTAL_BITS_TYPE waarde);
+void IR_send_direct(AANTAL_BITS_TYPE waarde);
 AANTAL_BITS_TYPE IR_receive(void);
 uint8_t IR_nieuwe_input(void);
 
