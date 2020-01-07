@@ -1,5 +1,5 @@
 /* Defines */
-#define PLAYER 1                                // 1/2
+#define PLAYER 2                                // 1/2
 #if PLAYER == 1                                 // player-specifieke define settings
 #define FREQUENCY 38                            // 38/56, geef frequentie aan IR LED
 #elif PLAYER == 2

@@ -42,8 +42,8 @@
 //#define MAXTIJD_PER_BIT 60 			// tijd van bit + TIJD0, moet groter zijn dan BITIS1_MS & BITIS0_MS
 //#endif
 #define RESEND_BITS 0xFF 			// als input gelijk is aan dit, stuur laatste byte opnieuw
-#define RESEND_TRIES 5				// maximaal aantal keer informatie opnieuw proberen op te halen
-#define AANTAL_BITS 16 				// geeft direct aantal bits aan, pas ook type aan, minimaal 8, of pas RESEND_BITS aan
+#define RESEND_TRIES 10				// maximaal aantal keer informatie opnieuw proberen op te halen
+#define AANTAL_BITS 12 				// geeft direct aantal bits aan, pas ook type aan, minimaal 8, of pas RESEND_BITS aan
 #define AANTAL_BITS_TYPE uint16_t 		// pas dit aan als aantal bits wordt aangepast
 #define AANTAL_BITS_TYPE_BITS 16 		// aantal bits mogelijk bij dit type data
 //#define PRINT_ONTVANGST 			// debug, print via USART, nog wel USART_Init() aanroepen
@@ -126,8 +126,10 @@ ISR (PCINT2_vect) { // wordt aangeroepen bij logische 1 naar 0 of 0 naar 1 van o
 			#endif
 
 			// aantal bits vanaf LSB in byte zetten
+			// als AANTAL_BITS ongelijk is aan AANTAL_BITS_TYPE_BITS moet de byte nog (AANTAL_BITS_TYPE_BITS - AANTAL_BITS) naar rechts geshift worden
+//			#if AANTAL_BITS_TYPE_BITS != AANTAL_BITS
 //			raw_input = (raw_input>>(AANTAL_BITS_TYPE_BITS - AANTAL_BITS));
-			// TODO, als AANTAL_BITS ongelijk is aan AANTAL_BITS_TYPE_BITS moet de byte nog (AANTAL_BITS_TYPE_BITS - AANTAL_BITS) naar rechts geshift worden
+//			#endif
 
 			if (AANTAL_BITS == aantal_bits) { // aantal bits checken op geldigheid
 

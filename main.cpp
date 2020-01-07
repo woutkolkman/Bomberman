@@ -51,8 +51,12 @@ int main(void) {
                                 	        counttomain++;
                                 	}
                        		} else {
+//					#if PLAYER == 1
 					clearDraw(tile_to_coords_x(player1_locatie), tile_to_coords_y(player1_locatie)); // haal speler weg huidige locatie
+//					#endif
+//					#if PLAYER == 2
 					clearDraw(tile_to_coords_x(player2_locatie), tile_to_coords_y(player2_locatie)); // haal speler weg huidige locatie
+//					#endif
 					move(); // pas nunchuk toe
 					item_updating(); // animaties, en cycle door item states (bomb, fire)
 					draw_screen(); // teken players opnieuw
@@ -71,12 +75,12 @@ int main(void) {
     		}
 
 		if (screenState == 0) {
-            if(mainmenuselect != mainmenuselected) {// aan het begin van het spel staat screenState op 0 om menuopties weer te geven
-                drawStartButton();
-                drawHighScoreButton();
-                drawQuitButton();
-                mainmenuselected = mainmenuselect;
-            }
+			if(mainmenuselect != mainmenuselected) {// aan het begin van het spel staat screenState op 0 om menuopties weer te geven
+				drawStartButton();
+				drawHighScoreButton();
+				drawQuitButton();
+				mainmenuselected = mainmenuselect;
+			}
 		}
 
 		#ifndef ADC_FREERUNNING
@@ -166,14 +170,20 @@ void ir_ontcijfer(VAR_TYPE_IR input) {
 	// verwerk input naar variabelen
 	if (kopie == PLAYER1_CODE) {
 //		clear_tile(player1_locatie);
+		if (!tile_bevat_bomb(player1_locatie)) { // tile mag geen geplaatste bom bevatten
+			tile_array[player1_locatie] = EMPTY_TILE;
+		}
 		clearDraw(tile_to_coords_x(player1_locatie), tile_to_coords_y(player1_locatie));
 		player1_locatie = data;
-//		tile_array[data] = PLAYER1_TILE;
+		tile_array[player1_locatie] = PLAYER1_TILE;
 	} else if (kopie == PLAYER2_CODE) {
-//		clear_tile(player1_locatie);
+//		clear_tile(player2_locatie);
+		if (!tile_bevat_bomb(player2_locatie)) { // tile mag geen geplaatste bom bevatten
+			tile_array[player2_locatie] = EMPTY_TILE;
+		}
 		clearDraw(tile_to_coords_x(player2_locatie), tile_to_coords_y(player2_locatie));
 		player2_locatie = data;
-//		tile_array[data] = PLAYER2_TILE;
+		tile_array[player2_locatie] = PLAYER2_TILE;
 	} else if (kopie == LOST_CODE) {
 		// you win message
 		displayWinMessage();
@@ -234,6 +244,12 @@ void screen_init(void) {
 		if (tile_bevat_bomb(tile) == PLAYER2_TILE) {
 			drawBomb(tile_to_coords_x(i), tile_to_coords_y(i));
 		}
+//		if (tile == PLAYER1_TILE) {
+//			drawPlayer1(tile_to_coords_x(i), tile_to_coords_y(i));
+//		}
+//		if (tile == PLAYER2_TILE) {
+//			drawPlayer2(tile_to_coords_x(i), tile_to_coords_y(i));
+//		}
 	}
 }
 
@@ -241,8 +257,12 @@ void screen_init(void) {
 void draw_screen(void) {
 	// screen is 240 x 320
 
+//	#if PLAYER == 1
 	drawPlayer1(tile_to_coords_x(player1_locatie), tile_to_coords_y(player1_locatie));
+//	#endif
+//	#if PLAYER == 2
 	drawPlayer2(tile_to_coords_x(player2_locatie), tile_to_coords_y(player2_locatie));
+//	#endif
 }
 
 
@@ -585,8 +605,20 @@ void item_updating(void) {
 			}
 //		} else if (tile == PLAYER1_TILE) {
 //			// update player1 als PLAYER == 2, teken player1 op player1_locatie
+//			#if PLAYER == 2
+//			if (i != player1_locatie) {
+//				clearDraw(tile_to_coords_x(i), tile_to_coords_y(i));
+//				drawPlayer1(tile_to_coords_x(player1_locatie), tile_to_coords_y(player1_locatie));
+//			}
+//			#endif
 //		} else if (tile == PLAYER2_TILE) {
 //			// update player2 als PLAYER == 1, teken player2 op player2_locatie
+//			#if PLAYER == 1
+//			if (i != player2_locatie) {
+//				clearDraw(tile_to_coords_x(i), tile_to_coords_y(i));
+//				drawPlayer2(tile_to_coords_x(player2_locatie), tile_to_coords_y(player2_locatie));
+//			{
+//			#endif
 		}
 	}
 }
